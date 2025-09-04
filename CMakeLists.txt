@@ -44,24 +44,28 @@ add_library(lua STATIC
 target_include_directories(lua PUBLIC extern/lua)
 
 # Smile executable
-add_executable(Smile src/main.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
+add_executable(Smile ${SOURCES})
 
 # Include directories (Lua and sol)
-target_include_directories(Smile PRIVATE extern/lua extern)
+target_include_directories(Smile PRIVATE extern/lua extern src)
 
 # Link Lua
 target_link_libraries(Smile PRIVATE lua)
 
-# Copy scripts to build directory
-add_custom_command(TARGET Smile POST_BUILD
+# Custom target to copy scripts (and licenses) every build
+add_custom_target(copy_scripts
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/scripts"
-    "$<TARGET_FILE_DIR:Smile>/scripts"
+        "${CMAKE_SOURCE_DIR}/scripts"
+        "$<TARGET_FILE_DIR:Smile>/scripts"
+)
+add_custom_target(copy_licenses
+    COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/third_party_licenses.txt"
+        "$<TARGET_FILE_DIR:Smile>/third_party_licenses.txt"
 )
 
-# Copy third-party licenses
-add_custom_command(TARGET Smile POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_SOURCE_DIR}/third_party_licenses.txt
-    $<TARGET_FILE_DIR:Smile>/third_party_licenses.txt
+# Make these run as part of ALL builds
+add_custom_target(prebuild ALL
+    DEPENDS copy_scripts copy_licenses
 )
