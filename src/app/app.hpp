@@ -19,6 +19,7 @@ License:
 
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
+#include <window/window_manager.hpp>
 
 class App {
 private:
@@ -44,5 +45,5 @@ public:
     std::shared_ptr<Window> createWindow(const std::string& title, const Vector2& size);
 
     void run();
-    void pause();
+    void quit();
 };

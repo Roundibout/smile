@@ -21,10 +21,7 @@ License:
 
 #include <datatypes/vector2.hpp>
 
-#include "window/window_impl.hpp"
-#ifdef _WIN32
-    #include "window/window_win32.hpp"
-#endif
+#include <window/window_manager.hpp>
 
 enum class WindowEvent {
     Update,
@@ -33,7 +30,7 @@ enum class WindowEvent {
 
 class Window {
 private:
-    std::unique_ptr<WindowImpl> impl;
+    uint32_t id;
     std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 public:
     Window(const std::string& title, const Vector2& size);

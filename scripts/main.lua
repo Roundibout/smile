@@ -17,8 +17,11 @@ local timer = 0
 window:ConnectCallback(WindowEvent.Update, function(deltaTime)
     timer = timer + 1
     print(timer / 60)
-    if timer / 60 > 10 then
-        App:Pause()
+    if timer / 60 >= 10 then
+        App:Quit()
+        timer = 0
+        App:CreateWindow("Smile", Vector2.new(800, 600))
+        App:Run()
     end
 end)
 

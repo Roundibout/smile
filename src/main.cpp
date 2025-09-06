@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     // -- App -- //
     lua.new_usertype<App>("App",
         "Run", &App::run,
-        "Pause", &App::pause,
+        "Quit", &App::quit,
 
         "CreateWindow", &App::createWindow
     );

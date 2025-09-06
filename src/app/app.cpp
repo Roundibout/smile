@@ -18,6 +18,12 @@ std::shared_ptr<Window> App::createWindow(const std::string& title, const Vector
 }
 
 void App::run() {
+    // Stop if the app is already running
+    if (running == true) {return;}
+
+    // Start window manager loop (runs on a different thread)
+    WindowManager::get().start();
+
     using clock = std::chrono::steady_clock;
 
     running = true;
@@ -46,6 +52,7 @@ void App::run() {
     }
 }
 
-void App::pause() {
+void App::quit() {
     running = false;
+    WindowManager::get().stop();
 }

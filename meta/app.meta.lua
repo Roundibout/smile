@@ -6,8 +6,8 @@ App = {}
 ---Begins the app loop.
 function App:Run() end
 
----Pauses the app loop.
-function App:Pause() end
+---Stops the app loop and quits the program.
+function App:Quit() end
 
 ---Creates a window and registers it with the app.
 ---@param title string The title of the window (the text on the titlebar)
