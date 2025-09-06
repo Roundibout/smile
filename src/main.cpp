@@ -15,7 +15,7 @@ License:
 #include <iostream>
 
 #include <datatypes/vector2.hpp>
-#include <window/window.hpp>
+#include <app/app.hpp>
 
 int main(int argc, char *argv[]) {
     std::cout << "Initializing smile..." << std::endl;
@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
         sol::lib::math
     );
 
-    // ---- USERTYPES ----
+    // ---- BIND USERTYPES ---- //
 
-    // Datatypes
+    // -- Datatypes -- //
 
     // Vector2
     lua.new_usertype<Vector2>("Vector2",
@@ -55,15 +55,18 @@ int main(int argc, char *argv[]) {
         sol::meta_function::unary_minus, sol::resolve<Vector2() const>(&Vector2::operator-)
     );
 
-    // Classes
+    // -- Classes -- //
 
-    // Window
-    lua.new_usertype<Window>("Window",
-        // Constructors
-        sol::constructors<
-            Window(std::string, Vector2)
-        >()
+    // -- App -- //
+    lua.new_usertype<App>("App",
+        "Run", &App::run,
+
+        "CreateWindow", &App::createWindow
     );
+    // Assign the singleton app to a global variable so you don't need use the get function
+    lua["App"] = &App::get();
+
+    // ---- RUN LUA ---- //
 
     // Run a script to set the package path to the scripts folder
     lua.safe_script("package.path = package.path..';./scripts/?.lua'");

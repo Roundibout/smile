@@ -1,0 +1,15 @@
+// For use with Lua Language Server
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "Lua 5.4",
+    "path": [
+      "scripts/?.lua"
+    ]
+  },
+  "workspace": {
+    "library": [
+      "./meta"
+    ]
+  }
+}
