@@ -12,8 +12,12 @@ License:
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include <memory>
 #include <iostream>
+
+#include <sol/sol.hpp>
 
 #include <datatypes/vector2.hpp>
 
@@ -22,9 +26,17 @@ License:
     #include "window/window_win32.hpp"
 #endif
 
+enum class WindowEvent {
+    Update,
+    Render
+};
+
 class Window {
 private:
     std::unique_ptr<WindowImpl> impl;
+    std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 public:
     Window(const std::string& title, const Vector2& size);
+    void update(float deltaTime);
+    void connectCallback(WindowEvent event, sol::function callback);
 };

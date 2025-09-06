@@ -21,4 +21,5 @@ protected:
     Vector2 size;
 public:
     WindowImpl(const std::string& t, const Vector2& s);
+    virtual void update() = 0;
 };

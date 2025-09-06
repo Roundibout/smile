@@ -14,6 +14,8 @@ License:
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <chrono>
+#include <thread>
 
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
@@ -28,6 +30,9 @@ private:
     App(const App&) = delete;
     App& operator=(const App&) = delete;
 
+    bool running = false;
+    int fps = 60;
+
     std::vector<std::shared_ptr<Window>> windows;
 public:
     static App& get() {
@@ -39,4 +44,5 @@ public:
     std::shared_ptr<Window> createWindow(const std::string& title, const Vector2& size);
 
     void run();
+    void pause();
 };

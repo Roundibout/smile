@@ -61,3 +61,12 @@ WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t,
     // Display the window
     ShowWindow(hwnd, SW_SHOW);
 }
+
+void WindowWin32::update() {
+    MSG msg;
+    // Process all pending messages
+    while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}

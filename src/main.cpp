@@ -16,6 +16,7 @@ License:
 
 #include <datatypes/vector2.hpp>
 #include <app/app.hpp>
+#include <window/window.hpp>
 
 int main(int argc, char *argv[]) {
     std::cout << "Initializing smile..." << std::endl;
@@ -55,11 +56,25 @@ int main(int argc, char *argv[]) {
         sol::meta_function::unary_minus, sol::resolve<Vector2() const>(&Vector2::operator-)
     );
 
+    // -- Enums -- //
+
+    lua.new_enum<WindowEvent>("WindowEvent",
+        {
+            {"Update", WindowEvent::Update},
+            {"Render", WindowEvent::Render}
+        }
+    );
+
     // -- Classes -- //
+
+    lua.new_usertype<Window>("Window",
+        "ConnectCallback", &Window::connectCallback
+    );
 
     // -- App -- //
     lua.new_usertype<App>("App",
         "Run", &App::run,
+        "Pause", &App::pause,
 
         "CreateWindow", &App::createWindow
     );

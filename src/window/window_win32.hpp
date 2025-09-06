@@ -25,4 +25,5 @@ private:
     HWND hwnd;
 public:
     WindowWin32(const std::string& t, const Vector2& s);
+    void update() override;
 };

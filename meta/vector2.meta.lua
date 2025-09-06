@@ -12,8 +12,10 @@
 ---@operator unm(): Vector2
 Vector2 = {}
 
----@param x number
----@param y number
+---Creates a new Vector2 consisting of two numbers.
+---@param x number The first dimension.
+---@param y number The second dimension.
 ---@return Vector2
+---If no arguments are provided, a blank Vector2 will be created.
 ---@overload fun(): Vector2
 function Vector2.new(x, y) end
