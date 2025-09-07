@@ -1,2 +1,4 @@
 # external things don't go towards the language overview
 extern/** linguist-generated=true
+# library definitions don't go towards the language overview
+meta/** linguist-generated=true
