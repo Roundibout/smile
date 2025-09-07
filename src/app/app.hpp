@@ -12,7 +12,7 @@ License:
 #pragma once
 
 #include <iostream>
-#include <vector>
+#include <unordered_map>
 #include <memory>
 #include <chrono>
 #include <thread>
@@ -20,6 +20,8 @@ License:
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
 #include <window/window_manager.hpp>
+
+class Window; // prevent cycle
 
 class App {
 private:
@@ -34,7 +36,7 @@ private:
     bool running = false;
     int fps = 60;
 
-    std::vector<std::shared_ptr<Window>> windows;
+    std::unordered_map<uint32_t, std::shared_ptr<Window>> windows;
 public:
     static App& get() {
         // Initialize app only once
@@ -43,6 +45,8 @@ public:
     }
 
     std::shared_ptr<Window> createWindow(const std::string& title, const Vector2& size);
+
+    std::shared_ptr<Window> getWindowById(const uint32_t& id);
 
     void run();
     void quit();

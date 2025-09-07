@@ -17,6 +17,7 @@ License:
 #include <datatypes/vector2.hpp>
 #include <app/app.hpp>
 #include <window/window.hpp>
+#include <window/window_input.hpp>
 
 int main(int argc, char *argv[]) {
     std::cout << "Initializing smile..." << std::endl;
@@ -31,6 +32,46 @@ int main(int argc, char *argv[]) {
     );
 
     // ---- BIND USERTYPES ---- //
+
+    // -- Enums -- //
+
+    lua.new_enum<WindowEvent>("WindowEvent",
+        {
+            {"Update", WindowEvent::Update},
+            {"Render", WindowEvent::Render},
+            {"Input", WindowEvent::Input}
+        }
+    );
+
+    // Window Input
+
+    lua.new_enum<WindowInputType>("WindowInputType",
+        {
+            {"MouseButtonDown", WindowInputType::MouseButtonDown},
+            {"MouseButtonUp", WindowInputType::MouseButtonUp},
+            {"MouseMove", WindowInputType::MouseMove},
+            {"MouseScroll", WindowInputType::MouseScroll},
+            {"KeyDown", WindowInputType::KeyDown},
+            {"KeyUp", WindowInputType::KeyUp},
+            {"WindowResized", WindowInputType::WindowResized},
+            {"WindowClosed", WindowInputType::WindowClosed}
+        }
+    );
+
+    lua.new_enum<MouseButton>("MouseButton",
+        {
+            {"Left", MouseButton::Left},
+            {"Right", MouseButton::Right},
+            {"Middle", MouseButton::Middle}
+        }
+    );
+
+    // Use macro to easily copy over the same items for the enum
+    lua.new_enum<KeyCode>("KeyCode", {
+    #define X(name) std::make_pair(#name, KeyCode::name),
+        KEY_CODE_LIST
+    #undef X
+    });
 
     // -- Datatypes -- //
 
@@ -56,20 +97,30 @@ int main(int argc, char *argv[]) {
         sol::meta_function::unary_minus, sol::resolve<Vector2() const>(&Vector2::operator-)
     );
 
-    // -- Enums -- //
+    // Window Input
+    lua.new_usertype<MouseInput>("MouseInput",
+        "button", &MouseInput::button,
+        "position", sol::property(
+            [](MouseInput& self) -> Vector2& {return self.position;},
+            [](MouseInput& self, Vector2 position) {self.position = position;}
+        ) // nested struct (with setter)
+    );
 
-    lua.new_enum<WindowEvent>("WindowEvent",
-        {
-            {"Update", WindowEvent::Update},
-            {"Render", WindowEvent::Render}
-        }
+    lua.new_usertype<WindowInput>("WindowInput",
+        "type", &WindowInput::type,
+        "mouse", sol::property([](WindowInput& self) -> MouseInput& {return self.mouse;}), // nested struct
+        "key", &WindowInput::key
     );
 
     // -- Classes -- //
 
     lua.new_usertype<Window>("Window",
-        "ConnectCallback", &Window::connectCallback
+        "ConnectUpdate", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Update, callback);},
+        "ConnectRender", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Render, callback);},
+        "ConnectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
     );
+
+
 
     // -- App -- //
     lua.new_usertype<App>("App",

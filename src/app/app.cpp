@@ -12,9 +12,19 @@ License:
 #include "app.hpp"
 
 std::shared_ptr<Window> App::createWindow(const std::string& title, const Vector2& size) {
+    std::cout << "Creating window" << std::endl;
     std::shared_ptr<Window> win = std::make_shared<Window>(title, size);
-    windows.push_back(win);
+    windows[win->getId()] = win;
     return win;
+}
+
+std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
+    auto it = windows.find(id);
+    if (it != windows.end()) {
+        return it->second; // Found it
+    } else {
+        return nullptr; // Doesn't exist
+    }
 }
 
 void App::run() {
@@ -39,9 +49,19 @@ void App::run() {
 
         float deltaTime = elapsed.count(); // seconds
 
+        // Process all windows' inputs
+        for (auto& [id, window] : windows) {
+            window->processInputs();
+        }
+
         // Update all windows
-        for (auto& window : windows) {
+        for (auto& [id, window] : windows) {
             window->update(deltaTime);
+        }
+
+        // Render all windows (in the future only render if something changed, returned by update)
+        for (auto& [id, window] : windows) {
+            window->render();
         }
 
         // Sleep to cap at 60 fps

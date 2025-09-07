@@ -12,8 +12,10 @@ License:
 #pragma once
 
 #include <string>
+#include <queue>
 
 #include <datatypes/vector2.hpp>
+#include <window/window_input.hpp>
 
 class WindowImpl {
 protected:
@@ -22,4 +24,6 @@ protected:
 public:
     WindowImpl(const std::string& t, const Vector2& s);
     virtual void update() = 0;
+
+    std::queue<WindowInput> inputs;
 };

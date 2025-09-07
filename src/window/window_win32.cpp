@@ -14,15 +14,187 @@ License:
 // A value for if the window class already registered, used in the function registerWindowClass
 static bool classRegistered = false;
 
+void pushInput(HWND hwnd, WindowInput input) {
+    WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
+    // Push the input to the queue
+    window->inputs.push(input);
+}
+
+KeyCode vkToKeyCode(WPARAM vk) {
+    switch (vk) { // Crap
+        case 'Q': return KeyCode::Q;
+        case 'W': return KeyCode::W;
+        case 'E': return KeyCode::E;
+        case 'R': return KeyCode::R;
+        case 'T': return KeyCode::T;
+        case 'Y': return KeyCode::Y;
+        case 'U': return KeyCode::U;
+        case 'I': return KeyCode::I;
+        case 'O': return KeyCode::O;
+        case 'P': return KeyCode::P;
+        case 'A': return KeyCode::A;
+        case 'S': return KeyCode::S;
+        case 'D': return KeyCode::D;
+        case 'F': return KeyCode::F;
+        case 'G': return KeyCode::G;
+        case 'H': return KeyCode::H;
+        case 'J': return KeyCode::J;
+        case 'K': return KeyCode::K;
+        case 'L': return KeyCode::L;
+        case 'Z': return KeyCode::Z;
+        case 'X': return KeyCode::X;
+        case 'C': return KeyCode::C;
+        case 'V': return KeyCode::V;
+        case 'B': return KeyCode::B;
+        case 'N': return KeyCode::N;
+        case 'M': return KeyCode::M;
+
+        case '1': return KeyCode::One;
+        case '2': return KeyCode::Two;
+        case '3': return KeyCode::Three;
+        case '4': return KeyCode::Four;
+        case '5': return KeyCode::Five;
+        case '6': return KeyCode::Six;
+        case '7': return KeyCode::Seven;
+        case '8': return KeyCode::Eight;
+        case '9': return KeyCode::Nine;
+        case '0': return KeyCode::Zero;
+
+        case VK_SPACE: return KeyCode::Space;
+
+        case VK_OEM_3: return KeyCode::BackQuote;
+        case VK_OEM_MINUS: return KeyCode::Minus;
+        case VK_OEM_PLUS: return KeyCode::Equals;
+        case VK_OEM_4: return KeyCode::LeftSquareBracket;
+        case VK_OEM_6: return KeyCode::RightSquareBracket;
+        case VK_OEM_5: return KeyCode::BackSlash;
+        case VK_OEM_1: return KeyCode::Semicolon;
+        case VK_OEM_7: return KeyCode::SingleQuote;
+        case VK_OEM_COMMA: return KeyCode::Comma;
+        case VK_OEM_PERIOD: return KeyCode::Period;
+        case VK_OEM_2: return KeyCode::Slash;
+
+        case VK_ESCAPE: return KeyCode::Escape;
+        case VK_F1: return KeyCode::F1;
+        case VK_F2: return KeyCode::F2;
+        case VK_F3: return KeyCode::F3;
+        case VK_F4: return KeyCode::F4;
+        case VK_F5: return KeyCode::F5;
+        case VK_F6: return KeyCode::F6;
+        case VK_F7: return KeyCode::F7;
+        case VK_F8: return KeyCode::F8;
+        case VK_F9: return KeyCode::F9;
+        case VK_F10: return KeyCode::F10;
+        case VK_F11: return KeyCode::F11;
+        case VK_F12: return KeyCode::F12;
+        case VK_DELETE: return KeyCode::Delete;
+
+        case VK_TAB: return KeyCode::Tab;
+        case VK_CAPITAL: return KeyCode::CapsLock;
+        case VK_SHIFT: return KeyCode::Shift;
+        case VK_LSHIFT: return KeyCode::Shift;
+        case VK_RSHIFT: return KeyCode::Shift;
+        case VK_CONTROL: return KeyCode::Control;
+        case VK_LCONTROL: return KeyCode::Control;
+        case VK_RCONTROL: return KeyCode::Control;
+        case VK_LWIN: return KeyCode::Super;
+        case VK_RWIN: return KeyCode::Super;
+        case VK_MENU: return KeyCode::Alt;
+        case VK_LMENU: return KeyCode::Alt;
+        case VK_RMENU: return KeyCode::Alt;
+        case VK_RETURN: return KeyCode::Enter;
+        case VK_BACK: return KeyCode::Back;
+
+        case VK_LEFT: return KeyCode::Left;
+        case VK_RIGHT: return KeyCode::Right;
+        case VK_UP: return KeyCode::Up;
+        case VK_DOWN: return KeyCode::Down;
+
+        case VK_HOME: return KeyCode::Home;
+        case VK_END: return KeyCode::End;
+        case VK_PRIOR: return KeyCode::PageUp;
+        case VK_NEXT: return KeyCode::PageDown;
+    }
+    return KeyCode::Unknown;
+}
+
 // Window procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    switch (msg) {
-        case WM_DESTROY:
+    switch (msg) { // Each case has its own scope so the variables don't overlap
+        case WM_NCCREATE: {
+            // Set the userdata for the window (the window class we create) so we can use it in other cases
+            CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(cs->lpCreateParams);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+            return DefWindowProc(hwnd, msg, wParam, lParam); // Do your thing Windows...
+        }
+        case WM_DESTROY: {
             PostQuitMessage(0);
             return 0;
-        default:
+        }
+        case WM_LBUTTONDOWN: {
+            WindowInput input;
+            input.type = WindowInputType::MouseButtonDown;
+            input.mouse.button = MouseButton::Left;
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        case WM_LBUTTONUP: {
+            WindowInput input;
+            input.type = WindowInputType::MouseButtonUp;
+            input.mouse.button = MouseButton::Left;
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        case WM_RBUTTONDOWN: {
+            WindowInput input;
+            input.type = WindowInputType::MouseButtonDown;
+            input.mouse.button = MouseButton::Right;
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        case WM_RBUTTONUP: {
+            WindowInput input;
+            input.type = WindowInputType::MouseButtonUp;
+            input.mouse.button = MouseButton::Right;
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN: { // KEYDOWN + SYSKEYDOWN, gets when any key is pressed
+            WindowInput input;
+            input.type = WindowInputType::KeyDown;
+            input.key = vkToKeyCode(wParam);
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        case WM_KEYUP:
+        case WM_SYSKEYUP: { // KEYUP + SYSKEYUP, gets when any key is lifted
+            WindowInput input;
+            input.type = WindowInputType::KeyUp;
+            input.key = vkToKeyCode(wParam);
+
+            pushInput(hwnd, input);
+            return 0;
+        }
+        default: {
+            // Do default
             return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
     }
+
+    // moment before cooked (fallback)
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 // Register the window class if it does not exist already
@@ -33,6 +205,8 @@ static void registerWindowClass(HINSTANCE hInstance) {
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = "SmileWindow";
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
     RegisterClass(&wc);
@@ -41,8 +215,6 @@ static void registerWindowClass(HINSTANCE hInstance) {
 
 // Win32 window constructor
 WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t, s) {
-    std::cout << "Creating win32 window" << std::endl; // temp
-
     // Get the handle to Smile
     HINSTANCE hInstance = GetModuleHandle(nullptr);
     // Register a window class with Windows if one has not been registered yet
@@ -55,7 +227,7 @@ WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         size.x, size.y,
-        nullptr, nullptr, hInstance, nullptr
+        nullptr, nullptr, hInstance, this // pass in the window so we can use it in the window procedure
     );
 
     // Display the window

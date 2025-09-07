@@ -15,10 +15,12 @@ License:
 #include <iostream>
 
 #include <windows.h>
+#include <windowsx.h>
 
 #include <datatypes/vector2.hpp>
 
 #include <window/window_impl.hpp>
+#include <window/window_manager.hpp>
 
 class WindowWin32 : public WindowImpl {
 private:

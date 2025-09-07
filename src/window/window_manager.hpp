@@ -13,7 +13,9 @@
 
 #include <datatypes/vector2.hpp>
 
+#include <window/window.hpp>
 #include <window/window_impl.hpp>
+#include <app/app.hpp>
 
 #ifdef _WIN32
     #include "window_win32.hpp"
