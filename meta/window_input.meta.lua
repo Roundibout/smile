@@ -22,6 +22,7 @@ MouseButton = {
 ---@class MouseInput
 ---@field button MouseButton?
 ---@field position Vector2
+---@field scroll Vector2?
 MouseInput = {}
 
 ---@enum KeyCode

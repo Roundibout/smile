@@ -44,8 +44,11 @@ enum class MouseButton {
 };
 
 struct MouseInput {
-    MouseButton button;
     Vector2 position;
+    union {
+        MouseButton button;
+        Vector2 scroll;
+    };
 
     MouseInput() {}
 };
@@ -58,9 +61,10 @@ enum class KeyCode {
 
 struct WindowInput {
     WindowInputType type;
-
-    MouseInput mouse;
-    KeyCode key;
+    union {
+        MouseInput mouse;
+        KeyCode key;
+    };
 
     WindowInput() {}
 };

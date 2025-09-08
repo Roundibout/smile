@@ -103,7 +103,11 @@ int main(int argc, char *argv[]) {
         "position", sol::property(
             [](MouseInput& self) -> Vector2& {return self.position;},
             [](MouseInput& self, Vector2 position) {self.position = position;}
-        ) // nested struct (with setter)
+        ), // nested struct (with setter)
+        "scroll", sol::property(
+            [](MouseInput& self) -> Vector2& {return self.scroll;},
+            [](MouseInput& self, Vector2 scroll) {self.scroll = scroll;}
+        ) // same thing
     );
 
     lua.new_usertype<WindowInput>("WindowInput",
