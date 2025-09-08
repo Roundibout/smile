@@ -18,7 +18,7 @@ void pushInput(HWND hwnd, WindowInput input) {
     WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
 
     // Push the input to the queue
-    window->inputs.push(input);
+    window->pushInput(input);
 }
 
 KeyCode vkToKeyCode(WPARAM vk) {
@@ -133,6 +133,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             PostQuitMessage(0);
             return 0;
         }
+
+        // FIX FOR STALLING DURING RESIZE AND MOVE
+
+        case WM_ENTERSIZEMOVE:
+            SetTimer(hwnd, 1, 16, nullptr); // ~60 FPS
+            return 0;
+        case WM_TIMER:
+            if (wParam == 1) {
+                App::get().step(); // Kinda stupid fix
+            }
+            return 0;
+        case WM_EXITSIZEMOVE:
+            KillTimer(hwnd, 1);
+            return 0;
+
         // MOUSE
         case WM_MOUSEMOVE: {
             WindowInput input;
@@ -300,9 +315,15 @@ std::queue<WindowInput> WindowWin32::update() {
         DispatchMessage(&msg);
     }
 
+    // How am i supposed to carry on with the rest of the app loop when resizing? The next logic is inside the app's loop??
+
     // Copy inputs to a new queue for use outside
     std::queue<WindowInput> inputsCopy;
     std::swap(inputsCopy, inputs);
 
     return inputsCopy;
+}
+
+void WindowWin32::pushInput(WindowInput input) {
+    inputs.push(input);
 }

@@ -33,41 +33,49 @@ std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
     }
 }
 
+std::chrono::time_point<std::chrono::steady_clock> App::step() {
+    // Get clock
+    using clock = std::chrono::steady_clock;
+
+    // Get current time
+    std::chrono::time_point<std::chrono::steady_clock> currentTime = clock::now();
+    std::chrono::duration<float> elapsed = currentTime - previousTime; // Get how much time has passed
+    previousTime = currentTime; // Set previous time to now
+
+    float deltaTime = elapsed.count(); // seconds
+
+    // Update all windows
+    for (auto& [id, window] : windows) {
+        window->update(deltaTime);
+    }
+
+    // Render all windows (in the future only render if something changed, returned by update)
+    for (auto& [id, window] : windows) {
+        window->render();
+    }
+
+    return currentTime; // Return time for use in main loop
+}
+
 void App::run() {
     // Stop if the app is already running
     if (running == true) {return;}
 
-    using clock = std::chrono::steady_clock;
-
     running = true;
 
+    using clock = std::chrono::steady_clock;
     std::chrono::milliseconds frameDuration(1000 / fps);
-
-    auto previousTime = clock::now();
+    previousTime = clock::now();
 
     while (running) {
-        auto currentTime = clock::now();
-        std::chrono::duration<float> elapsed = currentTime - previousTime;
-        previousTime = currentTime;
-
-        float deltaTime = elapsed.count(); // seconds
-
-        // Process all windows' inputs
+        // Process all windows' native windows (can lead to a freeze on Win32 when moving and resizing, is fixed internally)
         for (auto& [id, window] : windows) {
             window->process();
         }
 
-        // Update all windows
-        for (auto& [id, window] : windows) {
-            window->update(deltaTime);
-        }
+        auto currentTime = App::get().step();
 
-        // Render all windows (in the future only render if something changed, returned by update)
-        for (auto& [id, window] : windows) {
-            window->render();
-        }
-
-        // Sleep to cap at 60 fps
+        // Sleep to cap at set fps
         auto workTime = clock::now() - currentTime;
         if (workTime < frameDuration) {
             std::this_thread::sleep_for(frameDuration - workTime); // stop the CPU from busymaxxing

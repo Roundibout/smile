@@ -42,7 +42,6 @@ private:
     std::queue<WindowInput> inputs;
 public:
     Window(const std::string& title, const Vector2& size);
-    void pushInput(WindowInput input);
     void process();
     void update(float deltaTime);
     void render();

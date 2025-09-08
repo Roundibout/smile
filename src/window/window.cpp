@@ -17,10 +17,6 @@ Window::Window(const std::string& title, const Vector2& size) {
     #endif
 }
 
-void Window::pushInput(WindowInput input) {
-    inputs.push(std::move(input));
-}
-
 void Window::process() {
     // Get inputs through impl update
     inputs = impl->update();

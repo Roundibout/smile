@@ -20,13 +20,14 @@ License:
 #include <datatypes/vector2.hpp>
 
 #include <window/window_impl.hpp>
+#include <app/app.hpp>
 
 class WindowWin32 : public WindowImpl {
 private:
     HWND hwnd;
+    std::queue<WindowInput> inputs;
 public:
     WindowWin32(const std::string& t, const Vector2& s);
     std::queue<WindowInput> update() override;
-
-    std::queue<WindowInput> inputs; // TODO: I don't really like this but it's fine for now, maybe make it more elegant later
+    void pushInput(WindowInput input);
 };
