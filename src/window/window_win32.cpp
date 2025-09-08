@@ -263,7 +263,7 @@ static void registerWindowClass(HINSTANCE hInstance) {
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = "SmileWindow";
-    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
@@ -292,11 +292,17 @@ WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t,
     ShowWindow(hwnd, SW_SHOW);
 }
 
-void WindowWin32::update() {
+std::queue<WindowInput> WindowWin32::update() {
     MSG msg;
     // Process all pending messages
     while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    // Copy inputs to a new queue for use outside
+    std::queue<WindowInput> inputsCopy;
+    std::swap(inputsCopy, inputs);
+
+    return inputsCopy;
 }

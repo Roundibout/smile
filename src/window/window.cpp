@@ -12,25 +12,22 @@ License:
 #include "window.hpp"
 
 Window::Window(const std::string& title, const Vector2& size) {
-    // Create window through window manager, it will give us an id back
-    id = WindowManager::get().createWindow(title, size);
+    #ifdef _WIN32
+        impl = std::make_unique<WindowWin32>(title, size);
+    #endif
 }
 
 void Window::pushInput(WindowInput input) {
-    // Called from WindowManager
-    std::lock_guard<std::mutex> lock(inputMutex);
     inputs.push(std::move(input));
 }
 
-void Window::processInputs() {
-    std::queue<WindowInput> localQueue;
-    { // again, create a scope so lock is destroyed automatically
-        std::lock_guard<std::mutex> lock(inputMutex);
-        std::swap(localQueue, inputs);  // take all inputs atomically
-    }
+void Window::process() {
+    // Get inputs through impl update
+    inputs = impl->update();
 
-    while (!localQueue.empty()) {
-        WindowInput& input = localQueue.front();
+    // Process inputs
+    while (!inputs.empty()) {
+        WindowInput& input = inputs.front();
 
         // Find any input callbacks
         auto it = callbacks.find(WindowEvent::Input);
@@ -41,7 +38,7 @@ void Window::processInputs() {
             }
         }
 
-        localQueue.pop(); // remove the input
+        inputs.pop(); // remove the input
     }
 }
 

@@ -11,9 +11,11 @@ License:
 
 -- create test windows
 local window = App:CreateWindow("Smile", Vector2.new(800, 600))
+App:CreateWindow("Smile", Vector2.new(200, 200))
+App:CreateWindow("Smile", Vector2.new(400, 600))
 
 window:ConnectUpdate(function(deltaTime)
-    --print("update")
+    print("update")
 end)
 
 window:ConnectRender(function()

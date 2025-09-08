@@ -19,7 +19,6 @@ License:
 
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
-#include <window/window_manager.hpp>
 
 class Window; // prevent cycle
 
@@ -37,6 +36,7 @@ private:
     int fps = 60;
 
     std::unordered_map<uint32_t, std::shared_ptr<Window>> windows;
+    uint32_t nextId = 1;
 public:
     static App& get() {
         // Initialize app only once

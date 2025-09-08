@@ -13,18 +13,20 @@ License:
 
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <memory>
 #include <iostream>
 #include <queue>
-#include <mutex>
 
 #include <sol/sol.hpp>
 
 #include <datatypes/vector2.hpp>
 #include <window/window_input.hpp>
 
-#include <window/window_manager.hpp>
+#include <window/window_impl.hpp>
+
+#ifdef _WIN32
+    #include "window_win32.hpp"
+#endif
 
 enum class WindowEvent {
     Update,
@@ -34,17 +36,15 @@ enum class WindowEvent {
 
 class Window {
 private:
-    uint32_t id;
+    std::unique_ptr<WindowImpl> impl;
     std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 
     std::queue<WindowInput> inputs;
-    std::mutex inputMutex;
 public:
     Window(const std::string& title, const Vector2& size);
     void pushInput(WindowInput input);
-    void processInputs();
+    void process();
     void update(float deltaTime);
     void render();
     void connectCallback(WindowEvent event, sol::function callback);
-    uint32_t getId() {return id;}
 };

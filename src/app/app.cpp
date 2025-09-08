@@ -13,9 +13,15 @@ License:
 
 std::shared_ptr<Window> App::createWindow(const std::string& title, const Vector2& size) {
     std::cout << "Creating window" << std::endl;
-    std::shared_ptr<Window> win = std::make_shared<Window>(title, size);
-    windows[win->getId()] = win;
-    return win;
+
+    // Create window and associate it with the next window id
+    std::shared_ptr<Window> window = std::make_shared<Window>(title, size);
+    windows[nextId] = window;
+
+    // Increment window id
+    nextId++;
+
+    return window;
 }
 
 std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
@@ -30,9 +36,6 @@ std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
 void App::run() {
     // Stop if the app is already running
     if (running == true) {return;}
-
-    // Start window manager loop (runs on a different thread)
-    WindowManager::get().start();
 
     using clock = std::chrono::steady_clock;
 
@@ -51,7 +54,7 @@ void App::run() {
 
         // Process all windows' inputs
         for (auto& [id, window] : windows) {
-            window->processInputs();
+            window->process();
         }
 
         // Update all windows
@@ -74,5 +77,4 @@ void App::run() {
 
 void App::quit() {
     running = false;
-    WindowManager::get().stop();
 }
