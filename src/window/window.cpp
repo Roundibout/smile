@@ -11,10 +11,13 @@ License:
 
 #include "window.hpp"
 
-Window::Window(const std::string& title, const Vector2& size) {
+Window::Window(const uint32_t& id, const std::string& title, const Vector2& size)
     #ifdef _WIN32
-        impl = std::make_unique<WindowWin32>(title, size);
+        : impl(std::make_unique<WindowWin32>(id, title, size)), // initializer shenanigans
+        renderer(impl.get())
     #endif
+{
+    // maybe do other stuff later
 }
 
 void Window::process() {
@@ -50,6 +53,8 @@ void Window::update(float deltaTime) {
 }
 
 void Window::render() {
+    // Begin the frame
+    renderer.beginFrame();
     // Find any render callbacks
     auto it = callbacks.find(WindowEvent::Render);
     if (it != callbacks.end()) { // Is there any?
@@ -58,6 +63,8 @@ void Window::render() {
             func();
         }
     }
+    // End the frame
+    renderer.endFrame();
 }
 
 void Window::connectCallback(WindowEvent event, sol::function callback) {

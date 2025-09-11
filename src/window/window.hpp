@@ -28,6 +28,8 @@ License:
     #include "window_win32.hpp"
 #endif
 
+#include <render/renderer.hpp>
+
 enum class WindowEvent {
     Update,
     Render,
@@ -37,11 +39,13 @@ enum class WindowEvent {
 class Window {
 private:
     std::unique_ptr<WindowImpl> impl;
-    std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
-
     std::queue<WindowInput> inputs;
+
+    std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 public:
-    Window(const std::string& title, const Vector2& size);
+    Renderer renderer;
+
+    Window(const uint32_t& id, const std::string& title, const Vector2& size);
     void process();
     void update(float deltaTime);
     void render();

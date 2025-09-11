@@ -15,7 +15,7 @@ std::shared_ptr<Window> App::createWindow(const std::string& title, const Vector
     std::cout << "Creating window" << std::endl;
 
     // Create window and associate it with the next window id
-    std::shared_ptr<Window> window = std::make_shared<Window>(title, size);
+    std::shared_ptr<Window> window = std::make_shared<Window>(nextId, title, size);
     windows[nextId] = window;
 
     // Increment window id
@@ -30,6 +30,13 @@ std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
         return it->second; // Found it
     } else {
         return nullptr; // Doesn't exist
+    }
+}
+
+void App::destroyWindow(const uint32_t& id) {
+    auto it = windows.find(id);
+    if (it != windows.end()) {
+        windows.erase(it);
     }
 }
 

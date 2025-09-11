@@ -1,6 +1,7 @@
 ---@meta _
 
 ---@class Window
+---@field renderer Renderer
 Window = {}
 
 ---Connects a function to this window's update loop.

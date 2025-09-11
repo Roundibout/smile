@@ -20,7 +20,7 @@ License:
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
 
-class Window; // prevent cycle
+class Window; // forward declaration
 
 class App {
 private:
@@ -46,8 +46,9 @@ public:
     }
 
     std::shared_ptr<Window> createWindow(const std::string& title, const Vector2& size);
-
     std::shared_ptr<Window> getWindowById(const uint32_t& id);
+
+    void destroyWindow(const uint32_t& id);
 
     std::chrono::time_point<std::chrono::steady_clock> step();
 

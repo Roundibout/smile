@@ -13,6 +13,7 @@ License:
 #include <sol/sol.hpp>
 
 #include <iostream>
+#include <memory>
 
 #include <datatypes/vector2.hpp>
 #include <app/app.hpp>
@@ -119,12 +120,12 @@ int main(int argc, char *argv[]) {
     // -- Classes -- //
 
     lua.new_usertype<Window>("Window",
+        "renderer", sol::property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct
+
         "ConnectUpdate", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Update, callback);},
         "ConnectRender", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Render, callback);},
         "ConnectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
     );
-
-
 
     // -- App -- //
     lua.new_usertype<App>("App",

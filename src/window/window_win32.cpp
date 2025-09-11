@@ -130,6 +130,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             return DefWindowProc(hwnd, msg, wParam, lParam); // Do your thing Windows...
         }
         case WM_DESTROY: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+            App::get().destroyWindow(window->getId());
             PostQuitMessage(0);
             return 0;
         }
@@ -137,7 +139,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // FIX FOR STALLING DURING RESIZE AND MOVE
 
         case WM_ENTERSIZEMOVE:
-            SetTimer(hwnd, 1, 16, nullptr); // ~60 FPS
+            SetTimer(hwnd, 1, 16, nullptr); // ~60 FPS (TODO: make it change depending on set fps)
             return 0;
         case WM_TIMER:
             if (wParam == 1) {
@@ -274,20 +276,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 static void registerWindowClass(HINSTANCE hInstance) {
     if (classRegistered) return;
     
-    WNDCLASS wc = {};
+    WNDCLASSEX wc = {};
+    wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = "SmileWindow";
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wc.style = CS_OWNDC;
+    wc.hbrBackground = nullptr;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hIconSm = wc.hIcon;
 
-    RegisterClass(&wc);
+    RegisterClassEx(&wc);
     classRegistered = true;
 }
 
 // Win32 window constructor
-WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t, s) {
+WindowWin32::WindowWin32(const uint32_t& i, const std::string& t, const Vector2& s) : WindowImpl(i, t, s) {
     // Get the handle to Smile
     HINSTANCE hInstance = GetModuleHandle(nullptr);
     // Register a window class with Windows if one has not been registered yet
@@ -303,8 +308,14 @@ WindowWin32::WindowWin32(const std::string& t, const Vector2& s) : WindowImpl(t,
         nullptr, nullptr, hInstance, this // pass in the window so we can use it in the window procedure
     );
 
+    // Get display context for use in rendering
+    hdc = GetDC(hwnd);
+
     // Display the window
     ShowWindow(hwnd, SW_SHOW);
+
+    // Update the window
+    UpdateWindow(hwnd);
 }
 
 std::queue<WindowInput> WindowWin32::update() {
@@ -322,6 +333,89 @@ std::queue<WindowInput> WindowWin32::update() {
     std::swap(inputsCopy, inputs);
 
     return inputsCopy;
+}
+
+void WindowWin32::bindGLContext() {
+    if (rbackendSet) {
+        std::cout << "Render context already bound" << std::endl;
+        return;
+    }
+
+    // Set variables for the backend used and that it is set
+    rbackend = RenderBackend::GL;
+    rbackendSet = true;
+
+    // Create a PIXEL FORMAT DESCRIPTOR
+    PIXELFORMATDESCRIPTOR pfd = {};
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cDepthBits = 24;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+
+    int pf = ChoosePixelFormat(hdc, &pfd);
+    SetPixelFormat(hdc, pf, &pfd);
+
+    // Create dummy context (we need it to move out of caveman GL)
+    HGLRC dummyCtx = wglCreateContext(hdc);
+    wglMakeCurrent(hdc, dummyCtx); // Make it current so we can use it
+
+    // Load WGL extensions (needed for core context creation)
+    if (!gladLoaderLoadWGL(hdc)) {
+        std::cerr << "Failed to load WGL extensions\n";
+        wglMakeCurrent(NULL, NULL);
+        wglDeleteContext(dummyCtx);
+        return;
+    }
+
+    // Attributes list for modern GL (4.6)
+    int attribs[] = {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+        WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+        0
+    };
+
+    // Create modern GL context
+    glContext = wglCreateContextAttribsARB(hdc, 0, attribs);
+
+    // Delete the dummy
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(dummyCtx);
+    wglMakeCurrent(hdc, glContext); // Make it current so we can use modern GL
+
+    // Load GL from glad
+    if (!gladLoaderLoadGL()) {
+        std::cerr << "Failed to load OpenGL" << std::endl;
+        wglMakeCurrent(NULL, NULL);
+        wglDeleteContext(glContext);
+    }
+}
+
+void WindowWin32::makeGLCurrent() {
+    if (rbackendSet && rbackend == RenderBackend::GL) {
+        // Just make the context current
+        wglMakeCurrent(hdc, glContext);
+    } else {
+        std::cerr << "Render context either does not exist or is not OpenGL" << std::endl;
+    }
+}
+
+void WindowWin32::swapGLBuffers() {
+    if (rbackendSet && rbackend == RenderBackend::GL) {
+        // Just swap buffers
+        SwapBuffers(hdc);
+    } else {
+        std::cerr << "Render context either does not exist or is not OpenGL" << std::endl;
+    }
+}
+
+Vector2 WindowWin32::getSize() {
+    RECT size;
+    GetClientRect(hwnd, &size);
+    return Vector2(float(size.right - size.left), float(size.bottom - size.top));
 }
 
 void WindowWin32::pushInput(WindowInput input) {

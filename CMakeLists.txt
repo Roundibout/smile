@@ -46,6 +46,7 @@ target_include_directories(lua PUBLIC extern/lua)
 # GLAD static library
 add_library(glad STATIC
     extern/glad/src/gl.c
+    extern/glad/src/wgl.c
 )
 target_include_directories(glad PUBLIC extern/glad/include)
 
@@ -54,10 +55,10 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 add_executable(Smile ${SOURCES})
 
 # Include directories (Lua and sol)
-target_include_directories(Smile PRIVATE extern/lua extern src)
+target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern src)
 
 # Link Lua
-target_link_libraries(Smile PRIVATE lua glad)
+target_link_libraries(Smile PRIVATE lua glad opengl32)
 
 # Custom target to copy scripts (and licenses) every build
 add_custom_target(copy_scripts
