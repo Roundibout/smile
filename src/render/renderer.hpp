@@ -20,8 +20,17 @@ License:
 class Renderer {
 private:
     std::unique_ptr<RendererImpl> impl;
+    bool dirtied = false;
 public:
     Renderer(WindowImpl* window);
+
     void beginFrame();
+
+    void drawRect(const Vector2& position, const Vector2& size, const Color4& color);
+
     void endFrame();
+
+    void dirty();
+    void clean();
+    bool isDirty();
 };

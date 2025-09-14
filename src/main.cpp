@@ -98,6 +98,35 @@ int main(int argc, char *argv[]) {
         sol::meta_function::unary_minus, sol::resolve<Vector2() const>(&Vector2::operator-)
     );
 
+    // Color4
+    lua.new_usertype<Color4>("Color4",
+        // Constructors
+        sol::constructors<
+            Color4(), 
+            Color4(float, float, float, float)
+        >(),
+        // Fields
+        "r", &Color4::r,
+        "g", &Color4::g,
+        "b", &Color4::b,
+        "a", &Color4::a
+    );
+
+    // Window Config
+    lua.new_usertype<WindowConfig>("WindowConfig",
+        // Constructor
+        sol::constructors<WindowConfig()>(),
+        // Fields
+        "title", &WindowConfig::title,
+        "size", &WindowConfig::size,
+        "color", &WindowConfig::color,
+        "resizable", &WindowConfig::resizable,
+        "minSize", &WindowConfig::minSize,
+        "maxSize", &WindowConfig::maxSize,
+        "maximizable", &WindowConfig::maximizable,
+        "minimizable", &WindowConfig::minimizable
+    );
+
     // Window Input
     lua.new_usertype<MouseInput>("MouseInput",
         "button", &MouseInput::button,
@@ -118,6 +147,13 @@ int main(int argc, char *argv[]) {
     );
 
     // -- Classes -- //
+
+    lua.new_usertype<Renderer>("Renderer",
+        "Dirty", &Renderer::dirty,
+        "IsDirty", &Renderer::isDirty,
+
+        "DrawRect", &Renderer::drawRect
+    );
 
     lua.new_usertype<Window>("Window",
         "renderer", sol::property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct

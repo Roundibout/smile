@@ -45,7 +45,7 @@ public:
         return instance;
     }
 
-    std::shared_ptr<Window> createWindow(const std::string& title, const Vector2& size);
+    std::shared_ptr<Window> createWindow(const WindowConfig& config);
     std::shared_ptr<Window> getWindowById(const uint32_t& id);
 
     void destroyWindow(const uint32_t& id);

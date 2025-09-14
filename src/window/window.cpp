@@ -11,9 +11,9 @@ License:
 
 #include "window.hpp"
 
-Window::Window(const uint32_t& id, const std::string& title, const Vector2& size)
+Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
-        : impl(std::make_unique<WindowWin32>(id, title, size)), // initializer shenanigans
+        : impl(std::make_unique<WindowWin32>(id, config)), // initializer shenanigans
         renderer(impl.get())
     #endif
 {
@@ -21,6 +21,10 @@ Window::Window(const uint32_t& id, const std::string& title, const Vector2& size
 }
 
 void Window::process() {
+    // Clean renderer
+    renderer.clean();
+    bool overdirtied = false;
+
     // Get inputs through impl update
     inputs = impl->update();
 
@@ -37,7 +41,16 @@ void Window::process() {
             }
         }
 
+        // Set dirty overrides
+        if (input.type == WindowInputType::WindowResized) {
+            overdirtied = true;
+        }
+
         inputs.pop(); // remove the input
+    }
+
+    if (overdirtied == true) {
+        renderer.dirty();
     }
 }
 
@@ -53,18 +66,21 @@ void Window::update(float deltaTime) {
 }
 
 void Window::render() {
-    // Begin the frame
-    renderer.beginFrame();
-    // Find any render callbacks
-    auto it = callbacks.find(WindowEvent::Render);
-    if (it != callbacks.end()) { // Is there any?
-        // Go through all of them and run them
-        for (auto& func : it->second) {
-            func();
+    if (renderer.isDirty() || blank == true) { // Only render if the renderer is dirty or the window is blank
+        blank = false;
+        // Begin the frame
+        renderer.beginFrame();
+        // Find any render callbacks
+        auto it = callbacks.find(WindowEvent::Render);
+        if (it != callbacks.end()) { // Is there any?
+            // Go through all of them and run them
+            for (auto& func : it->second) {
+                func();
+            }
         }
+        // End the frame
+        renderer.endFrame();
     }
-    // End the frame
-    renderer.endFrame();
 }
 
 void Window::connectCallback(WindowEvent event, sol::function callback) {

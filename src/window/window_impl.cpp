@@ -11,8 +11,12 @@ License:
 
 #include "window_impl.hpp"
 
-WindowImpl::WindowImpl(const uint32_t& i, const std::string& t, const Vector2& s) : id(i), title(t), size(s) {}
+WindowImpl::WindowImpl(const uint32_t& i, const WindowConfig& c) : id(i), config(c) {}
 
 const uint32_t WindowImpl::getId() {
     return id;
+}
+
+WindowConfig WindowImpl::getConfig() {
+    return config;
 }

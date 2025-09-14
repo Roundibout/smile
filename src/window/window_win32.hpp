@@ -13,11 +13,13 @@ License:
 
 #include <string>
 #include <iostream>
+#include <optional>
 
 #include <glad/wgl.h>
 
 #include <windows.h>
 #include <windowsx.h>
+#include <dwmapi.h>
 
 #include <datatypes/vector2.hpp>
 
@@ -33,7 +35,8 @@ private:
     
     std::queue<WindowInput> inputs;
 public:
-    WindowWin32(const uint32_t& i, const std::string& t, const Vector2& s);
+    WindowWin32(const uint32_t& i, const WindowConfig& c);
+    ~WindowWin32();
     std::queue<WindowInput> update() override;
 
     // OpenGL

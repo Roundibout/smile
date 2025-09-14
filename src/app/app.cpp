@@ -11,11 +11,11 @@ License:
 
 #include "app.hpp"
 
-std::shared_ptr<Window> App::createWindow(const std::string& title, const Vector2& size) {
+std::shared_ptr<Window> App::createWindow(const WindowConfig& config) {
     std::cout << "Creating window" << std::endl;
 
     // Create window and associate it with the next window id
-    std::shared_ptr<Window> window = std::make_shared<Window>(nextId, title, size);
+    std::shared_ptr<Window> window = std::make_shared<Window>(nextId, config);
     windows[nextId] = window;
 
     // Increment window id
@@ -82,11 +82,15 @@ void App::run() {
 
         auto currentTime = App::get().step();
 
-        // Sleep to cap at set fps
-        auto workTime = clock::now() - currentTime;
-        if (workTime < frameDuration) {
-            std::this_thread::sleep_for(frameDuration - workTime); // stop the CPU from busymaxxing
+        auto frameTime = clock::now() - currentTime;
+        auto sleepTime = frameDuration - frameTime;
+
+        if (sleepTime > std::chrono::milliseconds(2)) {
+            std::this_thread::sleep_for(sleepTime - std::chrono::milliseconds(1));
         }
+
+        // Busy-wait the remaining ~1ms
+        while ((clock::now() - currentTime) < frameDuration) { }
     }
 }
 

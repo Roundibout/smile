@@ -12,6 +12,7 @@ License:
 #pragma once
 
 #include <datatypes/vector2.hpp>
+#include <datatypes/color4.hpp>
 
 #include <window/window_impl.hpp>
 
@@ -22,5 +23,8 @@ public:
     RendererImpl(WindowImpl* w);
 
     virtual void beginFrame() = 0;
+
+    virtual void drawRect(const Vector2& position, const Vector2& size, const Color4& color) = 0;
+
     virtual void endFrame() = 0;
 };

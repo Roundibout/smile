@@ -130,6 +130,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             return DefWindowProc(hwnd, msg, wParam, lParam); // Do your thing Windows...
         }
         case WM_DESTROY: {
+            KillTimer(hwnd, 1);
             WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
             App::get().destroyWindow(window->getId());
             PostQuitMessage(0);
@@ -139,7 +140,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // FIX FOR STALLING DURING RESIZE AND MOVE
 
         case WM_ENTERSIZEMOVE:
-            SetTimer(hwnd, 1, 16, nullptr); // ~60 FPS (TODO: make it change depending on set fps)
+            SetTimer(hwnd, 1, 4, nullptr); // ~240 FPS probably
             return 0;
         case WM_TIMER:
             if (wParam == 1) {
@@ -149,6 +150,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_EXITSIZEMOVE:
             KillTimer(hwnd, 1);
             return 0;
+
+        // ENFORCE MINIMUM AND MAXIMUM SIZE
+        case WM_GETMINMAXINFO: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+            if (!window) {
+                // Window not fully created yet, ignore this message
+                return 0;
+            }
+
+            MINMAXINFO* mmi = reinterpret_cast<MINMAXINFO*>(lParam);
+            WindowConfig config = window->getConfig();
+
+            // Always set the minimum size
+            mmi->ptMinTrackSize.x = static_cast<LONG>(config.minSize.x);
+            mmi->ptMinTrackSize.y = static_cast<LONG>(config.minSize.y);
+
+            // Only set max if present
+            if (config.maxSize.has_value()) {
+                mmi->ptMaxTrackSize.x = static_cast<LONG>(config.maxSize->x);
+                mmi->ptMaxTrackSize.y = static_cast<LONG>(config.maxSize->y);
+            }
+            return 0;
+        }
 
         // MOUSE
         case WM_MOUSEMOVE: {
@@ -292,21 +316,39 @@ static void registerWindowClass(HINSTANCE hInstance) {
 }
 
 // Win32 window constructor
-WindowWin32::WindowWin32(const uint32_t& i, const std::string& t, const Vector2& s) : WindowImpl(i, t, s) {
+WindowWin32::WindowWin32(const uint32_t& i, const WindowConfig& c) : WindowImpl(i, c) {
+    SetProcessDPIAware(); // Set this so it isn't blurry
+
     // Get the handle to Smile
     HINSTANCE hInstance = GetModuleHandle(nullptr);
     // Register a window class with Windows if one has not been registered yet
     registerWindowClass(hInstance);
 
+    // Create window style from config
+    DWORD style = WS_OVERLAPPEDWINDOW;
+
+    if (!config.resizable)
+        style &= ~WS_SIZEBOX;
+
+    if (!config.maximizable)
+        style &= ~WS_MAXIMIZEBOX;
+
+    if (!config.minimizable)
+        style &= ~WS_MINIMIZEBOX;
+    
     // Create a window associated with Smile
     hwnd = CreateWindow(
         "SmileWindow",
-        title.c_str(),
-        WS_OVERLAPPEDWINDOW,
+        config.title.c_str(),
+        style,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        size.x, size.y,
+        static_cast<int>(config.size.x), static_cast<int>(config.size.y),
         nullptr, nullptr, hInstance, this // pass in the window so we can use it in the window procedure
     );
+
+    // Set caption color
+    COLORREF captionColor = RGB(40, 40, 40);
+    DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &captionColor, sizeof(captionColor));
 
     // Get display context for use in rendering
     hdc = GetDC(hwnd);
@@ -325,8 +367,6 @@ std::queue<WindowInput> WindowWin32::update() {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
-    // How am i supposed to carry on with the rest of the app loop when resizing? The next logic is inside the app's loop??
 
     // Copy inputs to a new queue for use outside
     std::queue<WindowInput> inputsCopy;
@@ -420,4 +460,17 @@ Vector2 WindowWin32::getSize() {
 
 void WindowWin32::pushInput(WindowInput input) {
     inputs.push(input);
+}
+
+WindowWin32::~WindowWin32() {
+    if (glContext) {
+        wglMakeCurrent(nullptr, nullptr);
+        wglDeleteContext(glContext);
+        glContext = nullptr;
+    }
+    if (hdc && hwnd) {
+        ReleaseDC(hwnd, hdc);
+        hdc = nullptr;
+    }
+    hwnd = nullptr;
 }

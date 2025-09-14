@@ -42,10 +42,12 @@ private:
     std::queue<WindowInput> inputs;
 
     std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
+
+    bool blank = true;
 public:
     Renderer renderer;
 
-    Window(const uint32_t& id, const std::string& title, const Vector2& size);
+    Window(const uint32_t& id, const WindowConfig& config);
     void process();
     void update(float deltaTime);
     void render();

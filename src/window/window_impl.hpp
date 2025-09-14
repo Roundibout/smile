@@ -13,6 +13,7 @@ License:
 
 #include <string>
 #include <queue>
+#include <optional>
 
 #include <glad/gl.h>
 
@@ -20,16 +21,30 @@ License:
 #include <window/window_input.hpp>
 #include <render/renderer_types.hpp>
 
+struct WindowConfig {
+    std::string title = "Window";
+    Vector2 size = Vector2(800, 600);
+
+    Color4 color = Color4(255, 255, 255);
+
+    bool resizable = true;
+    std::optional<Vector2> maxSize;
+    Vector2 minSize = Vector2(400, 200);
+
+    bool maximizable = true;
+    bool minimizable = true;
+};
+
 class WindowImpl {
 protected:
     const uint32_t id;
-    std::string title;
-    Vector2 size;
+    WindowConfig config;
 
     RenderBackend rbackend;
     bool rbackendSet = false;
 public:
-    WindowImpl(const uint32_t& i, const std::string& t, const Vector2& s);
+    WindowImpl(const uint32_t& i, const WindowConfig& c);
+    virtual ~WindowImpl() = default;
     virtual std::queue<WindowInput> update() = 0;
 
     virtual void bindGLContext() = 0;
@@ -38,4 +53,6 @@ public:
 
     const uint32_t getId();
     virtual Vector2 getSize() = 0;
+
+    WindowConfig getConfig();
 };

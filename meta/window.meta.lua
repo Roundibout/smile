@@ -1,5 +1,20 @@
 ---@meta _
 
+---@class WindowConfig
+---@field title string
+---@field size Vector2
+---@field color Color4
+---@field resizable boolean
+---@field maxSize Vector2?
+---@field minSize Vector2
+---@field maximizable boolean
+---@field minimizable boolean
+WindowConfig = {}
+
+---Creates a new WindowConfig, used in creating windows.
+---@return WindowConfig config
+function WindowConfig.new() end
+
 ---@class Window
 ---@field renderer Renderer
 Window = {}

@@ -58,13 +58,23 @@ add_executable(Smile ${SOURCES})
 target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern src)
 
 # Link Lua
-target_link_libraries(Smile PRIVATE lua glad opengl32)
+target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi)
 
-# Custom target to copy scripts (and licenses) every build
+if (MINGW)
+    # bundle these so it works everywhere
+    target_link_options(Smile PRIVATE -static -static-libgcc -static-libstdc++)
+endif()
+
+# Custom target to copy scripts, assets (and licenses) every build
 add_custom_target(copy_scripts
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/scripts"
         "$<TARGET_FILE_DIR:Smile>/scripts"
+)
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:Smile>/assets"
 )
 add_custom_target(copy_licenses
     COMMAND ${CMAKE_COMMAND} -E copy
@@ -74,5 +84,5 @@ add_custom_target(copy_licenses
 
 # Make these run as part of ALL builds
 add_custom_target(prebuild ALL
-    DEPENDS copy_scripts copy_licenses
+    DEPENDS copy_scripts copy_assets copy_licenses
 )

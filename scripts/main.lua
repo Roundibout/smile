@@ -10,25 +10,45 @@ License:
 --]]
 
 -- create test windows
-local window = App:CreateWindow("Smile", Vector2.new(800, 600))
-local window2 = App:CreateWindow("Smile2", Vector2.new(800, 600))
+local config = WindowConfig.new()
+config.title = "Hello"
+config.minSize = Vector2.new(400, 400)
+config.minimizable = false
 
-local timer = 0
+local window = App:CreateWindow(config)
+
+local window2 = App:CreateWindow(WindowConfig.new())
+
+local pressed = true;
+local position = Vector2.new(50, 50)
+local size = Vector2.new(200, 50)
+local color = Color4.new(0.3, 0.3, 0.3, 1)
+local hovered = false
+local clickTimer = 0
+
 window:ConnectUpdate(function(deltaTime)
-    timer = timer + deltaTime
-    --print(timer)
+    clickTimer = clickTimer - deltaTime
+    if clickTimer < 0 then
+        clickTimer = 0
+    end
 end)
 
 window:ConnectRender(function()
-    --print("render")
+    window.renderer:DrawRect(position, size, color)
 end)
 
 window:ConnectInput(function(input)
-    if input.type == WindowInputType.MouseScroll then
-        print(input.mouse.scroll)
-        print(input.mouse.position)
-    elseif input.type == WindowInputType.MouseButtonDown then
-        print(input.mouse.position)
+    if input.type == WindowInputType.MouseMove then
+        local inside = input.mouse.position.x >= position.x and input.mouse.position.x <= position.x + size.x and input.mouse.position.y >= position.y and input.mouse.position.y <= position.y + size.y
+        if hovered ~= inside then
+            hovered = inside
+            if hovered == true then
+                color = Color4.new(0.4, 0.4, 0.4, 1)
+            else
+                color = Color4.new(0.3, 0.3, 0.3, 1)
+            end
+            window.renderer:Dirty()
+        end
     end
 end)
 
