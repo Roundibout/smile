@@ -14,6 +14,7 @@ License:
 #include <string>
 #include <iostream>
 #include <optional>
+#include <algorithm>
 
 #include <glad/wgl.h>
 

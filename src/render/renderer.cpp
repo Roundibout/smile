@@ -23,6 +23,10 @@ void Renderer::drawRect(const Vector2& position, const Vector2& size, const Colo
     impl->drawRect(position, size, color);
 }
 
+void Renderer::drawText(const std::string text, const Vector2& position, const std::string path, int size) {
+    impl->drawText(text, position, path, size);
+}
+
 void Renderer::endFrame() {
     impl->endFrame();
 }

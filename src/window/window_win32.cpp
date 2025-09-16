@@ -147,9 +147,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 App::get().step(); // Kinda stupid fix
             }
             return 0;
-        case WM_EXITSIZEMOVE:
+        case WM_EXITSIZEMOVE: {
+            WindowInput input;
+            input.type = WindowInputType::WindowResized;
+
+            pushInput(hwnd, input);
+
             KillTimer(hwnd, 1);
+
             return 0;
+        }
 
         // ENFORCE MINIMUM AND MAXIMUM SIZE
         case WM_GETMINMAXINFO: {
@@ -347,14 +354,24 @@ WindowWin32::WindowWin32(const uint32_t& i, const WindowConfig& c) : WindowImpl(
     );
 
     // Set caption color
-    COLORREF captionColor = RGB(40, 40, 40);
+    COLORREF captionColor = RGB(
+        std::round(std::clamp(config.color.r * 255.0f, 0.0f, 255.0f)), 
+        std::round(std::clamp(config.color.g * 255.0f, 0.0f, 255.0f)), 
+        std::round(std::clamp(config.color.b * 255.0f, 0.0f, 255.0f))
+    );
     DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &captionColor, sizeof(captionColor));
 
     // Get display context for use in rendering
     hdc = GetDC(hwnd);
 
     // Display the window
-    ShowWindow(hwnd, SW_SHOW);
+    if (config.maximizable == true && config.maximized == true) {
+        ShowWindow(hwnd, SW_MAXIMIZE);
+    } else if (config.minimizable == true && config.minimized == true) {
+        ShowWindow(hwnd, SW_MINIMIZE);
+    } else {
+        ShowWindow(hwnd, SW_SHOW);
+    }
 
     // Update the window
     UpdateWindow(hwnd);

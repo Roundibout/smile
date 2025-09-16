@@ -16,9 +16,10 @@ License:
 #include <memory>
 
 #include <datatypes/vector2.hpp>
-#include <app/app.hpp>
 #include <window/window.hpp>
 #include <window/window_input.hpp>
+#include <ui/theme.hpp>
+#include <app/app.hpp>
 
 int main(int argc, char *argv[]) {
     std::cout << "Initializing smile..." << std::endl;
@@ -74,6 +75,13 @@ int main(int argc, char *argv[]) {
     #undef X
     });
 
+    // Theme
+    lua.new_enum<ThemeColor>("ThemeColor",
+        {
+            {"WindowBackground", ThemeColor::WindowBackground}
+        }
+    );
+
     // -- Datatypes -- //
 
     // Vector2
@@ -123,6 +131,8 @@ int main(int argc, char *argv[]) {
         "resizable", &WindowConfig::resizable,
         "minSize", &WindowConfig::minSize,
         "maxSize", &WindowConfig::maxSize,
+        "maximized", &WindowConfig::maximized,
+        "minimized", &WindowConfig::minimized,
         "maximizable", &WindowConfig::maximizable,
         "minimizable", &WindowConfig::minimizable
     );
@@ -163,14 +173,21 @@ int main(int argc, char *argv[]) {
         "ConnectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
     );
 
-    // -- App -- //
+    // -- Singletons -- //
+
+    lua.new_usertype<Theme>("Theme",
+        "GetColor", &Theme::getColor
+    );
+
     lua.new_usertype<App>("App",
         "Run", &App::run,
         "Quit", &App::quit,
 
         "CreateWindow", &App::createWindow
     );
-    // Assign the singleton app to a global variable so you don't need use the get function
+
+    // Assign the singletons to global variables so you don't need the get function
+    lua["Theme"] = &Theme::get();
     lua["App"] = &App::get();
 
     // ---- RUN LUA ---- //

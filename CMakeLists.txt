@@ -50,15 +50,18 @@ add_library(glad STATIC
 )
 target_include_directories(glad PUBLIC extern/glad/include)
 
+# FreeType static library
+add_subdirectory(extern/freetype)
+
 # Smile executable
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 add_executable(Smile ${SOURCES})
 
-# Include directories (Lua and sol)
-target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern src)
+# Include directories (external)
+target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern/freetype/include extern src)
 
-# Link Lua
-target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi)
+# Link libraries
+target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi freetype)
 
 if (MINGW)
     # bundle these so it works everywhere

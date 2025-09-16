@@ -44,6 +44,7 @@ private:
     std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 
     bool blank = true;
+    Vector2 lastSize;
 public:
     Renderer renderer;
 

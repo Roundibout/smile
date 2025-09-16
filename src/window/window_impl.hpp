@@ -31,6 +31,9 @@ struct WindowConfig {
     std::optional<Vector2> maxSize;
     Vector2 minSize = Vector2(400, 200);
 
+    bool maximized = false;
+    bool minimized = false;
+
     bool maximizable = true;
     bool minimizable = true;
 };

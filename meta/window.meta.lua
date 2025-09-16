@@ -7,6 +7,8 @@
 ---@field resizable boolean
 ---@field maxSize Vector2?
 ---@field minSize Vector2
+---@field maximized boolean
+---@field minimized boolean
 ---@field maximizable boolean
 ---@field minimizable boolean
 WindowConfig = {}

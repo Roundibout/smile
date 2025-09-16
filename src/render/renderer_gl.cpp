@@ -30,7 +30,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     shaders = ShaderManagerGL();
-    shaders.loadShader("basic", "assets/shaders/basic.vert", "assets/shaders/basic.frag");
+    shaders.loadShader("quad", "assets/shaders/quad.vert", "assets/shaders/quad.frag");
     
     // Create VAO/VBO/EBO for batching
     glGenVertexArrays(1, &batchVAO);
@@ -58,7 +58,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, batchIndices.size() * sizeof(unsigned int), batchIndices.data(), GL_STATIC_DRAW);
 
-    // Set up vertex attributes (vector2 + color4)
+    // Set up vertex attributes
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
@@ -74,7 +74,7 @@ void RendererGL::flushBatch() {
     glBindBuffer(GL_ARRAY_BUFFER, batchVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(Vertex), batchVertices.data());
 
-    shaders.useShader("basic");
+    shaders.useShader("quad");
     glDrawElements(GL_TRIANGLES, quadCount * 6, GL_UNSIGNED_INT, 0);
 
     batchVertices.clear();
@@ -98,14 +98,15 @@ void RendererGL::beginFrame() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Clear the screen
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    Color4 color = window->getConfig().color;
+    glClearColor(color.r, color.g, color.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     batchVertices.clear();
     quadCount = 0;
 
     // Set uniforms
-    shaders.setUniformMat4("basic", "uProjection", proj.data());
+    shaders.setUniformMat4("quad", "uProjection", proj.data());
 }
 
 void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Color4& color) {
@@ -122,6 +123,10 @@ void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Co
     batchVertices.push_back(v3);
 
     ++quadCount;
+}
+
+void RendererGL::drawText(const std::string text, const Vector2& position, const std::string path, int size) {
+    // do stuff here
 }
 
 void RendererGL::endFrame() {

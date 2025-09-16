@@ -1,3 +1,14 @@
+/*
+File:
+    shader_manager.cpp
+Authors:
+    Lucas
+Purpose:
+    Implementation of the ShaderManager class, responsible for handling shaders per Renderer
+License:
+    MIT (see LICENSE file)
+*/
+
 #include "shader_manager.hpp"
 
 // Function for reading a file into a string

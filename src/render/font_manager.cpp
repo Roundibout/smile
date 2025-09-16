@@ -1,0 +1,81 @@
+/*
+File:
+    font_manager.cpp
+Authors:
+    Lucas
+Purpose:
+    Implementation of the FontManager singleton, responsible for handling fonts
+License:
+    MIT (see LICENSE file)
+*/
+
+#include "font_manager.hpp"
+
+Font::~Font() {
+    if (face) FT_Done_Face(face);
+}
+
+const Glyph* Font::getGlyph(char c) {
+    auto it = glyphs.find(c);
+    if (it != glyphs.end()) {
+        return &it->second;
+    }
+
+    // Load glyph from FreeType
+    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+        std::cerr << "Failed to load glyph: " << c << "\n";
+        return nullptr;
+    }
+
+    Glyph glyph;
+    FT_GlyphSlot slot = face->glyph;
+
+    glyph.width = slot->bitmap.width;
+    glyph.height = slot->bitmap.rows;
+    glyph.bearingX = slot->bitmap_left;
+    glyph.bearingY = slot->bitmap_top;
+    glyph.advance = slot->advance.x >> 6; // 1/64th pixels -> pixels
+
+    // Copy bitmap data
+    glyph.bitmap.assign(
+        slot->bitmap.buffer,
+        slot->bitmap.buffer + (slot->bitmap.width * slot->bitmap.rows)
+    );
+
+    // Insert into cache
+    auto [inserted, _] = glyphs.emplace(c, std::move(glyph));
+    return &inserted->second;
+}
+
+FontManager::FontManager() {
+    if (FT_Init_FreeType(&library)) {
+        std::cerr << "Failed to initialize FreeType" << std::endl;
+    }
+}
+
+FontManager::~FontManager() {
+    FT_Done_FreeType(library);
+}
+
+Font* FontManager::getFont(const std::string& path, int size) {
+    std::string key = path + "#" + std::to_string(size);
+
+    auto it = fonts.find(key);
+    if (it != fonts.end()) {
+        return it->second.get();
+    }
+
+    // Not loaded yet → load
+    auto font = std::make_unique<Font>();
+    if (FT_New_Face(library, path.c_str(), 0, &font->face)) {
+        std::cerr << "Failed to load font: " << path << "\n";
+        return nullptr;
+    }
+
+    FT_Set_Pixel_Sizes(font->face, 0, size);
+    font->size = size;
+
+    Font* ptr = font.get();
+    fonts.emplace(key, std::move(font));
+    return ptr;
+}

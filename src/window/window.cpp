@@ -14,7 +14,8 @@ License:
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
         : impl(std::make_unique<WindowWin32>(id, config)), // initializer shenanigans
-        renderer(impl.get())
+        renderer(impl.get()),
+        lastSize(config.size)
     #endif
 {
     // maybe do other stuff later
@@ -44,6 +45,7 @@ void Window::process() {
         // Set dirty overrides
         if (input.type == WindowInputType::WindowResized) {
             overdirtied = true;
+            lastSize = impl->getSize();
         }
 
         inputs.pop(); // remove the input
@@ -55,6 +57,12 @@ void Window::process() {
 }
 
 void Window::update(float deltaTime) {
+    // Check for new window size and force render
+    Vector2 windowSize = impl->getSize();
+    if (lastSize != windowSize) {
+        renderer.dirty();
+        lastSize = windowSize;
+    }
     // Find any update callbacks
     auto it = callbacks.find(WindowEvent::Update);
     if (it != callbacks.end()) { // Is there any?

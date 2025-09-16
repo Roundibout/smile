@@ -19,6 +19,7 @@ License:
 
 #include <render/renderer_impl.hpp>
 #include <render/shader_manager.hpp>
+#include <render/font_manager.hpp>
 
 class RendererGL : public RendererImpl {
 private:
@@ -38,6 +39,7 @@ public:
     void beginFrame() override;
 
     void drawRect(const Vector2& position, const Vector2& size, const Color4& color) override;
+    void drawText(const std::string text, const Vector2& position, const std::string path, int size) override;
 
     void endFrame() override;
 };

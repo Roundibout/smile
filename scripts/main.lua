@@ -12,12 +12,12 @@ License:
 -- create test windows
 local config = WindowConfig.new()
 config.title = "Hello"
+config.size = Vector2.new(1920, 1080)
 config.minSize = Vector2.new(400, 400)
-config.minimizable = false
+config.color = Theme:GetColor(ThemeColor.WindowBackground)
+config.maximized = false
 
 local window = App:CreateWindow(config)
-
-local window2 = App:CreateWindow(WindowConfig.new())
 
 local pressed = true;
 local position = Vector2.new(50, 50)
