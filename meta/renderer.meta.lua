@@ -9,6 +9,14 @@ Renderer = {}
 ---@param color Color4
 function Renderer:DrawRect(position, size, color) end
 
+---Draws text at the specified position (relative to the top-left corner) with the specified font (file path), size, (height) and color.
+---@param text string
+---@param position Vector2
+---@param font string
+---@param size integer
+---@param color Color4
+function Renderer:DrawText(text, position, font, size, color) end
+
 ---Flags the renderer for a render this frame.
 function Renderer:Dirty() end
 

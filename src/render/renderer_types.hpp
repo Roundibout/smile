@@ -17,8 +17,3 @@ License:
 enum class RenderBackend {
     GL
 };
-
-struct Vertex {
-    Vector2 position;
-    Color4 color;
-};

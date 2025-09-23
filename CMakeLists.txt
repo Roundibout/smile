@@ -54,7 +54,7 @@ target_include_directories(glad PUBLIC extern/glad/include)
 add_subdirectory(extern/freetype)
 
 # Smile executable
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_executable(Smile ${SOURCES})
 
 # Include directories (external)
@@ -66,6 +66,13 @@ target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi freetype)
 if (MINGW)
     # bundle these so it works everywhere
     target_link_options(Smile PRIVATE -static -static-libgcc -static-libstdc++)
+    # random crap to fix sol binding
+    target_compile_options(Smile PRIVATE 
+        -Wa,-mbig-obj
+        -ftemplate-backtrace-limit=0
+        -O1  # Lower optimization to reduce template bloat
+    )
+    target_link_options(Smile PRIVATE -Wl,--allow-multiple-definition)
 endif()
 
 # Custom target to copy scripts, assets (and licenses) every build

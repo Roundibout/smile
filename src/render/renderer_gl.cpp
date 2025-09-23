@@ -31,16 +31,17 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
 
     shaders = ShaderManagerGL();
     shaders.loadShader("quad", "assets/shaders/quad.vert", "assets/shaders/quad.frag");
+    shaders.loadShader("text", "assets/shaders/text.vert", "assets/shaders/text.frag");
     
     // Create VAO/VBO/EBO for batching
-    glGenVertexArrays(1, &batchVAO);
-    glGenBuffers(1, &batchVBO);
-    glGenBuffers(1, &batchEBO);
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glGenBuffers(1, &quadEBO);
 
-    glBindVertexArray(batchVAO);
+    glBindVertexArray(quadVAO);
 
     // Allocate buffer for vertices (dynamic draw for live updates which is important)
-    glBindBuffer(GL_ARRAY_BUFFER, batchVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
     glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
     // Precompute and upload indices for maxQuads
@@ -55,7 +56,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
         batchIndices[i*6 + 5] = offset + 3;
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, batchIndices.size() * sizeof(unsigned int), batchIndices.data(), GL_STATIC_DRAW);
 
     // Set up vertex attributes
@@ -65,20 +66,97 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
+
+    // Create VAO/VBO/EBO for text batching
+    glGenVertexArrays(1, &textVAO);
+    glGenBuffers(1, &textVBO);
+    glGenBuffers(1, &textEBO);
+
+    glBindVertexArray(textVAO);
+
+    // Allocate buffer for text vertices
+    glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+    glBufferData(GL_ARRAY_BUFFER, maxTextQuads * 4 * sizeof(TextVertex), nullptr, GL_DYNAMIC_DRAW);
+
+    // Precompute and upload indices for maxTextQuads
+    textBatchIndices.resize(maxTextQuads * 6);
+    for (size_t i = 0; i < maxTextQuads; ++i) {
+        unsigned int offset = i * 4;
+        textBatchIndices[i*6 + 0] = offset + 0;
+        textBatchIndices[i*6 + 1] = offset + 1;
+        textBatchIndices[i*6 + 2] = offset + 2;
+        textBatchIndices[i*6 + 3] = offset + 0;
+        textBatchIndices[i*6 + 4] = offset + 2;
+        textBatchIndices[i*6 + 5] = offset + 3;
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, textBatchIndices.size() * sizeof(unsigned int), textBatchIndices.data(), GL_STATIC_DRAW);
+
+    // Set up vertex attributes for text
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, texCoord));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, color));
+    glEnableVertexAttribArray(2);
+
+    // Crap to stop error
+    shaders.useShader("text");
+
+    glBindVertexArray(textVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+
+    GLuint dummyTex;
+    glGenTextures(1, &dummyTex);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, dummyTex);
+
+    TextVertex dummyVertex{};
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TextVertex), &dummyVertex);
+
+    shaders.setUniformInt("text", "uTexture", 0);
+
+    glBindVertexArray(0);
 }
 
-void RendererGL::flushBatch() {
+void RendererGL::flushQuadBatch() {
     if (quadCount == 0) return;
 
-    glBindVertexArray(batchVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, batchVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(Vertex), batchVertices.data());
 
     shaders.useShader("quad");
+    shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
     glDrawElements(GL_TRIANGLES, quadCount * 6, GL_UNSIGNED_INT, 0);
 
     batchVertices.clear();
     quadCount = 0;
+
+    glBindVertexArray(0);
+}
+
+void RendererGL::flushTextBatch() {
+    if (textQuadCount == 0) return;
+
+    glBindVertexArray(textVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, textBatchVertices.size() * sizeof(TextVertex), textBatchVertices.data());
+
+    shaders.useShader("text");
+    shaders.setUniformMat4("text", "uProjection", currentProjection.data());
+    
+    // For simplicity, we'll render each glyph separately
+    // A more advanced implementation would batch glyphs by texture
+    for (size_t i = 0; i < textQuadCount; ++i) {
+        // We need to bind the appropriate texture here
+        // For now, this is a simplified version (we will sort by texture later)
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
+    }
+
+    textBatchVertices.clear();
+    textQuadCount = 0;
 
     glBindVertexArray(0);
 }
@@ -91,7 +169,7 @@ void RendererGL::beginFrame() {
     glViewport(0, 0, int(size.x), int(size.y));
 
     // Get orthographic projection
-    auto proj = makeOrtho(0.0f, size.x, size.y, 0.0f);
+    currentProjection = makeOrtho(0.0f, size.x, 0.0f, size.y);
 
     // Enable alpha blending
     glEnable(GL_BLEND);
@@ -103,14 +181,18 @@ void RendererGL::beginFrame() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     batchVertices.clear();
+    textBatchVertices.clear();
     quadCount = 0;
+    textQuadCount = 0;
 
-    // Set uniforms
-    shaders.setUniformMat4("quad", "uProjection", proj.data());
+    // Set uniforms for both shaders
+    shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
+    shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
 void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Color4& color) {
-    if (quadCount >= maxQuads) flushBatch();
+    if (quadCount >= maxQuads) flushQuadBatch();
+    if (textQuadCount > 0) flushTextBatch();
 
     Vertex v0{{position.x, position.y}, color};
     Vertex v1{{position.x + size.x, position.y}, color};
@@ -125,11 +207,115 @@ void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Co
     ++quadCount;
 }
 
-void RendererGL::drawText(const std::string text, const Vector2& position, const std::string path, int size) {
-    // do stuff here
+const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* font, char c) {
+    // Return glyph if it already exists
+    auto& map = glyphs[path + "#" + std::to_string(size)];
+    auto it = map.find(c);
+    if (it != map.end()) return &it->second;
+    
+    const Glyph* g = font->getGlyph(c);
+    if (!g) return nullptr;
+
+    GLGlyph glyph;
+    glyph.width = g->width;
+    glyph.height = g->height;
+    glyph.bearingX = g->bearingX;
+    glyph.bearingY = g->bearingY;
+    glyph.advance = g->advance;
+
+    glGenTextures(1, &glyph.textureID);
+    glBindTexture(GL_TEXTURE_2D, glyph.textureID);
+    
+    // Set texture wrapping and filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // Upload the bitmap data
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, g->width, g->height, 0, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.data());
+
+    auto [inserted, _] = map.emplace(c, glyph);
+    return &inserted->second;
+}
+
+void RendererGL::drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) {
+    if (quadCount > 0) flushQuadBatch();
+
+    Font* font = FontManager::get().getFont(path, size);
+    if (!font) {
+        std::cout << "Failed to load font: " << path << std::endl;
+        return;
+    }
+
+    float x = position.x;
+    float y = position.y;
+
+    for (char c : text) {
+        const GLGlyph* g = getGlyph(path, size, font, c);
+        if (!g) {
+            std::cout << "Failed to get glyph for character: " << c << std::endl;
+            continue;
+        }
+
+        if (g->width > 0 && g->height > 0) {
+            // Flush text batch if we're at capacity
+            if (textQuadCount >= maxTextQuads) {
+                flushTextBatch();
+            }
+
+            // Calculate glyph position (fixed for proper orientation)
+            float xpos = x + g->bearingX;
+            float ypos = y + g->bearingY - g->height; // Fixed Y positioning
+
+            float w = g->width;
+            float h = g->height;
+
+            // Create vertices for this glyph (fixed texture coordinates)
+            TextVertex v0{{xpos, ypos}, {0.0f, 1.0f}, color};          // Bottom-left
+            TextVertex v1{{xpos + w, ypos}, {1.0f, 1.0f}, color};      // Bottom-right  
+            TextVertex v2{{xpos + w, ypos + h}, {1.0f, 0.0f}, color};  // Top-right
+            TextVertex v3{{xpos, ypos + h}, {0.0f, 0.0f}, color};      // Top-left
+
+            textBatchVertices.push_back(v0);
+            textBatchVertices.push_back(v1);
+            textBatchVertices.push_back(v2);
+            textBatchVertices.push_back(v3);
+
+            // For now, render each glyph immediately (not optimal but works)
+            // Bind the glyph texture
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, g->textureID);
+            
+            // Use shader and set texture uniform
+            shaders.useShader("text");
+            shaders.setUniformInt("text", "uTexture", 0); // Bind to texture unit 0
+            
+            // Flush just this glyph
+            glBindVertexArray(textVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(TextVertex), &textBatchVertices[textBatchVertices.size() - 4]);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            // Check for OpenGL errors
+            GLenum error = glGetError();
+            if (error != GL_NO_ERROR) {
+                std::cout << "OpenGL error after drawing glyph: " << error << std::endl;
+            }
+
+            // Clear the last 4 vertices since we just rendered them
+            textBatchVertices.erase(textBatchVertices.end() - 4, textBatchVertices.end());
+        }
+
+        // Advance the position for the next character
+        x += g->advance;
+    }
 }
 
 void RendererGL::endFrame() {
-    flushBatch();
+    flushQuadBatch();
+    flushTextBatch();
     window->swapGLBuffers();
 }

@@ -7,12 +7,20 @@
 ---@field a number
 Color4 = {}
 
----Creates a new Color4 consisting of four numbers for red, green, blue, and alpha (opacity).
+---Creates a new white and opaque Color4.
+function Color4.new() end
+
+---Creates a new opaque Color4 out of three numbers for red, green, and blue.
+---@param r number The red channel.
+---@param g number The green channel.
+---@param b number The blue channel.
+---@return Color4
+function Color4.new(r, g, b) end
+
+---Creates a new Color4 out of four numbers for red, green, blue, and alpha (opacity).
 ---@param r number The red channel.
 ---@param g number The green channel.
 ---@param b number The blue channel.
 ---@param a number The alpha (opacity) channel.
 ---@return Color4
----If no arguments are provided, a white, opaque Color4 will be created.
----@overload fun(): Color4
 function Color4.new(r, g, b, a) end

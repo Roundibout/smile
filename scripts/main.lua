@@ -35,6 +35,12 @@ end)
 
 window:ConnectRender(function()
     window.renderer:DrawRect(position, size, color)
+    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 100), "assets/fonts/PontanoSans-Light.ttf", 24, Color4.new(1, 1, 1, 1))
+    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 130), "assets/fonts/PontanoSans-Regular.ttf", 24, Color4.new(1, 1, 1, 1))
+    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 160), "assets/fonts/PontanoSans-Medium.ttf", 24, Color4.new(1, 1, 1, 1))
+    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 190), "assets/fonts/PontanoSans-SemiBold.ttf", 24, Color4.new(1, 1, 1, 1))
+    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 220), "assets/fonts/PontanoSans-Bold.ttf", 24, Color4.new(1, 1, 1, 1))
+    window.renderer:DrawText("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQWRSTUVWXYZ1234567890!@#$%^&*()", position, "assets/fonts/PontanoSans-Regular.ttf", 20, Color4.new(1, 1, 1, 0.5))
 end)
 
 window:ConnectInput(function(input)

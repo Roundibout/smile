@@ -183,68 +183,84 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // MOUSE
         case WM_MOUSEMOVE: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseMove;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_LBUTTONDOWN: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonDown;
             input.mouse.button = MouseButton::Left;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_LBUTTONUP: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonUp;
             input.mouse.button = MouseButton::Left;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_RBUTTONDOWN: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonDown;
             input.mouse.button = MouseButton::Right;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_RBUTTONUP: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonUp;
             input.mouse.button = MouseButton::Right;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_MBUTTONDOWN: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonDown;
             input.mouse.button = MouseButton::Middle;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_MBUTTONUP: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseButtonUp;
             input.mouse.button = MouseButton::Middle;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
 
             pushInput(hwnd, input);
             return 0;
         }
         case WM_MOUSEWHEEL: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+
             WindowInput input;
             input.type = WindowInputType::MouseScroll;
             
@@ -252,7 +268,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
             ScreenToClient(hwnd, &point); // convert to window-relative space because its in display-relative space for some reason
-            input.mouse.position = Vector2(float(point.x), float(point.y)); // convert from weird Windows types to real values
+            input.mouse.position = Vector2(float(point.x), window->getSize().y - float(GET_Y_LPARAM(lParam))); // convert from weird Windows types to real values
 
             input.mouse.scroll = Vector2(0.0f, float(GET_WHEEL_DELTA_WPARAM(wParam)) / 120.0f);
 
@@ -260,6 +276,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             return 0;
         }
         case WM_MOUSEHWHEEL: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+            
             WindowInput input;
             input.type = WindowInputType::MouseScroll;
             
@@ -267,7 +285,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
             ScreenToClient(hwnd, &point); // convert to window-relative space because its in display-relative space for some reason
-            input.mouse.position = Vector2(float(point.x), float(point.y)); // convert from weird Windows types to real values
+            input.mouse.position = Vector2(float(point.x), window->getSize().y - float(GET_Y_LPARAM(lParam))); // convert from weird Windows types to real values
 
             input.mouse.scroll = Vector2(float(GET_WHEEL_DELTA_WPARAM(wParam)) / 120.0f, 0.0f);
 

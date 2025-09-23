@@ -33,6 +33,11 @@ void Window::process() {
     while (!inputs.empty()) {
         WindowInput& input = inputs.front();
 
+        // Process input on widgets first
+        for (auto& widget : widgets) {
+            widget->processWindowInput(input);
+        }
+
         // Find any input callbacks
         auto it = callbacks.find(WindowEvent::Input);
         if (it != callbacks.end()) { // Is there any?
@@ -63,6 +68,10 @@ void Window::update(float deltaTime) {
         renderer.dirty();
         lastSize = windowSize;
     }
+    // Update widgets first
+    for (auto& widget : widgets) {
+        widget->update(deltaTime);
+    }
     // Find any update callbacks
     auto it = callbacks.find(WindowEvent::Update);
     if (it != callbacks.end()) { // Is there any?
@@ -78,6 +87,11 @@ void Window::render() {
         blank = false;
         // Begin the frame
         renderer.beginFrame();
+        // Render widgets first
+        UIBounds bounds(impl->getSize(), UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
+        for (auto& widget : widgets) {
+            widget->render(bounds);
+        }
         // Find any render callbacks
         auto it = callbacks.find(WindowEvent::Render);
         if (it != callbacks.end()) { // Is there any?

@@ -12,6 +12,7 @@ License:
 #pragma once
 
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <memory>
 #include <iostream>
@@ -30,6 +31,8 @@ License:
 
 #include <render/renderer.hpp>
 
+#include <ui/widgets/widget.hpp>
+
 enum class WindowEvent {
     Update,
     Render,
@@ -40,6 +43,8 @@ class Window {
 private:
     std::unique_ptr<WindowImpl> impl;
     std::queue<WindowInput> inputs;
+
+    std::vector<std::unique_ptr<Widget>> widgets;
 
     std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
 
@@ -53,4 +58,15 @@ public:
     void update(float deltaTime);
     void render();
     void connectCallback(WindowEvent event, sol::function callback);
+
+    template <typename T, typename... Args>
+    T* addWidget(Args&&... args) {
+        static_assert(std::is_base_of<Widget, T>::value, "T must be a Widget");
+
+        auto widget = std::make_unique<T>(this, std::forward<Args>(args)...);
+        T* ptr = widget.get(); // Keep raw pointer for return
+        widgets.push_back(std::move(widget));
+
+        return ptr;
+    }
 };

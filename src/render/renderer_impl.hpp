@@ -25,7 +25,7 @@ public:
     virtual void beginFrame() = 0;
 
     virtual void drawRect(const Vector2& position, const Vector2& size, const Color4& color) = 0;
-    virtual void drawText(const std::string text, const Vector2& position, const std::string path, int size) = 0;
+    virtual void drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) = 0;
 
     virtual void endFrame() = 0;
 };
