@@ -11,6 +11,8 @@ License:
 
 #include "window.hpp"
 
+#include <ui/widgets/button.hpp>
+
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
         : impl(std::make_unique<WindowWin32>(id, config)), // initializer shenanigans
@@ -19,6 +21,7 @@ Window::Window(const uint32_t& id, const WindowConfig& config)
     #endif
 {
     // maybe do other stuff later
+    addWidget<Button>(UILayout(UIRect(UIDim2(0.0f, 100, 0.0f, 100), UIDim2(1.0f, -200, 1.0f, -200))));
 }
 
 void Window::process() {

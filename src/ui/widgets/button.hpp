@@ -9,6 +9,6 @@ public:
     Button(Window* window, UILayout layout) : Widget(window, layout) {}
 
     void update(float deltaTime) {}
-    void render(UIBounds bounds) {}
+    void render(UIBounds bounds) override;
     void processWindowInput(WindowInput& input) override;
 };

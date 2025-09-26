@@ -14,7 +14,7 @@ private:
     // Private constructor to prevent direct instantiation (there should be only one theme)
     Theme() {
         // Initialize default colors
-        colors[ThemeColor::WindowBackground] = Color4(0.05f, 0.05f, 0.05f); 
+        colors[ThemeColor::WindowBackground] = Color4(0.05f, 0.05f, 0.07f); 
     }
     // Delete copy constructor and assignment operator to prevent copying (same reason)
     Theme(const Theme&) = delete;

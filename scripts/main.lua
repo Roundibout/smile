@@ -19,6 +19,10 @@ config.maximized = false
 
 local window = App:CreateWindow(config)
 
+local config2 = WindowConfig.new()
+config2.color = Theme:GetColor(ThemeColor.WindowBackground)--Color4.new(0.4, 0.25, 0.62, 1)
+local window2 = App:CreateWindow(config2)
+
 local pressed = true;
 local position = Vector2.new(50, 50)
 local size = Vector2.new(200, 50)

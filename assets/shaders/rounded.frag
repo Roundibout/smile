@@ -14,13 +14,19 @@ void main() {
         (vLocalPos.y < vCorner) ? vCorner : (vLocalPos.y > vRectSize.y - vCorner) ? vRectSize.y - vCorner : vLocalPos.y
     );
 
-    // distance from pixel to corner center
-    float distToCorner = length(vLocalPos - cornerCenter);
+    float alpha;
 
-    // smooth alpha over 1–2 pixels (adjust for desired softness)
-    float aa = 1.0; // 1 pixel smoothstep
-    float alpha = smoothstep(vCorner, vCorner - aa, distToCorner);
+    if ((vLocalPos.x >= vCorner && vLocalPos.x <= vRectSize.x - vCorner) ||
+        (vLocalPos.y >= vCorner && vLocalPos.y <= vRectSize.y - vCorner)) {
+        // Straight edge
+        alpha = 1.0;
+    } else {
+        // Rounded corner
+        float distToCorner = length(vLocalPos - cornerCenter);
+        float aa = 1.0;
+        alpha = 1.0 - smoothstep(vCorner - aa, vCorner + aa, distToCorner);
+    }
 
-    // multiply by color alpha
+    // Multiply by color alpha
     FragColor = vec4(vColor.rgb, vColor.a * alpha);
 }

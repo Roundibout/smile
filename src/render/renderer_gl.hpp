@@ -15,6 +15,7 @@ License:
 #include <vector>
 #include <array>
 #include <string>
+#include <algorithm>
 
 #include <glad/gl.h>
 

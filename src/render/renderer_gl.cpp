@@ -274,10 +274,19 @@ void RendererGL::drawRoundedRect(const Vector2& position, const Vector2& size, c
     if (quadCount > 0) flushQuadBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, static_cast<float>(corner.offset)};
-    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, static_cast<float>(corner.offset)};
-    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, static_cast<float>(corner.offset)};
-    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, static_cast<float>(corner.offset)};
+    float cornerPixels = static_cast<float>(corner.offset);
+    if (size.x >= size.y) {
+        cornerPixels += size.y / 2.0f * corner.scale;
+        cornerPixels = std::clamp(cornerPixels, 0.0f, size.y / 2.0f);
+    } else {
+        cornerPixels += size.x / 2.0f * corner.scale;
+        cornerPixels = std::clamp(cornerPixels, 0.0f, size.x / 2.0f);
+    }
+
+    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, cornerPixels};
+    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, cornerPixels};
+    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, cornerPixels};
+    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, cornerPixels};
 
     roundedBatchVertices.push_back(v0);
     roundedBatchVertices.push_back(v1);
