@@ -14,6 +14,8 @@ License:
 #include <memory>
 #include <string>
 
+#include <datatypes/ui_types.hpp>
+
 #include <window/window_impl.hpp>
 #include <render/renderer_impl.hpp>
 #include <render/renderer_gl.hpp>
@@ -28,6 +30,7 @@ public:
     void beginFrame();
 
     void drawRect(const Vector2& position, const Vector2& size, const Color4& color);
+    void drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner);
     void drawText(const std::string& text, const Vector2& position, const std::string& path, int size, const Color4& color);
 
     void endFrame();

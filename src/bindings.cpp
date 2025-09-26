@@ -198,6 +198,7 @@ void register_bindings(sol::state& lua) {
         "IsDirty", &Renderer::isDirty,
 
         "DrawRect", &Renderer::drawRect,
+        "DrawRoundedRect", &Renderer::drawRoundedRect,
         "DrawText", &Renderer::drawText
     );
 

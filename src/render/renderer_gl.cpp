@@ -31,9 +31,10 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
 
     shaders = ShaderManagerGL();
     shaders.loadShader("quad", "assets/shaders/quad.vert", "assets/shaders/quad.frag");
+    shaders.loadShader("rounded", "assets/shaders/rounded.vert", "assets/shaders/rounded.frag");
     shaders.loadShader("text", "assets/shaders/text.vert", "assets/shaders/text.frag");
     
-    // Create VAO/VBO/EBO for batching
+    // Create VAO/VBO/EBO for quad batching
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
     glGenBuffers(1, &quadEBO);
@@ -64,6 +65,46 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
     glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+
+    // Create VAO/VBO/EBO for rounded quad batching
+    glGenVertexArrays(1, &roundedVAO);
+    glGenBuffers(1, &roundedVBO);
+    glGenBuffers(1, &roundedEBO);
+
+    glBindVertexArray(roundedVAO);
+
+    // Allocate buffer for vertices (dynamic draw for live updates which is important)
+    glBindBuffer(GL_ARRAY_BUFFER, roundedVBO);
+    glBufferData(GL_ARRAY_BUFFER, maxRoundeds * 4 * sizeof(RoundedVertex), nullptr, GL_DYNAMIC_DRAW);
+
+    // Precompute and upload indices for maxRoundeds
+    roundedBatchIndices.resize(maxRoundeds * 6);
+    for (size_t i = 0; i < maxRoundeds; ++i) {
+        unsigned int offset = i * 4;
+        roundedBatchIndices[i*6 + 0] = offset + 0;
+        roundedBatchIndices[i*6 + 1] = offset + 1;
+        roundedBatchIndices[i*6 + 2] = offset + 2;
+        roundedBatchIndices[i*6 + 3] = offset + 0;
+        roundedBatchIndices[i*6 + 4] = offset + 2;
+        roundedBatchIndices[i*6 + 5] = offset + 3;
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, roundedEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, roundedBatchIndices.size() * sizeof(unsigned int), roundedBatchIndices.data(), GL_STATIC_DRAW);
+
+    // Set up vertex attributes
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, rectPosition));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, rectSize));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, color));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, corner));
+    glEnableVertexAttribArray(4);
 
     glBindVertexArray(0);
 
@@ -137,6 +178,23 @@ void RendererGL::flushQuadBatch() {
     glBindVertexArray(0);
 }
 
+void RendererGL::flushRoundedBatch() {
+    if (roundedCount == 0) return;
+
+    glBindVertexArray(roundedVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, roundedVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, roundedBatchVertices.size() * sizeof(RoundedVertex), roundedBatchVertices.data());
+
+    shaders.useShader("rounded");
+    shaders.setUniformMat4("rounded", "uProjection", currentProjection.data());
+    glDrawElements(GL_TRIANGLES, roundedCount * 6, GL_UNSIGNED_INT, 0);
+
+    roundedBatchVertices.clear();
+    roundedCount = 0;
+
+    glBindVertexArray(0);
+}
+
 void RendererGL::flushTextBatch() {
     if (textQuadCount == 0) return;
 
@@ -181,17 +239,21 @@ void RendererGL::beginFrame() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     batchVertices.clear();
+    roundedBatchVertices.clear();
     textBatchVertices.clear();
     quadCount = 0;
+    roundedCount = 0;
     textQuadCount = 0;
 
-    // Set uniforms for both shaders
+    // Set uniforms for shaders
     shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
+    shaders.setUniformMat4("rounded", "uProjection", currentProjection.data());
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
 void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Color4& color) {
     if (quadCount >= maxQuads) flushQuadBatch();
+    if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
     Vertex v0{{position.x, position.y}, color};
@@ -205,6 +267,24 @@ void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Co
     batchVertices.push_back(v3);
 
     ++quadCount;
+}
+
+void RendererGL::drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner) {
+    if (roundedCount >= maxRoundeds) flushRoundedBatch();
+    if (quadCount > 0) flushQuadBatch();
+    if (textQuadCount > 0) flushTextBatch();
+
+    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, static_cast<float>(corner.offset)};
+    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, static_cast<float>(corner.offset)};
+    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, static_cast<float>(corner.offset)};
+    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, static_cast<float>(corner.offset)};
+
+    roundedBatchVertices.push_back(v0);
+    roundedBatchVertices.push_back(v1);
+    roundedBatchVertices.push_back(v2);
+    roundedBatchVertices.push_back(v3);
+
+    ++roundedCount;
 }
 
 const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* font, char c) {
@@ -223,8 +303,8 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
     glyph.bearingY = g->bearingY;
     glyph.advance = g->advance;
 
-    glGenTextures(1, &glyph.textureID);
-    glBindTexture(GL_TEXTURE_2D, glyph.textureID);
+    glyph.texture = GLTexture{};
+    glyph.texture.bind();
     
     // Set texture wrapping and filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -236,12 +316,13 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, g->width, g->height, 0, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.data());
 
-    auto [inserted, _] = map.emplace(c, glyph);
+    auto [inserted, _] = map.emplace(c, std::move(glyph));
     return &inserted->second;
 }
 
 void RendererGL::drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) {
     if (quadCount > 0) flushQuadBatch();
+    if (roundedCount > 0) flushRoundedBatch();
 
     Font* font = FontManager::get().getFont(path, size);
     if (!font) {
@@ -285,8 +366,7 @@ void RendererGL::drawText(const std::string text, const Vector2& position, const
 
             // For now, render each glyph immediately (not optimal but works)
             // Bind the glyph texture
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, g->textureID);
+            g->texture.bind();
             
             // Use shader and set texture uniform
             shaders.useShader("text");
@@ -317,5 +397,6 @@ void RendererGL::drawText(const std::string text, const Vector2& position, const
 void RendererGL::endFrame() {
     flushQuadBatch();
     flushTextBatch();
+    flushRoundedBatch();
     window->swapGLBuffers();
 }
