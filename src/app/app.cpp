@@ -40,6 +40,11 @@ void App::destroyWindow(const uint32_t& id) {
     }
 }
 
+void App::setUIScale(float scale) {
+    uiScale = std::clamp(scale, 0.5f, 5.0f);
+    needsRender = true;
+}
+
 std::chrono::time_point<std::chrono::steady_clock> App::step() {
     // Get clock
     using clock = std::chrono::steady_clock;
@@ -58,8 +63,12 @@ std::chrono::time_point<std::chrono::steady_clock> App::step() {
 
     // Render all windows (in the future only render if something changed, returned by update)
     for (auto& [id, window] : windows) {
-        window->render();
+        if (needsRender == true) {
+            window->renderer.dirty();
+        }
+        window->render(uiScale);
     }
+    needsRender = false;
 
     return currentTime; // Return time for use in main loop
 }

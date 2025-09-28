@@ -13,12 +13,32 @@ struct UIDim {
     UIDim() : scale(0.0f), offset(0) {}
     UIDim(float scale, int offset) : scale(scale), offset(offset) {}
 
+    UIDim operator+(const UIDim& other) const {
+        return UIDim(scale + other.scale, offset + other.offset);
+    }
+
+    UIDim operator-(const UIDim& other) const {
+        return UIDim(scale - other.scale, offset - other.offset);
+    }
+
     bool operator==(const UIDim& other) const {
         return scale == other.scale && offset == other.offset;
     }
 
     bool operator!=(const UIDim& other) const {
         return scale != other.scale || offset != other.offset;
+    }
+
+    UIDim operator+=(const UIDim& other) {
+        scale += other.scale;
+        offset += other.offset;
+        return *this;
+    }
+
+    UIDim operator-=(const UIDim& other) {
+        scale -= other.scale;
+        offset -= other.offset;
+        return *this;
     }
 };
 
@@ -29,12 +49,32 @@ struct UIDim2 {
     UIDim2(const UIDim& x, const UIDim& y) : x(x), y(y) {}
     UIDim2(float scaleX, int offsetX, float scaleY, int offsetY) : x(UIDim(scaleX, offsetX)), y(UIDim(scaleY, offsetY)) {}
 
+    UIDim2 operator+(const UIDim2& other) const {
+        return UIDim2(x + other.x, y + other.y);
+    }
+
+    UIDim2 operator-(const UIDim2& other) const {
+        return UIDim2(x - other.x, y - other.y);
+    }
+
     bool operator==(const UIDim2& other) const {
         return x == other.x && y == other.y;
     }
 
     bool operator!=(const UIDim2& other) const {
         return x != other.x || y != other.y;
+    }
+
+    UIDim2 operator+=(const UIDim2& other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    UIDim2 operator-=(const UIDim2& other) {
+        x -= other.x;
+        y -= other.y;
+        return *this;
     }
 };
 
@@ -53,15 +93,32 @@ struct UIRect {
     }
 };
 
-struct UIBounds; // Forward declaration
+struct AbsoluteLayout {
+    Rect rect;
+
+    float cornerRT, cornerLT, cornerRB, cornerLB = 0.0f;
+
+    AbsoluteLayout() : rect(Rect()) {}
+    AbsoluteLayout(const Rect& rect) : rect(rect) {}
+};
 
 struct UILayout {
     UIRect rect;
 
+    UIDim cornerRT{};
+    UIDim cornerLT{};
+    UIDim cornerRB{};
+    UIDim cornerLB{};
+
     UILayout() : rect(UIRect()) {}
     UILayout(const UIRect& rect) : rect(rect) {}
 
-    Rect resolve(const UIBounds& bounds) const;
+    void setCorners(const UIDim& corner) {
+        cornerRT = corner;
+        cornerLT = corner;
+        cornerRB = corner;
+        cornerLB = corner;
+    }
 };
 
 struct UIBounds {
@@ -71,6 +128,10 @@ struct UIBounds {
     UIBounds() : absolute(Vector2()), layout(UILayout()) {}
     UIBounds(const Vector2& absolute) : absolute(absolute), layout(UILayout()) {}
     UIBounds(const Vector2& absolute, const UILayout& layout) : absolute(absolute), layout(layout) {}
+};
 
-    UIBounds applyLayout(const UILayout& childLayout) const;
+enum class UIStrokeAlignment {
+    Outside,
+    Middle,
+    Inside
 };

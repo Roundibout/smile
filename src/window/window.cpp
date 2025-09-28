@@ -13,6 +13,9 @@ License:
 
 #include <ui/widgets/button.hpp>
 
+#include <cstdlib>
+#include <ctime>
+
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
         : impl(std::make_unique<WindowWin32>(id, config)), // initializer shenanigans
@@ -21,7 +24,17 @@ Window::Window(const uint32_t& id, const WindowConfig& config)
     #endif
 {
     // maybe do other stuff later
-    addWidget<Button>(UILayout(UIRect(UIDim2(0.0f, 100, 0.0f, 100), UIDim2(1.0f, -200, 1.0f, -200))));
+    std::srand(std::time(nullptr));
+    for (int i = 1; i < 100; i++) {
+        float x = static_cast<float>(std::rand()) / RAND_MAX;
+        float y = static_cast<float>(std::rand()) / RAND_MAX;
+        UILayout layout = UILayout(UIRect(UIDim2(x, 0, y, 0), UIDim2(0.0f, 100, 0.0f, 50)));
+        layout.cornerRT = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
+        layout.cornerLT = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
+        layout.cornerRB = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
+        layout.cornerLB = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
+        addWidget<Button>(layout);
+    }
 }
 
 void Window::process() {
@@ -32,13 +45,20 @@ void Window::process() {
     // Get inputs through impl update
     inputs = impl->update();
 
+    UIBounds bounds(impl->getSize(), UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
+
     // Process inputs
     while (!inputs.empty()) {
         WindowInput& input = inputs.front();
 
         // Process input on widgets first
-        for (auto& widget : widgets) {
-            widget->processWindowInput(input);
+        bool consumed = false;
+        for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
+            if (consumed == false) {
+                consumed = (*it)->processWindowInput(input, bounds);
+            } else {
+                (*it)->observeWindowInput(input, bounds);
+            }
         }
 
         // Find any input callbacks
@@ -51,7 +71,7 @@ void Window::process() {
         }
 
         // Set dirty overrides
-        if (input.type == WindowInputType::WindowResized) {
+        if (input.type == WindowInputType::WindowResized || input.type == WindowInputType::WindowMoved) {
             overdirtied = true;
             lastSize = impl->getSize();
         }
@@ -72,8 +92,9 @@ void Window::update(float deltaTime) {
         lastSize = windowSize;
     }
     // Update widgets first
+    UIBounds bounds(impl->getSize(), UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
     for (auto& widget : widgets) {
-        widget->update(deltaTime);
+        widget->update(deltaTime, bounds);
     }
     // Find any update callbacks
     auto it = callbacks.find(WindowEvent::Update);
@@ -85,11 +106,11 @@ void Window::update(float deltaTime) {
     }
 }
 
-void Window::render() {
+void Window::render(float uiScale) {
     if (renderer.isDirty() || blank == true) { // Only render if the renderer is dirty or the window is blank
         blank = false;
         // Begin the frame
-        renderer.beginFrame();
+        renderer.beginFrame(uiScale);
         // Render widgets first
         UIBounds bounds(impl->getSize(), UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
         for (auto& widget : widgets) {

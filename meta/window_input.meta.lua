@@ -9,6 +9,7 @@ WindowInputType = {
     KeyDown = nil,
     KeyUp = nil,
     WindowResized = nil,
+    WindowMoved = nil,
     WindowClosed = nil
 }
 
@@ -47,8 +48,14 @@ KeyCode = {
     Unknown = nil
 }
 
+---@class WindowChangeInput
+---@field position Vector2?
+---@field size Vector2?
+WindowChangeInput = {}
+
 ---@class WindowInput
 ---@field type WindowInputType
 ---@field mouse MouseInput?
 ---@field key KeyCode?
+---@field window WindowChangeInput?
 WindowInput = {}

@@ -56,6 +56,7 @@ public:
 
     const uint32_t getId();
     virtual Vector2 getSize() = 0;
+    virtual Vector2 getPosition() = 0;
 
     WindowConfig getConfig();
 };

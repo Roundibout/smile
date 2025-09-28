@@ -47,6 +47,7 @@ public:
     void swapGLBuffers() override;
 
     Vector2 getSize() override;
+    Vector2 getPosition() override;
 
     void pushInput(WindowInput input);
 };

@@ -1,15 +1,37 @@
 #include "button.hpp"
 #include <window/window.hpp>
 
-void Button::render(UIBounds bounds) {
-    Rect resolved = layout.resolve(bounds);
-    std::cout << resolved.size.to_string() << ", " << resolved.position.to_string() << std::endl;
-    window->renderer.drawRoundedRect(resolved.position - Vector2(2.0f, 2.0f), resolved.size + Vector2(4.0f, 4.0f), Color4(0.2f, 0.2f, 0.25f, 1.0f), UIDim(1.0f, 2));
-    window->renderer.drawRoundedRect(resolved.position, resolved.size, Color4(0.08f, 0.08f, 0.11f, 1.0f), UIDim(1.0f, 0));
+void Button::deselect() {
+    if (hovered == true) window->renderer.dirty();
+    hovered = false;
 }
 
-void Button::processWindowInput(WindowInput& input) {
+void Button::render(const UIBounds& bounds) {
+    if (hovered == true) {
+        window->renderer.drawRoundedStrokeRect(layout, bounds, Color4(0.18f, 0.18f, 0.21f, 1.0f), 1, Color4(0.3f, 0.3f, 0.35f, 1.0f));
+        window->renderer.drawText(layout.rect.position + UIDim2(0.0f, 10, 0.0f, 10), bounds, "Test", "assets/fonts/Inter_18pt-Regular.ttf", 40, Color4(0.9f, 0.9f, 0.9f, 1.0f));
+    } else {
+        window->renderer.drawRoundedStrokeRect(layout, bounds, Color4(0.08f, 0.08f, 0.11f, 1.0f), 1, Color4(0.2f, 0.2f, 0.25f, 1.0f));
+        window->renderer.drawText(layout.rect.position + UIDim2(0.0f, 10, 0.0f, 10), bounds, "Test", "assets/fonts/Inter_18pt-Regular.ttf", 40, Color4(0.8f, 0.8f, 0.8f, 1.0f));
+    }
+}
+
+bool Button::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     if (input.type == WindowInputType::MouseMove) {
-        
+        AbsoluteLayout resolved = window->renderer.resolveLayout(layout, bounds);
+        if (UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+            if (hovered == false) window->renderer.dirty();
+            hovered = true;
+            return true;
+        } else {
+            deselect();
+        }
+    }
+    return false;
+}
+
+void Button::observeWindowInput(WindowInput& input, const UIBounds& bounds) {
+    if (input.type == WindowInputType::MouseMove) {
+        deselect();
     }
 }

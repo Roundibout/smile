@@ -139,22 +139,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // FIX FOR STALLING DURING RESIZE AND MOVE
 
-        case WM_ENTERSIZEMOVE:
-            SetTimer(hwnd, 1, 4, nullptr); // ~240 FPS probably
+        case WM_SIZE:
+            App::get().step();
             return 0;
-        case WM_TIMER:
-            if (wParam == 1) {
-                App::get().step(); // Kinda stupid fix
-            }
+        case WM_MOVE:
+            App::get().step();
             return 0;
         case WM_EXITSIZEMOVE: {
-            WindowInput input;
-            input.type = WindowInputType::WindowResized;
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
 
-            pushInput(hwnd, input);
+            WindowInput sizeInput;
+            sizeInput.type = WindowInputType::WindowResized;
+            sizeInput.window.size = window->getSize();
 
-            KillTimer(hwnd, 1);
+            pushInput(hwnd, sizeInput);
 
+            WindowInput positionInput;
+            positionInput.type = WindowInputType::WindowResized;
+            positionInput.window.position = window->getPosition();
+
+            pushInput(hwnd, positionInput);
             return 0;
         }
 
@@ -488,9 +492,15 @@ void WindowWin32::swapGLBuffers() {
 }
 
 Vector2 WindowWin32::getSize() {
-    RECT size;
-    GetClientRect(hwnd, &size);
-    return Vector2(float(size.right - size.left), float(size.bottom - size.top));
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    return Vector2(float(rect.right - rect.left), float(rect.bottom - rect.top));
+}
+
+Vector2 WindowWin32::getPosition() {
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    return Vector2(float(rect.left), float(rect.top));
 }
 
 void WindowWin32::pushInput(WindowInput input) {

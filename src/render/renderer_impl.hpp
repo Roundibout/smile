@@ -20,14 +20,21 @@ License:
 class RendererImpl {
 protected:
     WindowImpl* window;
+    float currentScale = 1.0f;
 public:
     RendererImpl(WindowImpl* w);
 
-    virtual void beginFrame() = 0;
+    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
+    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
+    UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);
 
-    virtual void drawRect(const Vector2& position, const Vector2& size, const Color4& color) = 0;
-    virtual void drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner) = 0;
-    virtual void drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) = 0;
+    virtual void beginFrame(float scale) = 0;
+
+    virtual void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) = 0;
+    virtual void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) = 0;
+    virtual void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) = 0;
+    virtual void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) = 0;
+    virtual void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) = 0;
 
     virtual void endFrame() = 0;
 };

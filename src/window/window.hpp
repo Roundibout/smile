@@ -56,7 +56,7 @@ public:
     Window(const uint32_t& id, const WindowConfig& config);
     void process();
     void update(float deltaTime);
-    void render();
+    void render(float uiScale);
     void connectCallback(WindowEvent event, sol::function callback);
 
     template <typename T, typename... Args>

@@ -45,6 +45,7 @@ enum class WindowInputType {
     KeyDown,
     KeyUp,
     WindowResized,
+    WindowMoved,
     WindowClosed
 };
 
@@ -70,11 +71,21 @@ enum class KeyCode {
 #undef X
 };
 
+struct WindowChangeInput {
+    union {
+        Vector2 position;
+        Vector2 size;
+    };
+
+    WindowChangeInput() {}
+};
+
 struct WindowInput {
     WindowInputType type;
     union {
         MouseInput mouse;
         KeyCode key;
+        WindowChangeInput window;
     };
 
     WindowInput() {}

@@ -40,7 +40,7 @@ struct RoundedVertex {
     Vector2 rectPosition;
     Vector2 rectSize;
     Color4 color;
-    float corner;
+    float corners[4];
 };
 
 class GLTexture {
@@ -130,11 +130,13 @@ private:
 public:
     RendererGL(WindowImpl* w);
 
-    void beginFrame() override;
+    void beginFrame(float scale) override;
 
-    void drawRect(const Vector2& position, const Vector2& size, const Color4& color) override;
-    void drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner) override;
-    void drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) override;
+    void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
+    void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
+    void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
+    void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
+    void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) override;
 
     void endFrame() override;
 };

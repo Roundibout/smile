@@ -2,31 +2,47 @@
 
 in vec2 vRectSize;
 in vec4 vColor;
-in float vCorner;
+in vec4 vCorner;
 in vec2 vLocalPos;
 
 out vec4 FragColor;
 
 void main() {
-    // vLocalPos is the pixel relative to bottom-left corner
-    vec2 cornerCenter = vec2(
-        (vLocalPos.x < vCorner) ? vCorner : (vLocalPos.x > vRectSize.x - vCorner) ? vRectSize.x - vCorner : vLocalPos.x,
-        (vLocalPos.y < vCorner) ? vCorner : (vLocalPos.y > vRectSize.y - vCorner) ? vRectSize.y - vCorner : vLocalPos.y
-    );
+    float alpha = 1.0;
 
-    float alpha;
-
-    if ((vLocalPos.x >= vCorner && vLocalPos.x <= vRectSize.x - vCorner) ||
-        (vLocalPos.y >= vCorner && vLocalPos.y <= vRectSize.y - vCorner)) {
-        // Straight edge
-        alpha = 1.0;
-    } else {
-        // Rounded corner
-        float distToCorner = length(vLocalPos - cornerCenter);
+    // bottom-left corner
+    if (vLocalPos.x < vCorner.x && vLocalPos.y < vCorner.x) {
+        vec2 center = vec2(vCorner.x, vCorner.x);
+        float dist = length(vLocalPos - center);
         float aa = 1.0;
-        alpha = 1.0 - smoothstep(vCorner - aa, vCorner + aa, distToCorner);
+        alpha = 1.0 - smoothstep(vCorner.x - aa, vCorner.x + aa, dist);
     }
 
-    // Multiply by color alpha
+    // bottom-right corner
+    else if (vLocalPos.x > vRectSize.x - vCorner.y && vLocalPos.y < vCorner.y) {
+        vec2 center = vec2(vRectSize.x - vCorner.y, vCorner.y);
+        float dist = length(vLocalPos - center);
+        float aa = 1.0;
+        alpha = 1.0 - smoothstep(vCorner.y - aa, vCorner.y + aa, dist);
+    }
+
+    // top-right corner
+    else if (vLocalPos.x > vRectSize.x - vCorner.z && vLocalPos.y > vRectSize.y - vCorner.z) {
+        vec2 center = vec2(vRectSize.x - vCorner.z, vRectSize.y - vCorner.z);
+        float dist = length(vLocalPos - center);
+        float aa = 1.0;
+        alpha = 1.0 - smoothstep(vCorner.z - aa, vCorner.z + aa, dist);
+    }
+
+    // top-left corner
+    else if (vLocalPos.x < vCorner.w && vLocalPos.y > vRectSize.y - vCorner.w) {
+        vec2 center = vec2(vCorner.w, vRectSize.y - vCorner.w);
+        float dist = length(vLocalPos - center);
+        float aa = 1.0;
+        alpha = 1.0 - smoothstep(vCorner.w - aa, vCorner.w + aa, dist);
+    }
+
+    // Elsewhere, inside the straight edges, alpha stays 1.0
+
     FragColor = vec4(vColor.rgb, vColor.a * alpha);
 }

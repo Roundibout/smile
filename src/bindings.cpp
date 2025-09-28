@@ -32,6 +32,7 @@ void register_bindings(sol::state& lua) {
             {"KeyDown", WindowInputType::KeyDown},
             {"KeyUp", WindowInputType::KeyUp},
             {"WindowResized", WindowInputType::WindowResized},
+            {"WindowMoved", WindowInputType::WindowMoved},
             {"WindowClosed", WindowInputType::WindowClosed}
         }
     );
@@ -220,7 +221,9 @@ void register_bindings(sol::state& lua) {
         "Run", &App::run,
         "Quit", &App::quit,
 
-        "CreateWindow", &App::createWindow
+        "CreateWindow", &App::createWindow,
+
+        "SetUIScale", &App::setUIScale
     );
 
     // Assign the singletons to global variables so you don't need the get function

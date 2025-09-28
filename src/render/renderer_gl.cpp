@@ -103,7 +103,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, color));
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, corner));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, corners));
     glEnableVertexAttribArray(4);
 
     glBindVertexArray(0);
@@ -219,8 +219,10 @@ void RendererGL::flushTextBatch() {
     glBindVertexArray(0);
 }
 
-void RendererGL::beginFrame() {
+void RendererGL::beginFrame(float scale) {
     window->makeGLCurrent();
+    
+    currentScale = scale;
 
     // Get and set viewport size
     Vector2 size = window->getSize();
@@ -251,10 +253,14 @@ void RendererGL::beginFrame() {
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
-void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Color4& color) {
+void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     if (quadCount >= maxQuads) flushQuadBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
+
+    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    Vector2 position = resolved.rect.position;
+    Vector2 size = resolved.rect.size;
 
     Vertex v0{{position.x, position.y}, color};
     Vertex v1{{position.x + size.x, position.y}, color};
@@ -269,24 +275,23 @@ void RendererGL::drawRect(const Vector2& position, const Vector2& size, const Co
     ++quadCount;
 }
 
-void RendererGL::drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner) {
+void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+    stroke = static_cast<int>(std::round(stroke * currentScale));
+}
+
+void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
     if (quadCount > 0) flushQuadBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    float cornerPixels = static_cast<float>(corner.offset);
-    if (size.x >= size.y) {
-        cornerPixels += size.y / 2.0f * corner.scale;
-        cornerPixels = std::clamp(cornerPixels, 0.0f, size.y / 2.0f);
-    } else {
-        cornerPixels += size.x / 2.0f * corner.scale;
-        cornerPixels = std::clamp(cornerPixels, 0.0f, size.x / 2.0f);
-    }
+    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    Vector2 position = resolved.rect.position;
+    Vector2 size = resolved.rect.size;
 
-    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, cornerPixels};
-    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, cornerPixels};
-    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, cornerPixels};
-    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, cornerPixels};
+    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
 
     roundedBatchVertices.push_back(v0);
     roundedBatchVertices.push_back(v1);
@@ -294,6 +299,94 @@ void RendererGL::drawRoundedRect(const Vector2& position, const Vector2& size, c
     roundedBatchVertices.push_back(v3);
 
     ++roundedCount;
+}
+
+void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+    if (roundedCount >= maxRoundeds) flushRoundedBatch();
+    if (quadCount > 0) flushQuadBatch();
+    if (textQuadCount > 0) flushTextBatch();
+
+    stroke = static_cast<int>(std::round(stroke * currentScale));
+
+    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    Vector2 position = resolved.rect.position;
+    Vector2 size = resolved.rect.size;
+
+    { // Stroke
+        RoundedVertex vertices[4];
+
+        if (strokeAlignment == UIStrokeAlignment::Outside) {
+            Vector2 offsetPosition = position - Vector2(stroke, stroke);
+            Vector2 offsetSize = size + Vector2(stroke * 2, stroke * 2);
+            float offsetCornerLB = resolved.cornerLB + stroke;
+            float offsetCornerRB = resolved.cornerRB + stroke;
+            float offsetCornerRT = resolved.cornerRT + stroke;
+            float offsetCornerLT = resolved.cornerLT + stroke;
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+        } else if (strokeAlignment == UIStrokeAlignment::Middle) {
+            Vector2 offsetPosition = position - Vector2(stroke / 2, stroke / 2);
+            Vector2 offsetSize = size + Vector2(stroke, stroke);
+            float offsetCornerLB = resolved.cornerLB + stroke / 2;
+            float offsetCornerRB = resolved.cornerRB + stroke / 2;
+            float offsetCornerRT = resolved.cornerRT + stroke / 2;
+            float offsetCornerLT = resolved.cornerLT + stroke / 2;
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, offsetPosition, offsetSize, strokeColor, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+        } else {
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, position, size, strokeColor, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, position, size, strokeColor, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, position, size, strokeColor, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, position, size, strokeColor, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+        }
+
+        roundedBatchVertices.push_back(vertices[0]);
+        roundedBatchVertices.push_back(vertices[1]);
+        roundedBatchVertices.push_back(vertices[2]);
+        roundedBatchVertices.push_back(vertices[3]);
+
+        ++roundedCount;
+    }
+
+    { // Rect
+        RoundedVertex vertices[4];
+
+        if (strokeAlignment == UIStrokeAlignment::Outside) {
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+        } else if (strokeAlignment == UIStrokeAlignment::Middle) {
+            Vector2 offsetPosition = position + Vector2(stroke / 2, stroke / 2);
+            Vector2 offsetSize = size - Vector2(stroke, stroke);
+            float offsetCornerLB = resolved.cornerLB - stroke / 2;
+            float offsetCornerRB = resolved.cornerRB - stroke / 2;
+            float offsetCornerRT = resolved.cornerRT - stroke / 2;
+            float offsetCornerLT = resolved.cornerLT - stroke / 2;
+        } else {
+            Vector2 offsetPosition = position + Vector2(stroke, stroke);
+            Vector2 offsetSize = size - Vector2(stroke * 2, stroke * 2);
+            float offsetCornerLB = resolved.cornerLB - stroke;
+            float offsetCornerRB = resolved.cornerRB - stroke;
+            float offsetCornerRT = resolved.cornerRT - stroke;
+            float offsetCornerLT = resolved.cornerLT - stroke;
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+        }
+
+        roundedBatchVertices.push_back(vertices[0]);
+        roundedBatchVertices.push_back(vertices[1]);
+        roundedBatchVertices.push_back(vertices[2]);
+        roundedBatchVertices.push_back(vertices[3]);
+
+        ++roundedCount;
+    }
 }
 
 const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* font, char c) {
@@ -329,9 +422,11 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
     return &inserted->second;
 }
 
-void RendererGL::drawText(const std::string text, const Vector2& position, const std::string path, int size, const Color4& color) {
+void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
     if (quadCount > 0) flushQuadBatch();
     if (roundedCount > 0) flushRoundedBatch();
+
+    size = static_cast<int>(std::round(size * currentScale));
 
     Font* font = FontManager::get().getFont(path, size);
     if (!font) {
@@ -339,8 +434,9 @@ void RendererGL::drawText(const std::string text, const Vector2& position, const
         return;
     }
 
-    float x = position.x;
-    float y = position.y;
+    Vector2 resolved = resolvePosition(position, bounds);
+    float x = resolved.x;
+    float y = resolved.y;
 
     for (char c : text) {
         const GLGlyph* g = getGlyph(path, size, font, c);

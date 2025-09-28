@@ -34,6 +34,8 @@ private:
 
     bool running = false;
     int fps = 60;
+    bool needsRender = false;
+    float uiScale = 1.0f;
     std::chrono::time_point<std::chrono::steady_clock> previousTime = std::chrono::steady_clock::now();
 
     std::unordered_map<uint32_t, std::shared_ptr<Window>> windows;
@@ -49,6 +51,8 @@ public:
     std::shared_ptr<Window> getWindowById(const uint32_t& id);
 
     void destroyWindow(const uint32_t& id);
+
+    void setUIScale(float scale);
 
     std::chrono::time_point<std::chrono::steady_clock> step();
 

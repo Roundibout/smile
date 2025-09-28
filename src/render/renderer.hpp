@@ -27,11 +27,17 @@ private:
 public:
     Renderer(WindowImpl* window);
 
-    void beginFrame();
+    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
+    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
+    UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);
 
-    void drawRect(const Vector2& position, const Vector2& size, const Color4& color);
-    void drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner);
-    void drawText(const std::string& text, const Vector2& position, const std::string& path, int size, const Color4& color);
+    void beginFrame(float scale);
+
+    void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4());
+    void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4(), int stroke = 1, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f), const UIStrokeAlignment& strokeAlignment = UIStrokeAlignment::Outside);
+    void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4());
+    void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4(), int stroke = 1, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f), const UIStrokeAlignment& strokeAlignment = UIStrokeAlignment::Outside);
+    void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color);
 
     void endFrame();
 

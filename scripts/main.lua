@@ -23,44 +23,28 @@ local config2 = WindowConfig.new()
 config2.color = Theme:GetColor(ThemeColor.WindowBackground)--Color4.new(0.4, 0.25, 0.62, 1)
 local window2 = App:CreateWindow(config2)
 
-local pressed = true;
-local position = Vector2.new(50, 50)
-local size = Vector2.new(200, 50)
-local color = Color4.new(0.3, 0.3, 0.3, 1)
-local hovered = false
-local clickTimer = 0
+local scale = 1
 
-window:ConnectUpdate(function(deltaTime)
-    clickTimer = clickTimer - deltaTime
-    if clickTimer < 0 then
-        clickTimer = 0
+local function clamp(number, lower, upper)
+    local clamped = number
+    if clamped < lower then
+        clamped = lower
+    elseif clamped > upper then
+        clamped = upper
     end
-end)
-
-window:ConnectRender(function()
-    --[[
-    window.renderer:DrawRect(position, size, Color4.new(1, 1, 1, 0.5))
-    window.renderer:DrawRoundedRect(position, Vector2.new(500, 500), color, UIDim.new(0, 10))
-    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 100), "assets/fonts/PontanoSans-Light.ttf", 24, Color4.new(1, 1, 1, 1))
-    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 130), "assets/fonts/PontanoSans-Regular.ttf", 24, Color4.new(1, 1, 1, 1))
-    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 160), "assets/fonts/PontanoSans-Medium.ttf", 24, Color4.new(1, 1, 1, 1))
-    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 190), "assets/fonts/PontanoSans-SemiBold.ttf", 24, Color4.new(1, 1, 1, 1))
-    window.renderer:DrawText("Hello world??????", position + Vector2.new(0, 220), "assets/fonts/PontanoSans-Bold.ttf", 24, Color4.new(1, 1, 1, 1))
-    window.renderer:DrawText("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQWRSTUVWXYZ1234567890!@#$%^&*()", position, "assets/fonts/PontanoSans-Regular.ttf", 20, Color4.new(1, 1, 1, 0.5))
-    --]]
-end)
+    return clamped
+end
 
 window:ConnectInput(function(input)
-    if input.type == WindowInputType.MouseMove then
-        local inside = input.mouse.position.x >= position.x and input.mouse.position.x <= position.x + size.x and input.mouse.position.y >= position.y and input.mouse.position.y <= position.y + size.y
-        if hovered ~= inside then
-            hovered = inside
-            if hovered == true then
-                color = Color4.new(0.4, 0.4, 0.4, 1)
-            else
-                color = Color4.new(0.3, 0.3, 0.3, 1)
-            end
-            window.renderer:Dirty()
+    if input.type == WindowInputType.KeyDown then
+        if input.key == KeyCode.Minus then
+            scale = clamp(scale - 0.25, 0.5, 5)
+            print(scale)
+            App:SetUIScale(scale)
+        elseif input.key == KeyCode.Equals then
+            scale = clamp(scale + 0.25, 0.5, 5)
+            print(scale)
+            App:SetUIScale(scale)
         end
     end
 end)

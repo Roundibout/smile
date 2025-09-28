@@ -4,13 +4,13 @@ layout(location = 0) in vec2 aUnitPos;
 layout(location = 1) in vec2 aRectPos;
 layout(location = 2) in vec2 aRectSize;
 layout(location = 3) in vec4 aColor;
-layout(location = 4) in float aCorner;
+layout(location = 4) in vec4 aCorner;
 
 uniform mat4 uProjection;
 
 out vec2 vRectSize;
 out vec4 vColor;
-out float vCorner;
+out vec4 vCorner;
 out vec2 vLocalPos;
 
 void main() {

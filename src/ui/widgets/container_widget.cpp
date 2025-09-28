@@ -1,24 +1,41 @@
 #include "container_widget.hpp"
 #include <window/window.hpp>
 
-void ContainerWidget::update(float deltaTime) {
+void ContainerWidget::update(float deltaTime, const UIBounds& bounds) {
+    UIBounds applied = window->renderer.applyLayout(bounds, layout);
+    
     for (auto& child : children) {
-        child->update(deltaTime);
+        child->update(deltaTime, applied);
     }
 }
 
-void ContainerWidget::render(UIBounds bounds) {
-    Rect resolved = layout.resolve(bounds);
-    window->renderer.drawRect(resolved.position, resolved.size, Color4(1.0f, 0.0f, 0.0f, 0.5f));
+void ContainerWidget::render(const UIBounds& bounds) {
+    UIBounds applied = window->renderer.applyLayout(bounds, layout);
 
-    UIBounds applied = bounds.applyLayout(layout);
     for (auto& child : children) {
         child->render(applied);
     }
 }
 
-void ContainerWidget::processWindowInput(WindowInput& input) {
+bool ContainerWidget::processWindowInput(WindowInput& input, const UIBounds& bounds) {
+    UIBounds applied = window->renderer.applyLayout(bounds, layout);
+    
+    bool consumed = false;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        if (consumed == false) {
+            consumed = (*it)->processWindowInput(input, applied);
+        } else {
+            (*it)->observeWindowInput(input, applied);
+        }
+    }
+
+    return consumed;
+}
+
+void ContainerWidget::observeWindowInput(WindowInput& input, const UIBounds& bounds) {
+    UIBounds applied = window->renderer.applyLayout(bounds, layout);
+
     for (auto& child : children) {
-        child->processWindowInput(input);
+        child->observeWindowInput(input, applied);
     }
 }

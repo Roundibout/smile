@@ -15,20 +15,40 @@ Renderer::Renderer(WindowImpl* window) {
     impl = std::make_unique<RendererGL>(window); // only OpenGL for now (a while probably)
 }
 
-void Renderer::beginFrame() {
-    impl->beginFrame();
+Vector2 Renderer::resolvePosition(const UIDim2& position, const UIBounds& bounds) {
+    return impl->resolvePosition(position, bounds);
 }
 
-void Renderer::drawRect(const Vector2& position, const Vector2& size, const Color4& color) {
-    impl->drawRect(position, size, color);
+AbsoluteLayout Renderer::resolveLayout(const UILayout& layout, const UIBounds& bounds) {
+    return impl->resolveLayout(layout, bounds);
 }
 
-void Renderer::drawRoundedRect(const Vector2& position, const Vector2& size, const Color4& color, const UIDim& corner) {
-    impl->drawRoundedRect(position, size, color, corner);
+UIBounds Renderer::applyLayout(const UIBounds& bounds, const UILayout& layout) {
+    return impl->applyLayout(bounds, layout);
 }
 
-void Renderer::drawText(const std::string& text, const Vector2& position, const std::string& path, int size, const Color4& color) {
-    impl->drawText(text, position, path, size, color);
+void Renderer::beginFrame(float scale) {
+    impl->beginFrame(scale);
+}
+
+void Renderer::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
+    impl->drawRect(layout, bounds, color);
+}
+
+void Renderer::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+    impl->drawStrokeRect(layout, bounds, color, stroke, strokeColor, strokeAlignment);
+}
+
+void Renderer::drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
+    impl->drawRoundedRect(layout, bounds, color);
+}
+
+void Renderer::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+    impl->drawRoundedStrokeRect(layout, bounds, color, stroke, strokeColor, strokeAlignment);
+}
+
+void Renderer::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
+    impl->drawText(position, bounds, text, path, size, color);
 }
 
 void Renderer::endFrame() {

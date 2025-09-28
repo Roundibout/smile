@@ -11,9 +11,10 @@ protected:
 public:
     ContainerWidget(Window* window, UILayout layout) : Widget(window, layout) {}
 
-    virtual void update(float deltaTime) override;
-    virtual void render(UIBounds bounds) override;
-    virtual void processWindowInput(WindowInput& input) override;
+    virtual void update(float deltaTime, const UIBounds& bounds) override;
+    virtual void render(const UIBounds& bounds) override;
+    virtual bool processWindowInput(WindowInput& input, const UIBounds& bounds) override;
+    virtual void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
     template <typename T, typename... Args>
     T* addChild(Args&&... args) {
