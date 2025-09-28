@@ -299,6 +299,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // KEYBOARD
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN: { // KEYDOWN + SYSKEYDOWN, gets when any key is pressed
+            if (lParam & (1 << 30)) { // Prevent repeated keydowns
+                return 0;
+            }
+
             WindowInput input;
             input.type = WindowInputType::KeyDown;
             input.key = vkToKeyCode(wParam);

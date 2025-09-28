@@ -36,10 +36,10 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
         )
     );
 
-    resolved.cornerRT = applied.layout.cornerRT.offset;
-    resolved.cornerLT = applied.layout.cornerLT.offset;
-    resolved.cornerRB = applied.layout.cornerRB.offset;
-    resolved.cornerLB = applied.layout.cornerLB.offset;
+    resolved.cornerRT = applied.layout.cornerRT.offset * currentScale;
+    resolved.cornerLT = applied.layout.cornerLT.offset * currentScale;
+    resolved.cornerRB = applied.layout.cornerRB.offset * currentScale;
+    resolved.cornerLB = applied.layout.cornerLB.offset * currentScale;
 
     float sizeX = resolved.rect.size.x;
     float sizeY = resolved.rect.size.y;
