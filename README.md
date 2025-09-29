@@ -1,6 +1,8 @@
 # smile
 Vector art drawing and animation program for Super Corporate World.
 
+### This app is not functional yet
+
 ## Dependencies
 
 Smile bundles the following dependencies:

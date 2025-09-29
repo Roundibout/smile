@@ -33,6 +33,8 @@ private:
     HDC hdc;
 
     HGLRC glContext;
+
+    LPCSTR cursorId = IDC_ARROW;
     
     std::queue<WindowInput> inputs;
 public:
@@ -49,5 +51,10 @@ public:
     Vector2 getSize() override;
     Vector2 getPosition() override;
 
+    void setCursor(Cursor cursor) override;
+
+    void setCapture() override;
+    void releaseCapture() override;
+    
     void pushInput(WindowInput input);
 };

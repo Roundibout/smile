@@ -54,10 +54,17 @@ public:
     Renderer renderer;
 
     Window(const uint32_t& id, const WindowConfig& config);
+
     void process();
     void update(float deltaTime);
     void render(float uiScale);
+
     void connectCallback(WindowEvent event, sol::function callback);
+
+    void setCursor(Cursor cursor);
+
+    void setCapture();
+    void releaseCapture();
 
     template <typename T, typename... Args>
     T* addWidget(Args&&... args) {

@@ -29,10 +29,10 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
 
     AbsoluteLayout resolved(
         Rect(
-            static_cast<int>(applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale),
-            static_cast<int>(applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale),
-            static_cast<int>(applied.absolute.x * applied.layout.rect.size.x.scale + applied.layout.rect.size.x.offset * currentScale),
-            static_cast<int>(applied.absolute.y * applied.layout.rect.size.y.scale + applied.layout.rect.size.y.offset * currentScale)
+            applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale,
+            applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale,
+            applied.absolute.x * applied.layout.rect.size.x.scale + applied.layout.rect.size.x.offset * currentScale,
+            applied.absolute.y * applied.layout.rect.size.y.scale + applied.layout.rect.size.y.offset * currentScale
         )
     );
 

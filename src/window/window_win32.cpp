@@ -507,6 +507,33 @@ Vector2 WindowWin32::getPosition() {
     return Vector2(float(rect.left), float(rect.top));
 }
 
+void WindowWin32::setCursor(Cursor cursor) {
+    LPCSTR id = IDC_ARROW;
+    switch (cursor) {
+        case Cursor::HorizontalResize:
+            id = IDC_SIZEWE;
+            break;
+        case Cursor::VerticalResize:
+            id = IDC_SIZENS;
+            break;
+    }
+    cursorId = id;
+
+    // Update NOW
+    SetCursor(LoadCursor(nullptr, cursorId));
+
+    // And stay that way
+    SetClassLongPtr(hwnd, GCLP_HCURSOR, reinterpret_cast<LONG_PTR>(LoadCursor(nullptr, cursorId)));
+}
+
+void WindowWin32::setCapture() {
+    SetCapture(hwnd);
+}
+
+void WindowWin32::releaseCapture() {
+    ReleaseCapture();
+}
+
 void WindowWin32::pushInput(WindowInput input) {
     inputs.push(input);
 }

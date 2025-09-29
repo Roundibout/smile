@@ -11,7 +11,7 @@ License:
 
 -- create test windows
 local config = WindowConfig.new()
-config.title = "Hello"
+config.title = "Smile"
 config.size = Vector2.new(1920, 1080)
 config.minSize = Vector2.new(400, 400)
 config.color = Theme:GetColor(ThemeColor.WindowBackground)

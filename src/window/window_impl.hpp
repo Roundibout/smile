@@ -38,6 +38,12 @@ struct WindowConfig {
     bool minimizable = true;
 };
 
+enum class Cursor {
+    Arrow,
+    HorizontalResize,
+    VerticalResize
+};
+
 class WindowImpl {
 protected:
     const uint32_t id;
@@ -57,6 +63,11 @@ public:
     const uint32_t getId();
     virtual Vector2 getSize() = 0;
     virtual Vector2 getPosition() = 0;
+
+    virtual void setCursor(Cursor cursor) = 0;
+
+    virtual void setCapture() = 0;
+    virtual void releaseCapture() = 0;
 
     WindowConfig getConfig();
 };

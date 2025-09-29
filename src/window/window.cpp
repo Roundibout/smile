@@ -11,10 +11,7 @@ License:
 
 #include "window.hpp"
 
-#include <ui/widgets/button.hpp>
-
-#include <cstdlib>
-#include <ctime>
+#include <ui/widgets/panels/panel_container.hpp>
 
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
@@ -24,17 +21,10 @@ Window::Window(const uint32_t& id, const WindowConfig& config)
     #endif
 {
     // maybe do other stuff later
-    std::srand(std::time(nullptr));
-    for (int i = 1; i < 100; i++) {
-        float x = static_cast<float>(std::rand()) / RAND_MAX;
-        float y = static_cast<float>(std::rand()) / RAND_MAX;
-        UILayout layout = UILayout(UIRect(UIDim2(x, 0, y, 0), UIDim2(0.0f, 100, 0.0f, 50)));
-        layout.cornerRT = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
-        layout.cornerLT = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
-        layout.cornerRB = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
-        layout.cornerLB = UIDim(static_cast<float>(std::rand()) / RAND_MAX, 0);
-        addWidget<Button>(layout);
-    }
+    PanelContainer* container = addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
+    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.875f, PanelSplitPlacement::First);
+    PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::Second);
+    PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.5f, PanelSplitPlacement::First);
 }
 
 void Window::process() {
@@ -131,4 +121,16 @@ void Window::render(float uiScale) {
 
 void Window::connectCallback(WindowEvent event, sol::function callback) {
     callbacks[event].push_back(callback);
+}
+
+void Window::setCursor(Cursor cursor) {
+    impl->setCursor(cursor);
+}
+
+void Window::setCapture() {
+    impl->setCapture();
+}
+
+void Window::releaseCapture() {
+    impl->releaseCapture();
 }

@@ -131,7 +131,7 @@ struct UIBounds {
 };
 
 enum class UIStrokeAlignment {
-    Outside,
-    Middle,
-    Inside
+    Outside = 0,
+    Middle = 1,
+    Inside = 2
 };
