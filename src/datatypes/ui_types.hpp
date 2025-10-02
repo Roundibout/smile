@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <string>
 
 #include <datatypes/vector2.hpp>
 #include <datatypes/rect.hpp>
@@ -40,6 +41,8 @@ struct UIDim {
         offset -= other.offset;
         return *this;
     }
+
+    std::string to_string() const;
 };
 
 struct UIDim2 {
@@ -76,6 +79,8 @@ struct UIDim2 {
         y -= other.y;
         return *this;
     }
+
+    std::string to_string() const;
 };
 
 struct UIRect {

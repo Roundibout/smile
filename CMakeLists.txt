@@ -57,8 +57,15 @@ add_subdirectory(extern/freetype)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_executable(Smile ${SOURCES})
 
+if(WIN32)
+    target_sources(Smile PRIVATE win.rc) # Windows resources
+    # set_target_properties(Smile PROPERTIES
+    #     WIN32_EXECUTABLE TRUE
+    # )
+endif()
+
 # Include directories (external)
-target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern/freetype/include extern src)
+target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern/freetype/include extern src ${CMAKE_SOURCE_DIR})
 
 # Link libraries
 target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi freetype)

@@ -22,6 +22,8 @@ License:
 #include <windowsx.h>
 #include <dwmapi.h>
 
+#include <winres.h>
+
 #include <datatypes/vector2.hpp>
 
 #include <window/window_impl.hpp>

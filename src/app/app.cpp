@@ -41,7 +41,7 @@ void App::destroyWindow(const uint32_t& id) {
 }
 
 void App::setUIScale(float scale) {
-    uiScale = std::clamp(scale, 0.5f, 5.0f);
+    uiScale = std::clamp(scale, 0.5f, 2.0f);
     needsRender = true;
 }
 

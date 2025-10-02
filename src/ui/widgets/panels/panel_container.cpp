@@ -18,8 +18,6 @@ void PanelContainer::render(const UIBounds& bounds) {
 bool PanelContainer::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     UIBounds applied = window->renderer.applyLayout(bounds, layout);
 
-    std::cout << resizeHovered << "\n";
-
     if (resizing == false) {
         if (input.type == WindowInputType::MouseMove) {
             resizeHovered = false;
@@ -58,8 +56,10 @@ PanelSplit* PanelContainer::splitPanel(PanelSplitDirection splitDirection, float
 }
 
 void PanelContainer::setResizeHovered(PanelSplitDirection direction) {
-    resizeHovered = true;
-    hoveredDirection = direction;
+    if (resizeHovered == false) {
+        resizeHovered = true;
+        hoveredDirection = direction;
+    }
 }
 
 void PanelContainer::setResize() {

@@ -1,0 +1,2 @@
+#include "winres.h"
+APP_ICON ICON "assets/icons/smile.ico"

@@ -341,7 +341,7 @@ static void registerWindowClass(HINSTANCE hInstance) {
     wc.style = CS_OWNDC;
     wc.hbrBackground = nullptr;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(APP_ICON));
     wc.hIconSm = wc.hIcon;
 
     RegisterClassEx(&wc);

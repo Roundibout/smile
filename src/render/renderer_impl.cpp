@@ -71,10 +71,10 @@ UIBounds RendererImpl::applyLayout(const UIBounds& bounds, const UILayout& child
     applied.layout.rect.position.y.offset = bounds.layout.rect.position.y.offset + childLayout.rect.position.y.offset + (bounds.layout.rect.size.y.offset * childLayout.rect.position.y.scale);
 
     applied.layout.rect.size.x.scale = bounds.layout.rect.size.x.scale * childLayout.rect.size.x.scale;
-    applied.layout.rect.size.x.offset = bounds.layout.rect.size.x.offset + childLayout.rect.size.x.offset - (bounds.layout.rect.size.x.offset * childLayout.rect.size.x.scale);
+    applied.layout.rect.size.x.offset = (bounds.layout.rect.size.x.offset * childLayout.rect.size.x.scale) + childLayout.rect.size.x.offset;
 
     applied.layout.rect.size.y.scale = bounds.layout.rect.size.y.scale * childLayout.rect.size.y.scale;
-    applied.layout.rect.size.y.offset = bounds.layout.rect.size.y.offset + childLayout.rect.size.y.offset - (bounds.layout.rect.size.y.offset * childLayout.rect.size.y.scale);
+    applied.layout.rect.size.y.offset = (bounds.layout.rect.size.y.offset * childLayout.rect.size.y.scale) + childLayout.rect.size.y.offset;
 
     applied.layout.cornerRT = childLayout.cornerRT;
     applied.layout.cornerLT = childLayout.cornerLT;

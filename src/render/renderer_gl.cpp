@@ -43,7 +43,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
 
     // Allocate buffer for vertices (dynamic draw for live updates which is important)
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(TriangleVertex), nullptr, GL_DYNAMIC_DRAW);
 
     // Precompute and upload indices for maxQuads
     batchIndices.resize(maxQuads * 6);
@@ -61,9 +61,9 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, batchIndices.size() * sizeof(unsigned int), batchIndices.data(), GL_STATIC_DRAW);
 
     // Set up vertex attributes
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TriangleVertex), (void*)offsetof(TriangleVertex, position));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(TriangleVertex), (void*)offsetof(TriangleVertex, color));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
@@ -166,7 +166,7 @@ void RendererGL::flushQuadBatch() {
 
     glBindVertexArray(quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(Vertex), batchVertices.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(TriangleVertex), batchVertices.data());
 
     shaders.useShader("quad");
     shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
@@ -262,10 +262,10 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
-    Vertex v0{{position.x, position.y}, color};
-    Vertex v1{{position.x + size.x, position.y}, color};
-    Vertex v2{{position.x + size.x, position.y + size.y}, color};
-    Vertex v3{{position.x, position.y + size.y}, color};
+    TriangleVertex v0{{position.x, position.y}, color};
+    TriangleVertex v1{{position.x + size.x, position.y}, color};
+    TriangleVertex v2{{position.x + size.x, position.y + size.y}, color};
+    TriangleVertex v3{{position.x, position.y + size.y}, color};
 
     batchVertices.push_back(v0);
     batchVertices.push_back(v1);

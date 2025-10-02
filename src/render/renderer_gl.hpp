@@ -23,7 +23,7 @@ License:
 #include <render/shader_manager.hpp>
 #include <render/font_manager.hpp>
 
-struct Vertex {
+struct TriangleVertex {
     Vector2 position;
     Color4 color;
 };
@@ -113,7 +113,7 @@ private:
     std::unordered_map<std::string, std::unordered_map<char, GLGlyph>> glyphs;
 
     // Batch data
-    std::vector<Vertex> batchVertices;
+    std::vector<TriangleVertex> batchVertices;
     std::vector<unsigned int> batchIndices;
     std::vector<RoundedVertex> roundedBatchVertices;
     std::vector<unsigned int> roundedBatchIndices;
