@@ -129,15 +129,32 @@ void Object::compute() {
             // Now that we have the positions of two lines' vertices, we can see if the lines intersect
             Vector2 intersection;
             if (lineSegmentIntersection(A1, A2, B1, B2, intersection)) { // Check for intersection
-                // Create a deterministic intersection vertex id
-                Id interId = hashLineIds(lineA.id, lineB.id);
-
-                // Only add if it doesn't exist yet
-                if (vertexIdToIndex.find(interId) == vertexIdToIndex.end()) {
-                    vertices.emplace_back(Vertex(interId, intersection));
-                    vertexIdToIndex[interId] = vertices.size() - 1;
-                    if (interId >= nextVertexId) nextVertexId = interId + 1;
+                auto isSamePoint = [&](const Point& p) {
+                    return std::fabs(p.x - intersection.x) < 1e-6f && std::fabs(p.y - intersection.y) < 1e-6f;
+                };
+                if (isSamePoint(pointA1) || isSamePoint(pointA2) ||
+                    isSamePoint(pointB1) || isSamePoint(pointB2)) {
+                    continue; // Already represented as a real point
                 }
+
+                // Check if we've already added this virtual point
+                bool exists = false;
+                for (const auto& v : vertices) {
+                    if (std::fabs(v.x - intersection.x) < 1e-6f &&
+                        std::fabs(v.y - intersection.y) < 1e-6f) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) continue;
+
+
+                // Create the vertex's id
+                Id interId = nextVertexId++;
+
+                vertices.emplace_back(Vertex(interId, intersection));
+                vertexIdToIndex[interId] = vertices.size() - 1;
+                if (interId >= nextVertexId) nextVertexId = interId + 1;
             }
         }
     }

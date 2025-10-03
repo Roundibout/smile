@@ -9,10 +9,11 @@
 
 struct UIDim {
     float scale;
-    int offset;
+    float offset;
 
     UIDim() : scale(0.0f), offset(0) {}
-    UIDim(float scale, int offset) : scale(scale), offset(offset) {}
+    UIDim(float scale, int offset) : scale(scale), offset(static_cast<float>(offset)) {}
+    UIDim(float scale, float offset) : scale(scale), offset(offset) {}
 
     UIDim operator+(const UIDim& other) const {
         return UIDim(scale + other.scale, offset + other.offset);
@@ -51,6 +52,7 @@ struct UIDim2 {
     UIDim2() : x(UIDim()), y(UIDim()) {}
     UIDim2(const UIDim& x, const UIDim& y) : x(x), y(y) {}
     UIDim2(float scaleX, int offsetX, float scaleY, int offsetY) : x(UIDim(scaleX, offsetX)), y(UIDim(scaleY, offsetY)) {}
+    UIDim2(float scaleX, float offsetX, float scaleY, float offsetY) : x(UIDim(scaleX, offsetX)), y(UIDim(scaleY, offsetY)) {}
 
     UIDim2 operator+(const UIDim2& other) const {
         return UIDim2(x + other.x, y + other.y);

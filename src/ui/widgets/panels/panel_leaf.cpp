@@ -5,8 +5,8 @@
 UILayout PanelLeaf::applyInsetToLayout(const UILayout& childLayout, const PanelAdjacency& adjacency) {
     UILayout insetLayout = childLayout;
 
-    int margin = Theme::get().getMetricInt(ThemeMetric::PanelMargin);
-    int stroke = Theme::get().getMetricInt(ThemeMetric::PanelStroke);
+    int margin = Theme::metricInt(ThemeMetric::PanelMargin);
+    int stroke = Theme::metricInt(ThemeMetric::PanelStroke);
 
     int posX = margin;
     int posY = margin;
@@ -45,9 +45,9 @@ void PanelLeaf::update(float deltaTime, const UIBounds& bounds, PanelAdjacency a
 
 void PanelLeaf::render(const UIBounds& bounds, PanelAdjacency adjacency) {
     UILayout inset = applyInsetToLayout(layout, adjacency);
-    inset.setCorners(UIDim(0.0f, Theme::get().getMetric(ThemeMetric::PanelCorner)));
+    inset.setCorners(UIDim(0.0f, Theme::metric(ThemeMetric::PanelCorner)));
 
-    window->renderer.drawRoundedStrokeRect(inset, bounds, Theme::get().getColor(ThemeColor::Panel), Theme::get().getMetricInt(ThemeMetric::PanelStroke), Theme::get().getColor(ThemeColor::PanelStroke));
+    window->renderer.drawRoundedStrokeRect(inset, bounds, Theme::color(ThemeColor::Panel), Theme::metricInt(ThemeMetric::PanelStroke), Theme::color(ThemeColor::PanelStroke));
 
     UIBounds applied = window->renderer.applyLayout(bounds, applyInsetToLayout(layout, adjacency));
 

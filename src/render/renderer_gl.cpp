@@ -43,7 +43,7 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
 
     // Allocate buffer for vertices (dynamic draw for live updates which is important)
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(TriangleVertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(QuadVertex), nullptr, GL_DYNAMIC_DRAW);
 
     // Precompute and upload indices for maxQuads
     batchIndices.resize(maxQuads * 6);
@@ -61,9 +61,9 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, batchIndices.size() * sizeof(unsigned int), batchIndices.data(), GL_STATIC_DRAW);
 
     // Set up vertex attributes
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TriangleVertex), (void*)offsetof(TriangleVertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void*)offsetof(QuadVertex, position));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(TriangleVertex), (void*)offsetof(TriangleVertex, color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void*)offsetof(QuadVertex, color));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
@@ -166,7 +166,7 @@ void RendererGL::flushQuadBatch() {
 
     glBindVertexArray(quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(TriangleVertex), batchVertices.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(QuadVertex), batchVertices.data());
 
     shaders.useShader("quad");
     shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
@@ -253,6 +253,29 @@ void RendererGL::beginFrame(float scale) {
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
+void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color) {
+    if (quadCount >= maxQuads) flushQuadBatch();
+    if (roundedCount > 0) flushRoundedBatch();
+    if (textQuadCount > 0) flushTextBatch();
+
+    Vector2 resolved1 = resolvePosition(position1, bounds);
+    Vector2 resolved2 = resolvePosition(position2, bounds);
+    Vector2 resolved3 = resolvePosition(position3, bounds);
+    Vector2 resolved4 = resolvePosition(position4, bounds);
+
+    QuadVertex v0{{resolved1.x, resolved1.y}, color};
+    QuadVertex v1{{resolved2.x, resolved2.y}, color};
+    QuadVertex v2{{resolved3.x, resolved3.y}, color};
+    QuadVertex v3{{resolved4.x, resolved4.y}, color};
+
+    batchVertices.push_back(v0);
+    batchVertices.push_back(v1);
+    batchVertices.push_back(v2);
+    batchVertices.push_back(v3);
+
+    ++quadCount;
+}
+
 void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     if (quadCount >= maxQuads) flushQuadBatch();
     if (roundedCount > 0) flushRoundedBatch();
@@ -262,10 +285,10 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
-    TriangleVertex v0{{position.x, position.y}, color};
-    TriangleVertex v1{{position.x + size.x, position.y}, color};
-    TriangleVertex v2{{position.x + size.x, position.y + size.y}, color};
-    TriangleVertex v3{{position.x, position.y + size.y}, color};
+    QuadVertex v0{{position.x, position.y}, color};
+    QuadVertex v1{{position.x + size.x, position.y}, color};
+    QuadVertex v2{{position.x + size.x, position.y + size.y}, color};
+    QuadVertex v3{{position.x, position.y + size.y}, color};
 
     batchVertices.push_back(v0);
     batchVertices.push_back(v1);

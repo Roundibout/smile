@@ -29,7 +29,7 @@ void PanelSplit::applyLayoutAndAdjacencies(const UIBounds& bounds, UIBounds& fir
 }
 
 bool PanelSplit::isOverResizeArea(const Vector2& point, const UIBounds& bounds) {
-    int margin = Theme::get().getMetricInt(ThemeMetric::PanelMargin);
+    int margin = Theme::metricInt(ThemeMetric::PanelMargin);
 
     UILayout selectionArea;
     if (direction == PanelSplitDirection::Vertical) {

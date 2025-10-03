@@ -1,4 +1,7 @@
-# smile
+<h1>
+  <img src="assets/icons/smile.png" alt="Smile" width="32" style="vertical-align: bottom;">
+  Smile
+</h1>
 Vector art drawing and animation program for Super Corporate World.
 
 ### This app is not functional yet

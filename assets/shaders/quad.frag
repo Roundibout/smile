@@ -1,10 +1,9 @@
 #version 460 core
 
-in vec4 vColor; // From vertex shader
+in vec4 vColor;
 
-out vec4 FragColor; // Output color of this fragment
+out vec4 FragColor;
 
-void main()
-{
+void main() {
     FragColor = vColor;
 }

@@ -33,6 +33,7 @@ public:
 
     void beginFrame(float scale);
 
+    void drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color = Color4());
     void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4());
     void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4(), int stroke = 1, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f), const UIStrokeAlignment& strokeAlignment = UIStrokeAlignment::Outside);
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4());

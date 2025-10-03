@@ -49,11 +49,6 @@ public: // CHANGE AFTER TESTING
     std::unordered_map<Id, size_t> edgeIdToIndex;
     Id nextEdgeId = 0;
 
-    Id hashLineIds(Id lineA, Id lineB) {
-        if (lineA > lineB) std::swap(lineA, lineB); // Ensure smaller ID comes first to make it order independent
-        return static_cast<Id>(lineA * 31 + lineB); // Simple deterministic combination
-    }
-
     bool lineSegmentIntersection(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& intersection) {
         // Represent lines as p + r*t and q + s*u
         Vector2 r = p2 - p1;
@@ -97,13 +92,28 @@ public: // CHANGE AFTER TESTING
         // Sort by projection t along AB
         std::sort(verticesOnLine.begin(), verticesOnLine.end(),
             [&](Id lhs, Id rhs) {
-                const Vertex& v1 = vertexIdToIndex.at(lhs);
-                const Vertex& v2 = vertexIdToIndex.at(rhs);
+                const Vertex& v1 = vertices[vertexIdToIndex.at(lhs)];
+                const Vertex& v2 = vertices[vertexIdToIndex.at(rhs)];
 
-                float t1 = (dx != 0.0f) ? (v1.x - a.x) / dx : (v1.y - a.y) / dy;
-                float t2 = (dx != 0.0f) ? (v2.x - a.x) / dx : (v2.y - a.y) / dy;
+                float t1, t2;
+                if (std::fabs(dx) > 1e-6f) {
+                    t1 = (v1.x - a.x) / dx;
+                    t2 = (v2.x - a.x) / dx;
+                } else if (std::fabs(dy) > 1e-6f) {
+                    t1 = (v1.y - a.y) / dy;
+                    t2 = (v2.y - a.y) / dy;
+                } else {
+                    t1 = t2 = 0.0f; // degenerate line
+                }
+
                 return t1 < t2;
             });
+
+        // Remove duplicate vertices if any
+        verticesOnLine.erase(
+            std::unique(verticesOnLine.begin(), verticesOnLine.end()),
+            verticesOnLine.end()
+        );
     }
 public:
     Object(std::string name) : Instance(name) {}

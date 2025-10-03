@@ -15,3 +15,9 @@ float Theme::getMetric(const ThemeMetric& key) const {
 int Theme::getMetricInt(const ThemeMetric& key) const {
     return static_cast<int>(getMetric(key));
 }
+
+std::string Theme::getFont(const ThemeFont& key) const {
+    auto it = fonts.find(key);
+    if (it != fonts.end()) return it->second;
+    return "assets/fonts/Inter_18pt-Regular.ttf"; // fallback to regular font
+}

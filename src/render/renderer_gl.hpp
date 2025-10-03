@@ -23,7 +23,7 @@ License:
 #include <render/shader_manager.hpp>
 #include <render/font_manager.hpp>
 
-struct TriangleVertex {
+struct QuadVertex {
     Vector2 position;
     Color4 color;
 };
@@ -113,7 +113,7 @@ private:
     std::unordered_map<std::string, std::unordered_map<char, GLGlyph>> glyphs;
 
     // Batch data
-    std::vector<TriangleVertex> batchVertices;
+    std::vector<QuadVertex> batchVertices;
     std::vector<unsigned int> batchIndices;
     std::vector<RoundedVertex> roundedBatchVertices;
     std::vector<unsigned int> roundedBatchIndices;
@@ -132,6 +132,7 @@ public:
 
     void beginFrame(float scale) override;
 
+    void drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color = Color4());
     void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
     void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
