@@ -30,40 +30,37 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
     shaders = ShaderManagerGL();
-    shaders.loadShader("quad", "assets/shaders/quad.vert", "assets/shaders/quad.frag");
+    shaders.loadShader("basic", "assets/shaders/basic.vert", "assets/shaders/basic.frag");
     shaders.loadShader("rounded", "assets/shaders/rounded.vert", "assets/shaders/rounded.frag");
     shaders.loadShader("text", "assets/shaders/text.vert", "assets/shaders/text.frag");
     
-    // Create VAO/VBO/EBO for quad batching
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glGenBuffers(1, &quadEBO);
+    // Create VAO/VBO/EBO for triangle batching
+    glGenVertexArrays(1, &triVAO);
+    glGenBuffers(1, &triVBO);
+    glGenBuffers(1, &triEBO);
 
-    glBindVertexArray(quadVAO);
+    glBindVertexArray(triVAO);
 
     // Allocate buffer for vertices (dynamic draw for live updates which is important)
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, maxQuads * 4 * sizeof(QuadVertex), nullptr, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, triVBO);
+    glBufferData(GL_ARRAY_BUFFER, maxTris * 3 * sizeof(BasicVertex), nullptr, GL_DYNAMIC_DRAW);
 
-    // Precompute and upload indices for maxQuads
-    batchIndices.resize(maxQuads * 6);
-    for (size_t i = 0; i < maxQuads; ++i) {
-        unsigned int offset = i * 4;
-        batchIndices[i*6 + 0] = offset + 0;
-        batchIndices[i*6 + 1] = offset + 1;
-        batchIndices[i*6 + 2] = offset + 2;
-        batchIndices[i*6 + 3] = offset + 0;
-        batchIndices[i*6 + 4] = offset + 2;
-        batchIndices[i*6 + 5] = offset + 3;
+    // Precompute and upload indices for maxTris
+    triBatchIndices.resize(maxTris * 6);
+    for (size_t i = 0; i < maxTris; ++i) {
+        unsigned int offset = i * 3;
+        triBatchIndices[i*6 + 0] = offset + 0;
+        triBatchIndices[i*6 + 1] = offset + 1;
+        triBatchIndices[i*6 + 2] = offset + 2;
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, batchIndices.size() * sizeof(unsigned int), batchIndices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, triBatchIndices.size() * sizeof(unsigned int), triBatchIndices.data(), GL_STATIC_DRAW);
 
     // Set up vertex attributes
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void*)offsetof(QuadVertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void*)offsetof(BasicVertex, position));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void*)offsetof(QuadVertex, color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void*)offsetof(BasicVertex, color));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
@@ -161,19 +158,19 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glBindVertexArray(0);
 }
 
-void RendererGL::flushQuadBatch() {
-    if (quadCount == 0) return;
+void RendererGL::flushTriangleBatch() {
+    if (triCount == 0) return;
 
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, batchVertices.size() * sizeof(QuadVertex), batchVertices.data());
+    glBindVertexArray(triVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, triVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, triBatchVertices.size() * sizeof(BasicVertex), triBatchVertices.data());
 
-    shaders.useShader("quad");
-    shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
-    glDrawElements(GL_TRIANGLES, quadCount * 6, GL_UNSIGNED_INT, 0);
+    shaders.useShader("basic");
+    shaders.setUniformMat4("basic", "uProjection", currentProjection.data());
+    glDrawElements(GL_TRIANGLES, triCount * 6, GL_UNSIGNED_INT, 0);
 
-    batchVertices.clear();
-    quadCount = 0;
+    triBatchVertices.clear();
+    triCount = 0;
 
     glBindVertexArray(0);
 }
@@ -240,21 +237,41 @@ void RendererGL::beginFrame(float scale) {
     glClearColor(color.r, color.g, color.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    batchVertices.clear();
+    triBatchVertices.clear();
     roundedBatchVertices.clear();
     textBatchVertices.clear();
-    quadCount = 0;
+    triCount = 0;
     roundedCount = 0;
     textQuadCount = 0;
 
     // Set uniforms for shaders
-    shaders.setUniformMat4("quad", "uProjection", currentProjection.data());
+    shaders.setUniformMat4("basic", "uProjection", currentProjection.data());
     shaders.setUniformMat4("rounded", "uProjection", currentProjection.data());
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
+void RendererGL::drawTriangle(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIBounds& bounds, const Color4& color) {
+    if (triCount >= maxTris) flushTriangleBatch();
+    if (roundedCount > 0) flushRoundedBatch();
+    if (textQuadCount > 0) flushTextBatch();
+
+    Vector2 resolved1 = resolvePosition(position1, bounds);
+    Vector2 resolved2 = resolvePosition(position2, bounds);
+    Vector2 resolved3 = resolvePosition(position3, bounds);
+
+    BasicVertex v0{{resolved1.x, resolved1.y}, color};
+    BasicVertex v1{{resolved2.x, resolved2.y}, color};
+    BasicVertex v2{{resolved3.x, resolved3.y}, color};
+
+    triBatchVertices.push_back(v0);
+    triBatchVertices.push_back(v1);
+    triBatchVertices.push_back(v2);
+
+    ++triCount;
+}
+
 void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color) {
-    if (quadCount >= maxQuads) flushQuadBatch();
+    if (triCount >= maxTris) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
@@ -263,21 +280,23 @@ void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, cons
     Vector2 resolved3 = resolvePosition(position3, bounds);
     Vector2 resolved4 = resolvePosition(position4, bounds);
 
-    QuadVertex v0{{resolved1.x, resolved1.y}, color};
-    QuadVertex v1{{resolved2.x, resolved2.y}, color};
-    QuadVertex v2{{resolved3.x, resolved3.y}, color};
-    QuadVertex v3{{resolved4.x, resolved4.y}, color};
+    BasicVertex v0{{resolved1.x, resolved1.y}, color};
+    BasicVertex v1{{resolved2.x, resolved2.y}, color};
+    BasicVertex v2{{resolved3.x, resolved3.y}, color};
+    BasicVertex v3{{resolved4.x, resolved4.y}, color};
 
-    batchVertices.push_back(v0);
-    batchVertices.push_back(v1);
-    batchVertices.push_back(v2);
-    batchVertices.push_back(v3);
+    triBatchVertices.push_back(v0);
+    triBatchVertices.push_back(v1);
+    triBatchVertices.push_back(v2);
+    triBatchVertices.push_back(v0);
+    triBatchVertices.push_back(v2);
+    triBatchVertices.push_back(v3);
 
-    ++quadCount;
+    triCount += 2;
 }
 
 void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
-    if (quadCount >= maxQuads) flushQuadBatch();
+    if (triCount >= maxTris) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
@@ -285,17 +304,19 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
-    QuadVertex v0{{position.x, position.y}, color};
-    QuadVertex v1{{position.x + size.x, position.y}, color};
-    QuadVertex v2{{position.x + size.x, position.y + size.y}, color};
-    QuadVertex v3{{position.x, position.y + size.y}, color};
+    BasicVertex v0{{position.x, position.y}, color};
+    BasicVertex v1{{position.x + size.x, position.y}, color};
+    BasicVertex v2{{position.x + size.x, position.y + size.y}, color};
+    BasicVertex v3{{position.x, position.y + size.y}, color};
 
-    batchVertices.push_back(v0);
-    batchVertices.push_back(v1);
-    batchVertices.push_back(v2);
-    batchVertices.push_back(v3);
+    triBatchVertices.push_back(v0);
+    triBatchVertices.push_back(v1);
+    triBatchVertices.push_back(v2);
+    triBatchVertices.push_back(v0);
+    triBatchVertices.push_back(v2);
+    triBatchVertices.push_back(v3);
 
-    ++quadCount;
+    triCount += 2;
 }
 
 void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
@@ -304,7 +325,7 @@ void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, 
 
 void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
-    if (quadCount > 0) flushQuadBatch();
+    if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
 
     AbsoluteLayout resolved = resolveLayout(layout, bounds);
@@ -326,7 +347,7 @@ void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds,
 
 void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
-    if (quadCount > 0) flushQuadBatch();
+    if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
 
     stroke = static_cast<int>(std::round(stroke * currentScale));
@@ -446,7 +467,7 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
 }
 
 void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
-    if (quadCount > 0) flushQuadBatch();
+    if (triCount > 0) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
 
     size = static_cast<int>(std::round(size * currentScale));
@@ -523,7 +544,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 }
 
 void RendererGL::endFrame() {
-    flushQuadBatch();
+    flushTriangleBatch();
     flushTextBatch();
     flushRoundedBatch();
     window->swapGLBuffers();

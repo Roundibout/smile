@@ -5,21 +5,32 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
+
+#include <iostream>
 
 #include <datatypes/vector2.hpp>
 
 #include <datatypes/object/point.hpp>
 #include <datatypes/object/line.hpp>
+#include <datatypes/object/shape.hpp>
 
 #include <datatypes/object/vertex.hpp>
 #include <datatypes/object/edge.hpp>
+#include <datatypes/object/face.hpp>
 
 #include <core/instance.hpp>
 
 constexpr float EPSILON = 1e-6f;
+constexpr float PI = 3.1415926f;
 
 using Id = uint32_t;
 constexpr Id INVALID_ID = UINT32_MAX;
+
+enum class EdgeDirection {
+    Forward,
+    Backward
+};
 
 class Object : public Instance {
 public: // CHANGE AFTER TESTING
@@ -37,17 +48,25 @@ public: // CHANGE AFTER TESTING
     std::vector<Id> freeLineIds;
     Id nextLineId = 0;
 
+    // Shapes
+    std::vector<Shape> shapes;
+    std::unordered_map<Id, size_t> shapeIdToIndex;
+    std::vector<Id> freeShapeIds;
+    Id nextShapeId = 0;
+
     // INTERNAL
 
     // Vertices
     std::vector<Vertex> vertices;
-    std::unordered_map<Id, size_t> vertexIdToIndex;
     Id nextVertexId = 0;
 
     // Edges
     std::vector<Edge> edges;
-    std::unordered_map<Id, size_t> edgeIdToIndex;
     Id nextEdgeId = 0;
+
+    // Faces
+    std::vector<Face> faces;
+    Id nextFaceId = 0;
 
     bool lineSegmentIntersection(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& intersection) {
         // Represent lines as p + r*t and q + s*u
@@ -92,8 +111,8 @@ public: // CHANGE AFTER TESTING
         // Sort by projection t along AB
         std::sort(verticesOnLine.begin(), verticesOnLine.end(),
             [&](Id lhs, Id rhs) {
-                const Vertex& v1 = vertices[vertexIdToIndex.at(lhs)];
-                const Vertex& v2 = vertices[vertexIdToIndex.at(rhs)];
+                const Vertex& v1 = vertices[lhs];
+                const Vertex& v2 = vertices[rhs];
 
                 float t1, t2;
                 if (std::fabs(dx) > 1e-6f) {
@@ -114,6 +133,213 @@ public: // CHANGE AFTER TESTING
             std::unique(verticesOnLine.begin(), verticesOnLine.end()),
             verticesOnLine.end()
         );
+    }
+
+    float ccwAngleFromEdges(float px, float py, float ax, float ay, float bx, float by) {
+        float vax = ax - px;
+        float vay = ay - py;
+
+        float vbx = bx - px;
+        float vby = by - py;
+
+        // Compute cross and dot
+        float cross = vax * vby - vay * vbx;
+        float dot = vax * vbx + vay * vby;
+
+        // atan2 gives signed angle in (-pi, pi], positive is CCW
+        float angle = atan2f(cross, dot) * 180.0f / PI;
+
+        if (angle < 0.0f) angle += 360.0f; // normalize to [0, 360)
+
+        return angle;
+    }
+
+    Id traverseEdge(Edge& startEdge, EdgeDirection direction) { 
+        Id aId;
+        Id pivotId;
+
+        // Return invalid id if we have already traversed this way and set this edge's A and pivot vertex ids depending on direction
+        if (direction == EdgeDirection::Forward) {
+            if (startEdge.forwardUsed) {
+                std::cout << "Forward already used" << std::endl;
+                return INVALID_ID;
+            }
+            aId = startEdge.start;
+            pivotId = startEdge.end;
+
+            startEdge.forwardUsed = true; // We're checking forward
+        } else if (direction == EdgeDirection::Backward) {
+            if (startEdge.backwardUsed) {
+                std::cout << "Backward already used" << std::endl;
+                return INVALID_ID;
+            }
+            aId = startEdge.end;
+            pivotId = startEdge.start;
+
+            startEdge.backwardUsed = true; // We're checking backward
+        }
+
+        std::vector<Id> edgesConnectedByStart;
+        std::vector<Id> edgesConnectedByEnd;
+
+        // Find edges connected to the pivot
+        for (const Edge& edge : edges) {
+            if (edge.id != startEdge.id) {
+                if (edge.start == pivotId && !edge.forwardUsed) {
+                    edgesConnectedByStart.push_back(edge.id);
+                } else if (edge.end == pivotId && !edge.backwardUsed) {
+                    edgesConnectedByEnd.push_back(edge.id);
+                }
+            }
+        }
+
+        // Get A vertex and pivot vertex
+        const Vertex& a = vertices[aId];
+        const Vertex& pivot = vertices[pivotId];
+
+        // Find lowest angle
+        Id lowestAngleId = INVALID_ID;
+        float lowestAngle = 360.0f;
+
+        for (Id edgeId : edgesConnectedByStart) {
+            Edge& edge = edges[edgeId];
+
+            const Vertex& b = vertices[edge.end];
+
+            float angle = ccwAngleFromEdges(pivot.x, pivot.y, a.x, a.y, b.x, b.y);
+
+            if (angle < lowestAngle) {
+                lowestAngleId = edgeId;
+                lowestAngle = angle;
+            }
+        }
+        for (Id edgeId : edgesConnectedByEnd) {
+            Edge& edge = edges[edgeId];
+
+            const Vertex& b = vertices[edge.start];
+
+            float angle = ccwAngleFromEdges(pivot.x, pivot.y, a.x, a.y, b.x, b.y);
+
+            if (angle < lowestAngle) {
+                lowestAngleId = edgeId;
+                lowestAngle = angle;
+            }
+        }
+
+        if (lowestAngleId != INVALID_ID) {
+            std::cout << "Edge " << startEdge.id << " Connection" << std::endl;
+            std::cout << "    " << lowestAngleId << " at angle " << lowestAngle << std::endl;
+        } else {
+            std::cout << "Could not find a next edge" << std::endl;
+        }
+
+        return lowestAngleId;
+    }
+
+    void computeFace(Edge& startEdge, EdgeDirection startDirection) {
+        Face face(nextFaceId++);
+        std::cout << "Computing face " << face.id << " (edge " << startEdge.id << " ";
+        if (startDirection == EdgeDirection::Forward) {
+            std::cout << "forward";
+        } else {
+            std::cout << "backward";
+        }
+        std::cout << ")" << std::endl;
+            
+        face.edges.push_back(startEdge.id);
+
+        bool traversing = true;
+        bool completed = false;
+        Id currentEdgeId = startEdge.id;
+        EdgeDirection direction = startDirection;
+
+        Id start;
+        if (direction == EdgeDirection::Forward) {
+            start = startEdge.start;
+        } else {
+            start = startEdge.end;
+        }
+        face.vertices.push_back(start);
+
+        while (traversing) {
+            Edge& currentEdge = edges[currentEdgeId];
+            Id nextEdgeId = traverseEdge(currentEdge, direction);
+
+            if (nextEdgeId == INVALID_ID) { // Failed
+                traversing = false;
+                break;
+            }
+
+            face.edges.push_back(nextEdgeId);
+
+            const Edge& nextEdge = edges[nextEdgeId];
+            Id pivot;
+            if (direction == EdgeDirection::Forward) {
+                pivot = currentEdge.end;
+            } else {
+                pivot = currentEdge.start;
+            }
+
+            if (nextEdge.start == pivot) { // Forward
+                   direction = EdgeDirection::Forward;
+
+                   face.vertices.push_back(nextEdge.start);
+
+                if (nextEdge.end == start) { // Completed forward loop
+                    completed = true;
+                    traversing = false;
+                    break;
+                }
+            } else { // Backward
+                direction = EdgeDirection::Backward;
+
+                face.vertices.push_back(nextEdge.end);
+
+                if (nextEdge.start == start) { // Completed forward loop (using backward edge)
+                    completed = true;
+                    traversing = false;
+                    break;
+                }
+            }
+
+            currentEdgeId = nextEdgeId;
+        };
+
+        if (completed) {
+            std::cout << "FACE " << face.id << std::endl;
+            for (Id edge : face.edges) {
+                std::cout << "    " << edge << std::endl;
+            }
+
+            faces.push_back(face); // Add face if it is completed
+        } else {
+            --nextFaceId;
+        }
+
+        std::cout << std::endl;
+    }
+
+    bool isCCW(const Face& face) {
+        float sum = 0.0f;
+        for (size_t i = 0; i < face.vertices.size(); i++) {
+            const Vertex& v0 = vertices[face.vertices[i]];
+            const Vertex& v1 = vertices[face.vertices[(i + 1) % face.vertices.size()]];
+            sum += (v1.x - v0.x) * (v1.y + v0.y);
+        }
+        return sum < 0.0f;
+    }
+
+    float cross(const Vertex& a, const Vertex& b, const Vertex& c) {
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    }
+
+    bool pointInTriangle(const Vertex& p, const Vertex& a, const Vertex& b, const Vertex& c) {
+        float c1 = cross(a, b, p);
+        float c2 = cross(b, c, p);
+        float c3 = cross(c, a, p);
+        bool hasNeg = (c1 < 0) || (c2 < 0) || (c3 < 0);
+        bool hasPos = (c1 > 0) || (c2 > 0) || (c3 > 0);
+        return !(hasNeg && hasPos); // all same sign => inside
     }
 public:
     Object(std::string name) : Instance(name) {}

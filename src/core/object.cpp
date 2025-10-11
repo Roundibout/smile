@@ -89,21 +89,17 @@ const Line* Object::getLine(Id id) {
 }
 
 void Object::compute() {
-    // Step 1: Convert from non-planar to planar
-    //     Turn intersections into virtual points and combine them with real points into vertices
-    //     Split lines at intersections and combine with existing lines into edges
-
-    // Step 2: Compute faces from edges
-    //     Use some sort of algorithm to figure this out
-    //     We also must have holes working inside faces (But these holes will just be other faces and not actual holes. They can be made to look like holes in their appearance.)
-
-    // Step 3 (maybe): Triangulate
-    //     Not important yet, we'll do it after.
+    // Reset
+    vertices.clear();
+    edges.clear();
+    faces.clear();
+    nextVertexId = 0;
+    nextEdgeId = 0;
+    nextFaceId = 0;
 
     // Add existing real points to vertex vector
     for (const Point& point : points) {
         vertices.emplace_back(Vertex(point.id, point.x, point.y));
-        vertexIdToIndex[point.id] = vertices.size() - 1;
         if (point.id >= nextVertexId) nextVertexId = point.id + 1;
     }
 
@@ -130,7 +126,7 @@ void Object::compute() {
             Vector2 intersection;
             if (lineSegmentIntersection(A1, A2, B1, B2, intersection)) { // Check for intersection
                 auto isSamePoint = [&](const Point& p) {
-                    return std::fabs(p.x - intersection.x) < 1e-6f && std::fabs(p.y - intersection.y) < 1e-6f;
+                    return std::fabs(p.x - intersection.x) < EPSILON && std::fabs(p.y - intersection.y) < EPSILON;
                 };
                 if (isSamePoint(pointA1) || isSamePoint(pointA2) ||
                     isSamePoint(pointB1) || isSamePoint(pointB2)) {
@@ -140,20 +136,18 @@ void Object::compute() {
                 // Check if we've already added this virtual point
                 bool exists = false;
                 for (const auto& v : vertices) {
-                    if (std::fabs(v.x - intersection.x) < 1e-6f &&
-                        std::fabs(v.y - intersection.y) < 1e-6f) {
+                    if (std::fabs(v.x - intersection.x) < EPSILON &&
+                        std::fabs(v.y - intersection.y) < EPSILON) {
                         exists = true;
                         break;
                     }
                 }
                 if (exists) continue;
 
-
                 // Create the vertex's id
                 Id interId = nextVertexId++;
 
-                vertices.emplace_back(Vertex(interId, intersection));
-                vertexIdToIndex[interId] = vertices.size() - 1;
+                vertices.emplace_back(interId, intersection);
                 if (interId >= nextVertexId) nextVertexId = interId + 1;
             }
         }
@@ -163,8 +157,8 @@ void Object::compute() {
     for (const Line& line : lines) { // For every line
         std::vector<Id> verticesOnLine = {line.point1, line.point2}; // Collect endpoints
 
-        const Vertex& vertex1 = vertices[vertexIdToIndex[line.point1]];
-        const Vertex& vertex2 = vertices[vertexIdToIndex[line.point2]];
+        const Vertex& vertex1 = vertices[line.point1];
+        const Vertex& vertex2 = vertices[line.point2];
 
         // Check all intersection vertices
         for (const Vertex& vertex : vertices) { // For every line, go through every vertex
@@ -183,8 +177,78 @@ void Object::compute() {
         for (size_t i = 0; i < verticesOnLine.size() - 1; ++i) {
             Id v1 = verticesOnLine[i];
             Id v2 = verticesOnLine[i+1];
-            edges.emplace_back(Edge(nextEdgeId++, v1, v2));
-            edgeIdToIndex[edges.back().id] = edges.size() - 1;
+            Edge edge = Edge(nextEdgeId++, v1, v2);
+            edges.push_back(edge);
+        }
+    }
+
+    // Figure out the faces
+    for (Edge& startEdge : edges) {
+        computeFace(startEdge, EdgeDirection::Forward); // Go forward
+        computeFace(startEdge, EdgeDirection::Backward); // Go backward
+    }
+
+    // Triangulate faces
+    for (Face& face : faces) {
+        if (face.vertices.size() == 3) {
+            face.triangles.emplace_back(face.vertices[0], face.vertices[1], face.vertices[2]);
+        } else if (face.vertices.size() > 3) {
+            std::vector<Id> remainingVertices = face.vertices;
+
+            // Ensure CCW winding
+            if (!isCCW(face)) {
+                std::reverse(remainingVertices.begin(), remainingVertices.end());
+            }
+
+            while (remainingVertices.size() > 3) {
+                bool earFound = false;
+
+                for (size_t i = 0; i < remainingVertices.size(); i++) {
+                    Id prevId = remainingVertices[(i + remainingVertices.size() - 1) % remainingVertices.size()];
+                    Id currId = remainingVertices[i];
+                    Id nextId = remainingVertices[(i + 1) % remainingVertices.size()];
+                    const Vertex& prev = vertices[prevId];
+                    const Vertex& curr = vertices[currId];
+                    const Vertex& next = vertices[nextId];
+
+                    // Check convexity
+                    if (cross(prev, curr, next) <= 0) continue; // Not convex (skip)
+
+                    // Check if any other vertex is inside the triangle
+                    bool contains = false;
+                    for (size_t j = 0; j < remainingVertices.size(); j++) {
+                        if (j == i || j == (i + 1) % remainingVertices.size() || j == (i + remainingVertices.size() - 1) % remainingVertices.size())
+                            continue; // skip the 3 vertices that make up this triangle
+
+                        const Vertex& testVertex = vertices[remainingVertices[j]];
+                        if (pointInTriangle(testVertex, prev, curr, next)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+
+                    if (contains) continue;
+
+                    // It's an ear — add triangle
+                    face.triangles.emplace_back(prevId, currId, nextId);
+
+                    // Remove current vertex
+                    remainingVertices.erase(remainingVertices.begin() + i);
+                    earFound = true;
+                    break;
+                }
+
+                if (!earFound) {
+                    // Polygon may be self-intersecting or malformed
+                    std::cerr << "Ear clipping failed";
+                    break;
+                }
+            }
+
+            // Remaining 3 vertices form the last triangle
+            if (remainingVertices.size() == 3) {
+                face.triangles.emplace_back(remainingVertices[0], remainingVertices[1], remainingVertices[2]);
+            }
         }
     }
 }

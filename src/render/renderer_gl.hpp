@@ -23,7 +23,7 @@ License:
 #include <render/shader_manager.hpp>
 #include <render/font_manager.hpp>
 
-struct QuadVertex {
+struct BasicVertex {
     Vector2 position;
     Color4 color;
 };
@@ -96,10 +96,10 @@ class RendererGL : public RendererImpl {
 private:
     ShaderManagerGL shaders;
 
-    // Quad
-    GLuint quadVAO, quadVBO, quadEBO;
-    size_t quadCount = 0;
-    const size_t maxQuads = 1000;
+    // Triangle
+    GLuint triVAO, triVBO, triEBO;
+    size_t triCount = 0;
+    const size_t maxTris = 2000;
 
     // Rounded
     GLuint roundedVAO, roundedVBO, roundedEBO;
@@ -113,8 +113,8 @@ private:
     std::unordered_map<std::string, std::unordered_map<char, GLGlyph>> glyphs;
 
     // Batch data
-    std::vector<QuadVertex> batchVertices;
-    std::vector<unsigned int> batchIndices;
+    std::vector<BasicVertex> triBatchVertices;
+    std::vector<unsigned int> triBatchIndices;
     std::vector<RoundedVertex> roundedBatchVertices;
     std::vector<unsigned int> roundedBatchIndices;
     std::vector<TextVertex> textBatchVertices;
@@ -122,7 +122,7 @@ private:
 
     std::array<float, 16> currentProjection;
 
-    void flushQuadBatch();
+    void flushTriangleBatch();
     void flushRoundedBatch();
     void flushTextBatch();
 
@@ -132,7 +132,8 @@ public:
 
     void beginFrame(float scale) override;
 
-    void drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color = Color4());
+    void drawTriangle(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIBounds& bounds, const Color4& color = Color4()) override;
+    void drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color = Color4()) override;
     void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
     void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;

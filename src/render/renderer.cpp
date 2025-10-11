@@ -31,6 +31,10 @@ void Renderer::beginFrame(float scale) {
     impl->beginFrame(scale);
 }
 
+void Renderer::drawTriangle(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIBounds& bounds, const Color4& color) {
+    impl->drawTriangle(position1, position2, position3, bounds, color);
+}
+
 void Renderer::drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color) {
     impl->drawQuad(position1, position2, position3, position4, bounds, color);
 }

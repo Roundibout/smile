@@ -2,6 +2,7 @@
 #include <window/window.hpp>
 
 void Viewport::update(float deltaTime, const UIBounds& bounds) {
+    //obj.compute();
     timer += deltaTime;
     if (timer >= 1.0f) {
         timer -= 1.0f;
@@ -38,8 +39,8 @@ void Viewport::render(const UIBounds& bounds) {
             px *= 1.0f;
             py *= 1.0f;
 
-            UIDim2 offset1(0.0f, px + 5, 0.0f, py + 5);
-            UIDim2 offset2(0.0f, -px + 5, 0.0f, -py + 5);
+            UIDim2 offset1(0.0f, px, 0.0f, py);
+            UIDim2 offset2(0.0f, -px, 0.0f, -py);
 
             window->renderer.drawQuad(
                 position1 + offset1,
@@ -52,15 +53,40 @@ void Viewport::render(const UIBounds& bounds) {
 
         for (const Point& point : obj.points) {
             UIDim2 position = UIDim2(0.25f + point.x / 2, 0, 0.25f + point.y / 2, 0);
-            window->renderer.drawRoundedRect(UILayout(UIRect(position, UIDim2(0.0f, 10, 0.0f, 10))), bounds, Color4());
-            window->renderer.drawText(position + UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
+            UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
+            pointLayout.setCorners(UIDim(1.0f, 0));
+            window->renderer.drawRoundedRect(pointLayout, bounds, Color4());
+            window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     } else {
         window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
+        for (const Face& face : obj.faces) {
+
+            std::cout << "FACE: " << face.id << std::endl;
+
+            float blue = static_cast<float>(face.id) / static_cast<float>(obj.nextFaceId - 1);
+
+            for (const Triangle& triangle : face.triangles) {
+                const Vertex& vertex1 = obj.vertices[triangle.vertex1];
+                const Vertex& vertex2 = obj.vertices[triangle.vertex2];
+                const Vertex& vertex3 = obj.vertices[triangle.vertex3];
+                UIDim2 position1 = UIDim2(0.25f + vertex1.x / 2, 0, 0.25f + vertex1.y / 2, 30 * face.id);
+                UIDim2 position2 = UIDim2(0.25f + vertex2.x / 2, 0, 0.25f + vertex2.y / 2, 30 * face.id);
+                UIDim2 position3 = UIDim2(0.25f + vertex3.x / 2, 0, 0.25f + vertex3.y / 2, 30 * face.id);
+
+                std::cout << "TRIANGLE" << std::endl;
+                std::cout << "    " << position1.to_string() << std::endl;
+                std::cout << "    " << position2.to_string() << std::endl;
+                std::cout << "    " << position3.to_string() << std::endl;
+
+                window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2, 0.5f));
+            }
+        }
+
         for (const Edge& edge : obj.edges) {
-            const Vertex& vertex1 = obj.vertices[obj.vertexIdToIndex[edge.vertex1]];
-            const Vertex& vertex2 = obj.vertices[obj.vertexIdToIndex[edge.vertex2]];
+            const Vertex& vertex1 = obj.vertices[edge.start];
+            const Vertex& vertex2 = obj.vertices[edge.end];
             UIDim2 position1 = UIDim2(0.25f + vertex1.x / 2, 0, 0.25f + vertex1.y / 2, 0);
             UIDim2 position2 = UIDim2(0.25f + vertex2.x / 2, 0, 0.25f + vertex2.y / 2, 0);
             UIDim2 midPos = UIDim2(0.25f + (vertex1.x / 2 + vertex2.x / 2) / 2, 0, 0.25f + (vertex1.y / 2 + vertex2.y / 2) / 2, 0);
@@ -76,8 +102,8 @@ void Viewport::render(const UIBounds& bounds) {
             px *= 1.0f;
             py *= 1.0f;
 
-            UIDim2 offset1(0.0f, px + 5, 0.0f, py + 5);
-            UIDim2 offset2(0.0f, -px + 5, 0.0f, -py + 5);
+            UIDim2 offset1(0.0f, px, 0.0f, py);
+            UIDim2 offset2(0.0f, -px, 0.0f, -py);
 
             float blue = static_cast<float>(edge.id) / static_cast<float>(obj.nextEdgeId - 1);
 
@@ -86,15 +112,17 @@ void Viewport::render(const UIBounds& bounds) {
                 position1 + offset2,
                 position2 + offset2,
                 position2 + offset1,
-                bounds, Color4(1.0f - blue, 0.0f, blue) // I want to make the color change depending on how close the edge id is to the last one (at the start its red, at the end its blue)
+                bounds, Color4(1.0f - blue, 0.0f, blue)
             );
-            window->renderer.drawText(midPos, bounds, std::to_string(edge.id), Theme::font(ThemeFont::Bold), 20, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2));
+            window->renderer.drawText(midPos - UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(edge.id), Theme::font(ThemeFont::Bold), 20, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2));
         }
 
         for (const Vertex& vertex : obj.vertices) {
             UIDim2 position = UIDim2(0.25f + vertex.x / 2, 0, 0.25f + vertex.y / 2, 0);
-            window->renderer.drawRoundedRect(UILayout(UIRect(position, UIDim2(0.0f, 10, 0.0f, 10))), bounds, Color4());
-            window->renderer.drawText(position + UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
+            UILayout vertexLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
+            vertexLayout.setCorners(UIDim(1.0f, 0));
+            window->renderer.drawRoundedRect(vertexLayout, bounds, Color4());
+            window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     }
 }
