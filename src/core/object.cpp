@@ -193,6 +193,7 @@ void Object::compute() {
         if (face.vertices.size() == 3) {
             face.triangles.emplace_back(face.vertices[0], face.vertices[1], face.vertices[2]);
         } else if (face.vertices.size() > 3) {
+            // Ear clipping
             std::vector<Id> remainingVertices = face.vertices;
 
             // Ensure CCW winding

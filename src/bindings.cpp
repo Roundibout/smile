@@ -124,6 +124,8 @@ void register_bindings(sol::state& lua) {
         "scale", &UIDim::scale,
         "offset", &UIDim::offset,
         // Operators
+        sol::meta_function::addition, &UIDim::operator+,
+        sol::meta_function::subtraction, &UIDim::operator-,
         sol::meta_function::equal_to, &UIDim::operator==
     );
 
@@ -139,6 +141,8 @@ void register_bindings(sol::state& lua) {
         "x", &UIDim2::x,
         "y", &UIDim2::y,
         // Operators
+        sol::meta_function::addition, &UIDim2::operator+,
+        sol::meta_function::subtraction, &UIDim2::operator-,
         sol::meta_function::equal_to, &UIDim2::operator==
     );
     
@@ -154,6 +158,51 @@ void register_bindings(sol::state& lua) {
         "size", &UIRect::size,
         // Operators
         sol::meta_function::equal_to, &UIRect::operator==
+    );
+
+    // AbsoluteLayout
+    lua.new_usertype<AbsoluteLayout>("AbsoluteLayout",
+        // Constructors
+        sol::constructors<
+            AbsoluteLayout(),
+            AbsoluteLayout(const Rect&)
+        >(),
+        // Fields
+        "rect", &AbsoluteLayout::rect,
+        "cornerRT", &AbsoluteLayout::cornerRT,
+        "cornerLT", &AbsoluteLayout::cornerLT,
+        "cornerRB", &AbsoluteLayout::cornerRB,
+        "cornerLB", &AbsoluteLayout::cornerLB
+    );
+
+    // UILayout
+    lua.new_usertype<UILayout>("UILayout",
+        // Constructors
+        sol::constructors<
+            UILayout(),
+            UILayout(const UIRect&)
+        >(),
+        // Fields
+        "rect", &UILayout::rect,
+        "cornerRT", &UILayout::cornerRT,
+        "cornerLT", &UILayout::cornerLT,
+        "cornerRB", &UILayout::cornerRB,
+        "cornerLB", &UILayout::cornerLB,
+        // Methods
+        "SetCorners", &UILayout::setCorners
+    );
+
+    // UIBounds
+    lua.new_usertype<UIBounds>("UIBounds",
+        // Constructors
+        sol::constructors<
+            UIBounds(),
+            UIBounds(const Vector2&),
+            UIBounds(const Vector2&, const UILayout&)
+        >(),
+        // Fields
+        "absolute", &UIBounds::absolute,
+        "layout", &UIBounds::layout
     );
 
     // Window Config
@@ -198,8 +247,16 @@ void register_bindings(sol::state& lua) {
         "Dirty", &Renderer::dirty,
         "IsDirty", &Renderer::isDirty,
 
+        "ResolvePosition", &Renderer::resolvePosition,
+        "ResolveLayout", &Renderer::resolveLayout,
+        "ApplyLayout", &Renderer::applyLayout,
+
+        "DrawTriangle", &Renderer::drawTriangle,
+        "DrawQuad", &Renderer::drawQuad,
         "DrawRect", &Renderer::drawRect,
+        "DrawStrokeRect", &Renderer::drawStrokeRect,
         "DrawRoundedRect", &Renderer::drawRoundedRect,
+        "DrawRoundedRect", &Renderer::drawRoundedStrokeRect,
         "DrawText", &Renderer::drawText
     );
 
@@ -214,7 +271,9 @@ void register_bindings(sol::state& lua) {
     // -- Singletons -- //
 
     lua.new_usertype<Theme>("Theme",
-        "GetColor", &Theme::getColor
+        "GetMetric", &Theme::getMetric,
+        "GetColor", &Theme::getColor,
+        "GetFont", &Theme::getFont
     );
 
     lua.new_usertype<App>("App",

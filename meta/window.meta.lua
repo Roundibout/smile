@@ -22,13 +22,13 @@ function WindowConfig.new() end
 Window = {}
 
 ---Connects a function to this window's update loop.
----@param callback fun(deltaTime: number)
+---@param callback fun(deltaTime: number, bounds: UIBounds)
 function Window:ConnectUpdate(callback) end
 
 ---Connects a function to this window's render loop.
----@param callback fun()
+---@param callback fun(bounds: UIBounds)
 function Window:ConnectRender(callback) end
 
 ---Connects a function to this window's WindowInput signal.
----@param callback fun(input: WindowInput)
+---@param callback fun(input: WindowInput, bounds: UIBounds)
 function Window:ConnectInput(callback) end

@@ -59,7 +59,7 @@ void Window::process() {
         if (it != callbacks.end()) { // Is there any?
             // Go through all of them and run them
             for (auto& func : it->second) {
-                func(input);
+                func(input, bounds);
             }
         }
 
@@ -94,7 +94,7 @@ void Window::update(float deltaTime) {
     if (it != callbacks.end()) { // Is there any?
         // Go through all of them and run them
         for (auto& func : it->second) {
-            func(deltaTime);
+            func(deltaTime, bounds);
         }
     }
 }
@@ -114,7 +114,7 @@ void Window::render(float uiScale) {
         if (it != callbacks.end()) { // Is there any?
             // Go through all of them and run them
             for (auto& func : it->second) {
-                func();
+                func(bounds);
             }
         }
         // End the frame

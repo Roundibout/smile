@@ -10,13 +10,13 @@ Rect = {}
 ---@return Rect
 function Rect.new() end
 
----Creates a new Rect with a position and size.
+---Creates a new Rect from a position and size.
 ---@param position Vector2
 ---@param size Vector2
 ---@return Rect
 function Rect.new(position, size) end
 
----Creates a new Rect with each x and y component of its position and size.
+---Creates a new Rect from each x and y component of its position and size.
 ---@param positionX number
 ---@param positionY number
 ---@param sizeX number

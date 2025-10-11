@@ -14,6 +14,6 @@ function App:Quit() end
 ---@return Window window The created window object
 function App:CreateWindow(config) end
 
----Sets the app's UIScale
+---Sets the app's UIScale.
 ---@param scale number
 function App:SetUIScale(scale) end
