@@ -64,7 +64,7 @@ void Console::render(const UIBounds& bounds) {
         // Draw each line
         for (size_t j = 0; j < lines.size(); ++j) {
             int lineHeight = textHeight + Theme::metricInt(ThemeMetric::ConsoleTextSize) * j;
-
+            
             window->renderer.drawText(
                 UIDim2(0.0f, 10 + timestampWidth, 0.0f, lineHeight),
                 bounds,

@@ -199,18 +199,26 @@ void RendererGL::flushTextBatch() {
     glBindBuffer(GL_ARRAY_BUFFER, textVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, textBatchVertices.size() * sizeof(TextVertex), textBatchVertices.data());
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textEBO);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, textBatchIndices.size() * sizeof(unsigned int), textBatchIndices.data());
+
     shaders.useShader("text");
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
-    
-    // For simplicity, we'll render each glyph separately
-    // A more advanced implementation would batch glyphs by texture
-    for (size_t i = 0; i < textQuadCount; ++i) {
-        // We need to bind the appropriate texture here
-        // For now, this is a simplified version (we will sort by texture later)
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
+    shaders.setUniformInt("text", "uTexture", 0);
+
+    for (const TextBatch& batch : textBatches) {
+        batch.texture->bind();
+        glDrawElements(
+            GL_TRIANGLES,
+            static_cast<GLsizei>(batch.count * 6),
+            GL_UNSIGNED_INT,
+            (void*)(batch.start * 6 * sizeof(unsigned int))
+        );
     }
 
     textBatchVertices.clear();
+    textBatchIndices.clear();
+    textBatches.clear();
     textQuadCount = 0;
 
     glBindVertexArray(0);
@@ -411,6 +419,10 @@ void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& b
             float offsetCornerRB = resolved.cornerRB - stroke / 2;
             float offsetCornerRT = resolved.cornerRT - stroke / 2;
             float offsetCornerLT = resolved.cornerLT - stroke / 2;
+            vertices[0] = RoundedVertex{{0.0f, 0.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[1] = RoundedVertex{{1.0f, 0.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[2] = RoundedVertex{{1.0f, 1.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
+            vertices[3] = RoundedVertex{{0.0f, 1.0f}, offsetPosition, offsetSize, color, {offsetCornerLB, offsetCornerRB, offsetCornerRT, offsetCornerLT}};
         } else {
             Vector2 offsetPosition = position + Vector2(stroke, stroke);
             Vector2 offsetSize = size - Vector2(stroke * 2, stroke * 2);
@@ -508,34 +520,26 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
             TextVertex v2{{xpos + w, ypos + h}, {1.0f, 0.0f}, color};  // Top-right
             TextVertex v3{{xpos, ypos + h}, {0.0f, 0.0f}, color};      // Top-left
 
+            size_t baseIndex = textBatchVertices.size();
             textBatchVertices.push_back(v0);
             textBatchVertices.push_back(v1);
             textBatchVertices.push_back(v2);
             textBatchVertices.push_back(v3);
 
-            // For now, render each glyph immediately (not optimal but works)
-            // Bind the glyph texture
-            g->texture.bind();
-            
-            // Use shader and set texture uniform
-            shaders.useShader("text");
-            shaders.setUniformInt("text", "uTexture", 0); // Bind to texture unit 0
-            
-            // Flush just this glyph
-            glBindVertexArray(textVAO);
-            glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(TextVertex), &textBatchVertices[textBatchVertices.size() - 4]);
+            unsigned int offset = static_cast<unsigned int>(baseIndex);
+            textBatchIndices.insert(textBatchIndices.end(), {
+                offset + 0, offset + 1, offset + 2,
+                offset + 2, offset + 3, offset + 0
+            });
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            // Check for OpenGL errors
-            GLenum error = glGetError();
-            if (error != GL_NO_ERROR) {
-                Logger::print("OpenGL error after drawing glyph: " + error);
+            // handle texture batch
+            if (textBatches.empty() || textBatches.back().texture != &g->texture) {
+                textBatches.push_back({ &g->texture, textQuadCount, 1 });
+            } else {
+                textBatches.back().count++;
             }
 
-            // Clear the last 4 vertices since we just rendered them
-            textBatchVertices.erase(textBatchVertices.end() - 4, textBatchVertices.end());
+            textQuadCount++;
         }
 
         // Advance the position for the next character

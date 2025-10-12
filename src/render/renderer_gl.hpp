@@ -93,6 +93,12 @@ struct GLGlyph {
     GLGlyph& operator=(GLGlyph&&) noexcept = default;
 };
 
+struct TextBatch {
+    const GLTexture* texture;
+    size_t start;
+    size_t count;
+};
+
 class RendererGL : public RendererImpl {
 private:
     ShaderManagerGL shaders;
@@ -120,6 +126,7 @@ private:
     std::vector<unsigned int> roundedBatchIndices;
     std::vector<TextVertex> textBatchVertices;
     std::vector<unsigned int> textBatchIndices;
+    std::vector<TextBatch> textBatches;
 
     std::array<float, 16> currentProjection;
 
