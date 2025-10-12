@@ -2,7 +2,7 @@
 #include <window/window.hpp>
 
 void Viewport::update(float deltaTime, const UIBounds& bounds) {
-    //obj.compute();
+    obj.compute();
     timer += deltaTime;
     if (timer >= 1.0f) {
         timer -= 1.0f;
@@ -63,24 +63,17 @@ void Viewport::render(const UIBounds& bounds) {
 
         for (const Face& face : obj.faces) {
 
-            std::cout << "FACE: " << face.id << std::endl;
-
             float blue = static_cast<float>(face.id) / static_cast<float>(obj.nextFaceId - 1);
 
             for (const Triangle& triangle : face.triangles) {
                 const Vertex& vertex1 = obj.vertices[triangle.vertex1];
                 const Vertex& vertex2 = obj.vertices[triangle.vertex2];
                 const Vertex& vertex3 = obj.vertices[triangle.vertex3];
-                UIDim2 position1 = UIDim2(0.25f + vertex1.x / 2, 0, 0.25f + vertex1.y / 2, 30 * face.id);
-                UIDim2 position2 = UIDim2(0.25f + vertex2.x / 2, 0, 0.25f + vertex2.y / 2, 30 * face.id);
-                UIDim2 position3 = UIDim2(0.25f + vertex3.x / 2, 0, 0.25f + vertex3.y / 2, 30 * face.id);
+                UIDim2 position1 = UIDim2(0.25f + vertex1.x / 2, 0, 0.25f + vertex1.y / 2, 0 * face.id);
+                UIDim2 position2 = UIDim2(0.25f + vertex2.x / 2, 0, 0.25f + vertex2.y / 2, 0 * face.id);
+                UIDim2 position3 = UIDim2(0.25f + vertex3.x / 2, 0, 0.25f + vertex3.y / 2, 0 * face.id);
 
-                std::cout << "TRIANGLE" << std::endl;
-                std::cout << "    " << position1.to_string() << std::endl;
-                std::cout << "    " << position2.to_string() << std::endl;
-                std::cout << "    " << position3.to_string() << std::endl;
-
-                window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2, 0.5f));
+                window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f - blue, 0.0f, 0.0f + blue, 0.25f));
             }
         }
 

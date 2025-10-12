@@ -420,7 +420,7 @@ std::queue<WindowInput> WindowWin32::update() {
 
 void WindowWin32::bindGLContext() {
     if (rbackendSet) {
-        std::cout << "Render context already bound" << std::endl;
+        Logger::print("Render context already bound");
         return;
     }
 
@@ -436,6 +436,7 @@ void WindowWin32::bindGLContext() {
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 32;
     pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
     int pf = ChoosePixelFormat(hdc, &pfd);
@@ -447,7 +448,7 @@ void WindowWin32::bindGLContext() {
 
     // Load WGL extensions (needed for core context creation)
     if (!gladLoaderLoadWGL(hdc)) {
-        std::cerr << "Failed to load WGL extensions\n";
+        Logger::error("Failed to load WGL extensions");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(dummyCtx);
         return;
@@ -471,7 +472,7 @@ void WindowWin32::bindGLContext() {
 
     // Load GL from glad
     if (!gladLoaderLoadGL()) {
-        std::cerr << "Failed to load OpenGL" << std::endl;
+        Logger::error("Failed to load OpenGL");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(glContext);
     }
@@ -482,7 +483,7 @@ void WindowWin32::makeGLCurrent() {
         // Just make the context current
         wglMakeCurrent(hdc, glContext);
     } else {
-        std::cerr << "Render context either does not exist or is not OpenGL" << std::endl;
+        Logger::error("Render context either does not exist or is not OpenGL");
     }
 }
 
@@ -491,7 +492,7 @@ void WindowWin32::swapGLBuffers() {
         // Just swap buffers
         SwapBuffers(hdc);
     } else {
-        std::cerr << "Render context either does not exist or is not OpenGL" << std::endl;
+        Logger::error("Render context either does not exist or is not OpenGL");
     }
 }
 

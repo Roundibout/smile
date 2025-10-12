@@ -21,9 +21,11 @@ class RendererImpl {
 protected:
     WindowImpl* window;
     float currentScale = 1.0f;
+    bool stencilActive = false;
 public:
     RendererImpl(WindowImpl* w);
 
+    float scale(float value) {return value * currentScale;}
     Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
     AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
     UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);
@@ -37,6 +39,10 @@ public:
     virtual void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) = 0;
     virtual void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) = 0;
     virtual void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) = 0;
+
+    virtual void beginStencil() = 0;
+    virtual void useStencil() = 0;
+    virtual void endStencil() = 0;
 
     virtual void endFrame() = 0;
 };

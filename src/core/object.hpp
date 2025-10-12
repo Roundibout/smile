@@ -6,8 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
-
-#include <iostream>
+#include <stack>
 
 #include <datatypes/vector2.hpp>
 
@@ -20,6 +19,8 @@
 #include <datatypes/object/face.hpp>
 
 #include <core/instance.hpp>
+
+#include <util/logger.hpp>
 
 constexpr float EPSILON = 1e-6f;
 constexpr float PI = 3.1415926f;
@@ -161,7 +162,7 @@ public: // CHANGE AFTER TESTING
         // Return invalid id if we have already traversed this way and set this edge's A and pivot vertex ids depending on direction
         if (direction == EdgeDirection::Forward) {
             if (startEdge.forwardUsed) {
-                std::cout << "Forward already used" << std::endl;
+                Logger::warn("Forward already used");
                 return INVALID_ID;
             }
             aId = startEdge.start;
@@ -170,7 +171,7 @@ public: // CHANGE AFTER TESTING
             startEdge.forwardUsed = true; // We're checking forward
         } else if (direction == EdgeDirection::Backward) {
             if (startEdge.backwardUsed) {
-                std::cout << "Backward already used" << std::endl;
+                Logger::warn("Backward already used");
                 return INVALID_ID;
             }
             aId = startEdge.end;
@@ -227,10 +228,10 @@ public: // CHANGE AFTER TESTING
         }
 
         if (lowestAngleId != INVALID_ID) {
-            std::cout << "Edge " << startEdge.id << " Connection" << std::endl;
-            std::cout << "    " << lowestAngleId << " at angle " << lowestAngle << std::endl;
+            Logger::print("Edge " + std::to_string(startEdge.id) + " Connection");
+            Logger::print("    " + std::to_string(lowestAngleId) + " at angle " + std::to_string(lowestAngle));
         } else {
-            std::cout << "Could not find a next edge" << std::endl;
+            Logger::error("Could not find a next edge");
         }
 
         return lowestAngleId;
@@ -238,13 +239,13 @@ public: // CHANGE AFTER TESTING
 
     void computeFace(Edge& startEdge, EdgeDirection startDirection) {
         Face face(nextFaceId++);
-        std::cout << "Computing face " << face.id << " (edge " << startEdge.id << " ";
+        Logger::print("Computing face " + std::to_string(face.id) + " (edge " + std::to_string(startEdge.id));
         if (startDirection == EdgeDirection::Forward) {
-            std::cout << "forward";
+            Logger::append(" forward");
         } else {
-            std::cout << "backward";
+            Logger::append(" backward");
         }
-        std::cout << ")" << std::endl;
+        Logger::append(")");
             
         face.edges.push_back(startEdge.id);
 
@@ -306,9 +307,9 @@ public: // CHANGE AFTER TESTING
         };
 
         if (completed) {
-            std::cout << "FACE " << face.id << std::endl;
+            Logger::print("FACE " + std::to_string(face.id));
             for (Id edge : face.edges) {
-                std::cout << "    " << edge << std::endl;
+                Logger::print("    " + std::to_string(edge));
             }
 
             faces.push_back(face); // Add face if it is completed
@@ -316,7 +317,7 @@ public: // CHANGE AFTER TESTING
             --nextFaceId;
         }
 
-        std::cout << std::endl;
+        Logger::append("\n");
     }
 
     bool isCCW(const Face& face) {

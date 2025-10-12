@@ -241,7 +241,7 @@ void Object::compute() {
 
                 if (!earFound) {
                     // Polygon may be self-intersecting or malformed
-                    std::cerr << "Ear clipping failed";
+                    Logger::error("Ear clipping failed");
                     break;
                 }
             }
@@ -249,6 +249,93 @@ void Object::compute() {
             // Remaining 3 vertices form the last triangle
             if (remainingVertices.size() == 3) {
                 face.triangles.emplace_back(remainingVertices[0], remainingVertices[1], remainingVertices[2]);
+            }
+        }
+    }
+
+    // Remove silhouettes
+
+    std::unordered_map<Id, std::vector<Id>> edgeToFaces;
+    for (size_t i = 0; i < faces.size(); ++i)
+        for (Id e : faces[i].edges)
+            edgeToFaces[e].push_back(i);
+
+    std::vector<std::vector<Id>> clusters; // each cluster = face indices
+    std::vector<bool> visited(faces.size(), false);
+
+    for (size_t i = 0; i < faces.size(); ++i) {
+        if (visited[i]) continue;
+
+        std::vector<Id> cluster;
+        std::stack<Id> stack;
+        stack.push(i);
+        visited[i] = true;
+
+        while (!stack.empty()) {
+            Id fidx = stack.top();
+            stack.pop();
+            cluster.push_back(fidx);
+            const Face& f = faces[fidx];
+
+            // explore neighbors
+            for (Id v : f.edges) {
+                for (Id neighborIdx : edgeToFaces[v]) {
+                    if (!visited[neighborIdx]) {
+                        visited[neighborIdx] = true;
+                        stack.push(neighborIdx);
+                    }
+                }
+            }
+        }
+
+        clusters.push_back(cluster);
+    }
+
+    Logger::print("CLUSTERS: " + std::to_string(clusters.size()));
+
+    for (std::vector<Id> cluster : clusters) {
+        Id biggestFace = INVALID_ID;
+        float biggestArea = 0.0f;
+
+        // Find the face with the biggest area
+        for (Id face : cluster) {
+            float area = 0.0f;
+
+            for (Triangle triangle : faces[face].triangles) {
+                const Vertex& a = vertices[triangle.vertex1];
+                const Vertex& b = vertices[triangle.vertex2];
+                const Vertex& c = vertices[triangle.vertex3];
+                
+                area += std::abs(
+                    (a.x * (b.y - c.y) +
+                    b.x * (c.y - a.y) +
+                    c.x * (a.y - b.y)) * 0.5f
+                );
+            }
+
+            Logger::print(std::to_string(face) + " area: " + std::to_string(area));
+
+            if (area > biggestArea) {
+                biggestFace = face;
+                biggestArea = area;
+            }
+        }
+
+        if (biggestFace != INVALID_ID) {
+            Logger::print("Biggest Face: " + std::to_string(biggestFace));
+            // Remove from faces vector
+            faces.erase(faces.begin() + biggestFace);
+
+            // Update face IDs
+            for (size_t i = 0; i < faces.size(); ++i)
+                faces[i].id = i;
+
+            // Update clusters
+            for (auto& c : clusters) {
+                for (auto& fidx : c) {
+                    if (fidx > biggestFace) fidx--;
+                }
+                c.erase(std::remove(c.begin(), c.end(), biggestFace), c.end());
             }
         }
     }

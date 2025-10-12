@@ -10,17 +10,18 @@ License:
     MIT (see LICENSE file)
 */
 
+#include <memory>
+#include <string>
+
 #include <sol/sol.hpp>
 
-#include <iostream>
-#include <memory>
-
 #include <app/app.hpp>
+#include <util/logger.hpp>
 
 extern void register_bindings(sol::state& lua);
 
 int main(int argc, char *argv[]) {
-    std::cout << "Initializing smile..." << std::endl;
+    Logger::print("Initializing smile...");
     
     sol::state lua;
     lua.open_libraries(
@@ -39,27 +40,20 @@ int main(int argc, char *argv[]) {
     // Run a script to set the package path to the scripts folder
     lua.safe_script("package.path = package.path..';./scripts/?.lua'");
 
-    std::cout << std::endl << "---- Starting smile ----" << std::endl << std::endl;
+    Logger::print("\n---- Starting smile ----\n");
 
     // Run main Lua entry point
     auto result = lua.safe_script_file("scripts/main.lua", sol::script_pass_on_error);
     if (!result.valid()) {
         sol::error err = result;
 
-        std::cout << std::endl << "---- Smile crashed -----" << std::endl;
-        std::cerr << std::endl << "[ ERROR ] " << std::endl << err.what() << std::endl;
+        Logger::print("\n---- Smile crashed -----");
+        Logger::print("\n[ ERROR ]\n" + std::string(err.what()));
         
-        std::cout << std::endl << "Press enter to exit...";
-        std::cin.get();
-
         return -1; // Lua error
     } else {
         // Valid response
     }
-
-    std::cout << std::endl << "------ Smile quit ------" << std::endl;
-    std::cout << std::endl << "Press enter to exit...";
-    std::cin.get();
 
     return 0;
 }

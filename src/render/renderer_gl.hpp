@@ -11,7 +11,6 @@ License:
 
 #pragma once
 
-#include <iostream>
 #include <vector>
 #include <array>
 #include <string>
@@ -22,6 +21,8 @@ License:
 #include <render/renderer_impl.hpp>
 #include <render/shader_manager.hpp>
 #include <render/font_manager.hpp>
+
+#include <util/logger.hpp>
 
 struct BasicVertex {
     Vector2 position;
@@ -139,6 +140,10 @@ public:
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
     void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
     void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) override;
+
+    void beginStencil() override;
+    void useStencil() override;
+    void endStencil() override;
 
     void endFrame() override;
 };

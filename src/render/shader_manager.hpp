@@ -15,9 +15,10 @@ License:
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
-#include <iostream>
 
 #include <glad/gl.h>
+
+#include <util/logger.hpp>
 
 class ShaderManagerGL {
 private:

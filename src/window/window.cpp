@@ -13,6 +13,7 @@ License:
 
 #include <ui/widgets/panels/panel_container.hpp>
 #include <ui/widgets/viewport/viewport.hpp>
+#include <ui/widgets/console/console.hpp>
 
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
@@ -25,9 +26,11 @@ Window::Window(const uint32_t& id, const WindowConfig& config)
     PanelContainer* container = addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
     PanelLeaf* viewportPanel = static_cast<PanelLeaf*>(container->getPanel());
     viewportPanel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
-    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.875f, PanelSplitPlacement::First);
+    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.8f, PanelSplitPlacement::First);
     PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::Second);
     PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.5f, PanelSplitPlacement::First);
+    PanelLeaf* consolePanel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::First));
+    //consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
 }
 
 void Window::process() {

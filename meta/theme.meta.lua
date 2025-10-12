@@ -20,7 +20,10 @@ ThemeFont = {
     Regular = 0,
     Italic = 1,
     Bold = 2,
-    BoldItalic = 3
+    BoldItalic = 3,
+
+    CodeRegular = 4,
+    CodeBold = 5
 }
 
 ---@class Theme

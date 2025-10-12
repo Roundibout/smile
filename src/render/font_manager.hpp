@@ -13,10 +13,11 @@ License:
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include <iostream>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#include <util/logger.hpp>
 
 struct Glyph {
     std::vector<unsigned char> bitmap;
@@ -24,7 +25,6 @@ struct Glyph {
     int bearingX, bearingY;
     int advance;
 };
-
 
 struct Font {
     FT_Face face;
@@ -51,4 +51,5 @@ public:
         return instance;
     }
     Font* getFont(const std::string& path, int size);
+    float getTextWidth(const std::string& text, const std::string& path, int size);
 };

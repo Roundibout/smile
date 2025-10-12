@@ -55,7 +55,7 @@ add_subdirectory(extern/freetype)
 
 # Smile executable
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
-add_executable(Smile ${SOURCES})
+add_executable(Smile WIN32 ${SOURCES})
 
 if(WIN32)
     target_sources(Smile PRIVATE win.rc) # Windows resources

@@ -12,7 +12,7 @@ License:
 #include "app.hpp"
 
 std::shared_ptr<Window> App::createWindow(const WindowConfig& config) {
-    std::cout << "Creating window" << std::endl;
+    Logger::print("Creating window");
 
     // Create window and associate it with the next window id
     std::shared_ptr<Window> window = std::make_shared<Window>(nextId, config);
@@ -100,6 +100,12 @@ void App::run() {
 
         // Busy-wait the remaining ~1ms
         while ((clock::now() - currentTime) < frameDuration) { }
+
+        // TEMP
+        // Quit app once there are no windows
+        if (windows.empty()) {
+            quit();
+        }
     }
 }
 

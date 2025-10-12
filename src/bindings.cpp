@@ -59,6 +59,15 @@ void register_bindings(sol::state& lua) {
         }
     );
 
+    // UI
+    lua.new_enum<UIStrokeAlignment>("UIStrokeAlignment",
+        {
+            {"Outside", UIStrokeAlignment::Outside},
+            {"Middle", UIStrokeAlignment::Middle},
+            {"Inside", UIStrokeAlignment::Inside}
+        }
+    );
+
     // -- Datatypes -- //
 
     // Vector2

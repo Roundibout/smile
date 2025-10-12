@@ -11,7 +11,6 @@ License:
 
 #pragma once
 
-#include <iostream>
 #include <unordered_map>
 #include <memory>
 #include <chrono>
@@ -20,13 +19,15 @@ License:
 #include <datatypes/vector2.hpp>
 #include <window/window.hpp>
 
+#include <util/logger.hpp>
+
 class Window; // forward declaration
 
 class App {
 private:
     // Private constructor to prevent direct instantiation (there should be only one app)
     App() {
-        std::cout << "App created." << std::endl;
+        Logger::print("App created.");
     }
     // Delete copy constructor and assignment operator to prevent copying (same reason)
     App(const App&) = delete;

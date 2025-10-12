@@ -8,21 +8,32 @@
 enum class ThemeMetric {
     PanelMargin,
     PanelCorner,
-    PanelStroke
+    PanelStroke,
+
+    ConsoleTextSize
 };
 
 enum class ThemeColor {
     WindowBackground,
 
     Panel,
-    PanelStroke
+    PanelStroke,
+
+    ConsoleBackground,
+    ConsoleTimestamp,
+    ConsoleInfo,
+    ConsoleWarning,
+    ConsoleError
 };
 
 enum class ThemeFont {
     Regular,
     Italic,
     Bold,
-    BoldItalic
+    BoldItalic,
+
+    CodeRegular,
+    CodeBold
 };
 
 class Theme {
@@ -33,15 +44,25 @@ private:
         metrics[ThemeMetric::PanelMargin] = 10.0f;
         metrics[ThemeMetric::PanelCorner] = 6.0f;
         metrics[ThemeMetric::PanelStroke] = 2.0f;
+
+        metrics[ThemeMetric::ConsoleTextSize] = 20.0f;
         // Initialize default colors
         colors[ThemeColor::WindowBackground] = Color4(0.07f, 0.07f, 0.07f);
         colors[ThemeColor::Panel] = Color4(0.15f, 0.15f, 0.15f);
         colors[ThemeColor::PanelStroke] = Color4(0.2f, 0.2f, 0.2f);
+
+        colors[ThemeColor::ConsoleBackground] = Color4(0.0f, 0.0f, 0.0f);
+        colors[ThemeColor::ConsoleTimestamp] = Color4(0.5f, 0.5f, 0.5f);
+        colors[ThemeColor::ConsoleInfo] = Color4(0.9f, 0.9f, 0.9f);
+        colors[ThemeColor::ConsoleWarning] = Color4(0.9f, 0.6f, 0.1f);
+        colors[ThemeColor::ConsoleError] = Color4(0.9f, 0.1f, 0.05f);
         // Initialize default fonts
         fonts[ThemeFont::Regular] = "assets/fonts/Inter_18pt-Regular.ttf";
         fonts[ThemeFont::Italic] = "assets/fonts/Inter_18pt-Italic.ttf";
         fonts[ThemeFont::Bold] = "assets/fonts/Inter_18pt-Bold.ttf";
         fonts[ThemeFont::BoldItalic] = "assets/fonts/Inter_18pt-BoldItalic.ttf";
+        fonts[ThemeFont::CodeRegular] = "assets/fonts/CourierPrime-Regular.ttf";
+        fonts[ThemeFont::CodeBold] = "assets/fonts/CourierPrime-Bold.ttf";
     }
     // Delete copy constructor and assignment operator to prevent copying (same reason)
     Theme(const Theme&) = delete;

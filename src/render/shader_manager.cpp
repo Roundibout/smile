@@ -15,7 +15,7 @@ License:
 static std::string readFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cerr << "Failed to open shader file: " << path << "\n";
+        Logger::error("Failed to open shader file: " + path);
         return "";
     }
     std::stringstream ss;
@@ -28,7 +28,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     std::string fragmentSrc = readFile(fragmentPath);
 
     if (vertexSrc.empty() || fragmentSrc.empty()) {
-        std::cerr << "Shader source is empty" << std::endl;
+        Logger::error("Shader source is empty");
         return false;
     }
 
@@ -46,7 +46,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     if (!success) {
         char log[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, log);
-        std::cerr << "Vertex shader compilation failed: " << log << std::endl;
+        Logger::error("Vertex shader compilation failed: " + std::string(log));
         glDeleteShader(vertexShader);
         return false;
     }
@@ -60,7 +60,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     if (!success) {
         char log[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, log);
-        std::cerr << "Fragment shader compilation failed: " << log << std::endl;
+        Logger::error("Fragment shader compilation failed: " + std::string(log));
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         return false;
@@ -75,7 +75,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     if (!success) {
         char log[512];
         glGetProgramInfoLog(program, 512, nullptr, log);
-        std::cerr << "Shader program linking failed: " << log << std::endl;
+        Logger::error("Shader program linking failed: " + std::string(log));
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         glDeleteProgram(program);
@@ -95,20 +95,20 @@ void ShaderManagerGL::useShader(const std::string& name) {
     if (it != shaders.end()) {
         glUseProgram(it->second);
     } else {
-        std::cerr << "Shader not found: " << name << std::endl;
+        Logger::error("Shader not found: " + name);
     }
 }
 
 GLint ShaderManagerGL::getUniformLocation(const std::string& shaderName, const std::string& uniform) {
     auto it = shaders.find(shaderName);
     if (it == shaders.end()) {
-        std::cerr << "Shader not found: " << shaderName << std::endl;
+        Logger::error("Shader not found: " + shaderName);
         return -1;
     }
     
     GLint location = glGetUniformLocation(it->second, uniform.c_str());
     if (location == -1) {
-        std::cerr << "Uniform not found: " << uniform << " in shader: " << shaderName << std::endl;
+        Logger::error("Uniform not found: " + uniform + " in shader: " + shaderName);
     }
     
     return location;

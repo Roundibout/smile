@@ -27,7 +27,7 @@ static std::array<float, 16> makeOrtho(float left, float right, float bottom, fl
 
 RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     w->bindGLContext();
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    Logger::print("OpenGL loaded");
 
     shaders = ShaderManagerGL();
     shaders.loadShader("basic", "assets/shaders/basic.vert", "assets/shaders/basic.frag");
@@ -235,7 +235,7 @@ void RendererGL::beginFrame(float scale) {
     // Clear the screen
     Color4 color = window->getConfig().color;
     glClearColor(color.r, color.g, color.b, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     triBatchVertices.clear();
     roundedBatchVertices.clear();
@@ -474,7 +474,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 
     Font* font = FontManager::get().getFont(path, size);
     if (!font) {
-        std::cout << "Failed to load font: " << path << std::endl;
+        Logger::print("Failed to load font: " + path);
         return;
     }
 
@@ -485,7 +485,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
     for (char c : text) {
         const GLGlyph* g = getGlyph(path, size, font, c);
         if (!g) {
-            std::cout << "Failed to get glyph for character: " << c << std::endl;
+            Logger::print("Failed to get glyph for character: " + c);
             continue;
         }
 
@@ -531,7 +531,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
             // Check for OpenGL errors
             GLenum error = glGetError();
             if (error != GL_NO_ERROR) {
-                std::cout << "OpenGL error after drawing glyph: " << error << std::endl;
+                Logger::print("OpenGL error after drawing glyph: " + error);
             }
 
             // Clear the last 4 vertices since we just rendered them
@@ -540,6 +540,47 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 
         // Advance the position for the next character
         x += g->advance;
+    }
+}
+
+void RendererGL::beginStencil() {
+    if (!stencilActive) {
+        stencilActive = true;
+
+        flushTriangleBatch();
+        flushRoundedBatch();
+        flushTextBatch();
+
+        glEnable(GL_STENCIL_TEST);
+        glClear(GL_STENCIL_BUFFER_BIT);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glDepthMask(GL_FALSE);
+    }
+}
+
+void RendererGL::useStencil() {
+    if (stencilActive) {
+        flushTriangleBatch();
+        flushRoundedBatch();
+        flushTextBatch();
+
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glDepthMask(GL_TRUE);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    }
+}
+
+void RendererGL::endStencil() {
+    if (stencilActive) {
+        flushTriangleBatch();
+        flushRoundedBatch();
+        flushTextBatch();
+
+        glDisable(GL_STENCIL_TEST);
+        stencilActive = false;
     }
 }
 

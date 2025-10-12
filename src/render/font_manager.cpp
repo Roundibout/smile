@@ -23,7 +23,7 @@ const Glyph* Font::getGlyph(char c) {
 
     // Load glyph from FreeType
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-        std::cerr << "Failed to load glyph: " << c << "\n";
+        Logger::error("Failed to load glyph: " + c);
         return nullptr;
     }
 
@@ -49,7 +49,7 @@ const Glyph* Font::getGlyph(char c) {
 
 FontManager::FontManager() {
     if (FT_Init_FreeType(&library)) {
-        std::cerr << "Failed to initialize FreeType" << std::endl;
+        Logger::error("Failed to initialize FreeType");
     }
 }
 
@@ -68,7 +68,7 @@ Font* FontManager::getFont(const std::string& path, int size) {
     // Not loaded yet → load
     auto font = std::make_unique<Font>();
     if (FT_New_Face(library, path.c_str(), 0, &font->face)) {
-        std::cerr << "Failed to load font: " << path << "\n";
+        Logger::error("Failed to load font: " + path);
         return nullptr;
     }
 
@@ -78,4 +78,32 @@ Font* FontManager::getFont(const std::string& path, int size) {
     Font* ptr = font.get();
     fonts.emplace(key, std::move(font));
     return ptr;
+}
+
+float FontManager::getTextWidth(const std::string& text, const std::string& path, int size) {
+    Font* font = getFont(path, size);
+    if (!font || !font->face) {
+        return 0.0f;
+    }
+
+    float totalWidth = 0.0f;
+
+    for (size_t i = 0; i < text.size(); ++i) {
+        unsigned char c = text[i];
+
+        // Get glyph so we can add it's width
+        const Glyph* glyph = font->getGlyph(c);
+        if (!glyph) continue;
+
+        totalWidth += glyph->advance;
+
+        // Kerning
+        if (i + 1 < text.size()) {
+            FT_Vector kern;
+            FT_Get_Kerning(font->face, FT_Get_Char_Index(font->face, c), FT_Get_Char_Index(font->face, text[i + 1]), FT_KERNING_DEFAULT, &kern);
+            totalWidth += kern.x >> 6; // convert from 1/64 pixels
+        }
+    }
+
+    return totalWidth;
 }

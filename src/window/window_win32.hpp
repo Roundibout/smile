@@ -12,7 +12,6 @@ License:
 #pragma once
 
 #include <string>
-#include <iostream>
 #include <optional>
 #include <algorithm>
 
@@ -28,6 +27,8 @@ License:
 
 #include <window/window_impl.hpp>
 #include <app/app.hpp>
+
+#include <util/logger.hpp>
 
 class WindowWin32 : public WindowImpl {
 private:

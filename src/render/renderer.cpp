@@ -59,6 +59,18 @@ void Renderer::drawText(const UIDim2& position, const UIBounds& bounds, const st
     impl->drawText(position, bounds, text, path, size, color);
 }
 
+void Renderer::beginStencil() {
+    impl->beginStencil();
+}
+
+void Renderer::useStencil() {
+    impl->useStencil();
+}
+
+void Renderer::endStencil() {
+    impl->endStencil();
+}
+
 void Renderer::endFrame() {
     impl->endFrame();
 }
