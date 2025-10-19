@@ -64,6 +64,13 @@ public:
     virtual Vector2 getSize() = 0;
     virtual Vector2 getPosition() = 0;
 
+    virtual bool isKeyDown(KeyCode key) = 0;
+
+    virtual void setMousePosition(const Vector2& position) = 0;
+
+    virtual void freezeMouse() = 0;
+    virtual void unfreezeMouse() = 0;
+
     virtual void setCursor(Cursor cursor) = 0;
 
     virtual void setCapture() = 0;

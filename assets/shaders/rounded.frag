@@ -44,5 +44,8 @@ void main() {
 
     // Elsewhere, inside the straight edges, alpha stays 1.0
 
+    // If fully transparent, discard (important for stencil)
+    if (alpha <= 0.0) discard;
+
     FragColor = vec4(vColor.rgb, vColor.a * alpha);
 }

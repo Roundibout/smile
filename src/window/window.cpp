@@ -23,14 +23,14 @@ Window::Window(const uint32_t& id, const WindowConfig& config)
     #endif
 {
     // maybe do other stuff later
-    PanelContainer* container = addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
+    PanelContainer* container = addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 30), UIDim2(1.0f, 0, 1.0f, -60))));
     PanelLeaf* viewportPanel = static_cast<PanelLeaf*>(container->getPanel());
-    viewportPanel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
+    viewportPanel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
     PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.8f, PanelSplitPlacement::First);
     PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::Second);
     PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.5f, PanelSplitPlacement::First);
     PanelLeaf* consolePanel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::First));
-    consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0.0), UIDim2(1.0f, 0, 1.0f, 0))));
+    consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
 }
 
 void Window::process() {
@@ -127,6 +127,22 @@ void Window::render(float uiScale) {
 
 void Window::connectCallback(WindowEvent event, sol::function callback) {
     callbacks[event].push_back(callback);
+}
+
+bool Window::isKeyDown(KeyCode key) {
+    return impl->isKeyDown(key);
+}
+
+void Window::setMousePosition(const Vector2& position) {
+    impl->setMousePosition(position);
+}
+
+void Window::freezeMouse() {
+    impl->freezeMouse();
+}
+
+void Window::unfreezeMouse() {
+    impl->unfreezeMouse();
 }
 
 void Window::setCursor(Cursor cursor) {

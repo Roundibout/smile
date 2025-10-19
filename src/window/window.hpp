@@ -61,6 +61,13 @@ public:
 
     void connectCallback(WindowEvent event, sol::function callback);
 
+    bool isKeyDown(KeyCode key);
+
+    void setMousePosition(const Vector2& position);
+
+    void freezeMouse();
+    void unfreezeMouse();
+
     void setCursor(Cursor cursor);
 
     void setCapture();

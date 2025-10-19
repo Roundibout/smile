@@ -238,10 +238,14 @@ void register_bindings(sol::state& lua) {
             [](MouseInput& self) -> Vector2& {return self.position;},
             [](MouseInput& self, Vector2 position) {self.position = position;}
         ), // nested struct (with setter)
+        "delta", sol::property(
+            [](MouseInput& self) -> Vector2& {return self.delta;},
+            [](MouseInput& self, Vector2 delta) {self.delta = delta;}
+        ), // same
         "scroll", sol::property(
             [](MouseInput& self) -> Vector2& {return self.scroll;},
             [](MouseInput& self, Vector2 scroll) {self.scroll = scroll;}
-        ) // same thing
+        ) // same
     );
 
     lua.new_usertype<WindowInput>("WindowInput",

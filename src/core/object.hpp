@@ -309,7 +309,7 @@ public: // CHANGE AFTER TESTING
         if (completed) {
             Logger::print("FACE " + std::to_string(face.id));
             for (Id edge : face.edges) {
-                Logger::print("    " + std::to_string(edge));
+                Logger::append("\n    " + std::to_string(edge));
             }
 
             faces.push_back(face); // Add face if it is completed

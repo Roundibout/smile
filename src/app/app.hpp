@@ -34,7 +34,7 @@ private:
     App& operator=(const App&) = delete;
 
     bool running = false;
-    int fps = 240;
+    int fps = 360;
     bool needsRender = false;
     float uiScale = 1.0f;
     std::chrono::time_point<std::chrono::steady_clock> previousTime = std::chrono::steady_clock::now();

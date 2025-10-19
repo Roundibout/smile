@@ -49,3 +49,26 @@ bool UITools::isPointOverRoundedRect(const Vector2& point, const AbsoluteLayout&
 
     return true;
 }
+
+Vector2 UITools::clampPointWithinRect(const Vector2& point, const AbsoluteLayout& layout) {
+    return Vector2(std::clamp(point.x, layout.rect.position.x, layout.rect.position.x + layout.rect.size.x), std::clamp(point.y, layout.rect.position.y, layout.rect.position.y + layout.rect.size.y));
+}
+
+Vector2 UITools::mirrorPointAcrossRect(const Vector2& point, const AbsoluteLayout& layout) {
+    Vector2 mirrored;
+    if (point.x < layout.rect.position.x) {
+        mirrored.x = layout.rect.position.x + layout.rect.size.x - 1;
+    } else if (point.x > layout.rect.position.x + layout.rect.size.x) {
+        mirrored.x = layout.rect.position.x + 1;
+    } else {
+        mirrored.x = point.x;
+    }
+    if (point.y < layout.rect.position.y) {
+        mirrored.y = layout.rect.position.y + layout.rect.size.y - 1;
+    } else if (point.y > layout.rect.position.y + layout.rect.size.y) {
+        mirrored.y = layout.rect.position.y + 1;
+    } else {
+        mirrored.y = point.y;
+    }
+    return mirrored;
+}

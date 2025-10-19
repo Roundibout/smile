@@ -14,6 +14,8 @@ License:
 #include <string>
 #include <optional>
 #include <algorithm>
+#include <unordered_map>
+#include <utility>
 
 #include <glad/wgl.h>
 
@@ -36,10 +38,10 @@ private:
     HDC hdc;
 
     HGLRC glContext;
-
-    LPCSTR cursorId = IDC_ARROW;
     
     std::queue<WindowInput> inputs;
+
+    LPCSTR cursorId = IDC_ARROW;
 public:
     WindowWin32(const uint32_t& i, const WindowConfig& c);
     ~WindowWin32();
@@ -54,10 +56,23 @@ public:
     Vector2 getSize() override;
     Vector2 getPosition() override;
 
+    bool isKeyDown(KeyCode key) override;
+
+    void setMousePosition(const Vector2& position) override;
+
     void setCursor(Cursor cursor) override;
+
+    void freezeMouse() override;
+    void unfreezeMouse() override;
 
     void setCapture() override;
     void releaseCapture() override;
     
     void pushInput(WindowInput input);
+
+    // Should be private but WndProc
+
+    Vector2 lastMousePos;
+    bool hasLastMousePos = false;
+    bool ignoreMouseDelta = false;
 };

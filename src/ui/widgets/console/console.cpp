@@ -20,12 +20,14 @@ void Console::render(const UIBounds& bounds) {
     window->renderer.drawRoundedRect(content, bounds);
     window->renderer.useStencil();
 
+    int textSize = Theme::metricInt(ThemeMetric::ConsoleTextSize);
     float height = window->renderer.resolveLayout(content, bounds).rect.size.y + Theme::metric(ThemeMetric::ConsoleTextSize); // add 20 for one extra line so hanging letters aren't cut
     int absoluteLineHeight = static_cast<int>(window->renderer.scale(Theme::metric(ThemeMetric::ConsoleTextSize)));
 
     const std::vector<LogEntry>& logs = Logger::getAllLogs();
 
-    int currentHeight = 10;
+    int textHeight = 10;
+    int currentHeight = static_cast<int>(window->renderer.scale(10.0f));
     for (size_t i = 0; i < logs.size(); ++i) {
         const LogEntry& log = logs[logs.size() - 1 - i];
 
@@ -42,11 +44,8 @@ void Console::render(const UIBounds& bounds) {
             font = Theme::font(ThemeFont::CodeBold);
         }
 
-        // Get the height which the text will be drawn off of
-        int textHeight = 10 + Theme::metricInt(ThemeMetric::ConsoleTextSize) * i;
-
         // Get the width of the timestamp to offset this log's message
-        int timestampWidth = static_cast<int>(FontManager::get().getTextWidth(log.timestamp, Theme::font(ThemeFont::CodeRegular), Theme::metricInt(ThemeMetric::ConsoleTextSize)));
+        int timestampWidth = static_cast<int>(FontManager::get().getTextWidth(log.timestamp, Theme::font(ThemeFont::CodeRegular), textSize));
         
         // Split message into lines on each "\n"
         std::vector<std::string> lines;
@@ -59,33 +58,32 @@ void Console::render(const UIBounds& bounds) {
                 current += c;
             }
         }
-        if (!current.empty()) lines.push_back(current);
+        lines.push_back(current);
         
         // Draw each line
         for (size_t j = 0; j < lines.size(); ++j) {
-            int lineHeight = textHeight + Theme::metricInt(ThemeMetric::ConsoleTextSize) * j;
-            
             window->renderer.drawText(
-                UIDim2(0.0f, 10 + timestampWidth, 0.0f, lineHeight),
+                UIDim2(0.0f, 10 + timestampWidth, 0.0f, textHeight),
                 bounds,
-                log.message,
+                lines[lines.size() - 1 - j],
                 font,
-                Theme::metricInt(ThemeMetric::ConsoleTextSize),
+                textSize,
                 color
             );
 
             if (j + 1 == lines.size()) { // Last line (first one)
                 // Draw the timestamp
                 window->renderer.drawText(
-                    UIDim2(0.0f, 10, 0.0f, lineHeight),
+                    UIDim2(0.0f, 10, 0.0f, textHeight),
                     bounds,
                     log.timestamp,
                     Theme::font(ThemeFont::CodeRegular),
-                    Theme::metricInt(ThemeMetric::ConsoleTextSize),
+                    textSize,
                     Theme::color(ThemeColor::ConsoleTimestamp)
                 );
             }
 
+            textHeight += textSize;
             currentHeight += absoluteLineHeight;
             if (currentHeight >= height) {
                 break;

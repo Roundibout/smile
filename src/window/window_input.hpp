@@ -59,6 +59,7 @@ struct MouseInput {
     Vector2 position;
     union {
         MouseButton button;
+        Vector2 delta;
         Vector2 scroll;
     };
 

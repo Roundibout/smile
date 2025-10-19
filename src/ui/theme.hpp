@@ -47,9 +47,9 @@ private:
 
         metrics[ThemeMetric::ConsoleTextSize] = 20.0f;
         // Initialize default colors
-        colors[ThemeColor::WindowBackground] = Color4(0.07f, 0.07f, 0.07f);
-        colors[ThemeColor::Panel] = Color4(0.15f, 0.15f, 0.15f);
-        colors[ThemeColor::PanelStroke] = Color4(0.2f, 0.2f, 0.2f);
+        colors[ThemeColor::WindowBackground] = Color4(0.12f, 0.12f, 0.12f);
+        colors[ThemeColor::Panel] = Color4(0.2f, 0.2f, 0.2f);
+        colors[ThemeColor::PanelStroke] = Color4(0.3f, 0.3f, 0.3f);
 
         colors[ThemeColor::ConsoleBackground] = Color4(0.0f, 0.0f, 0.0f);
         colors[ThemeColor::ConsoleTimestamp] = Color4(0.5f, 0.5f, 0.5f);

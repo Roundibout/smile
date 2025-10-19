@@ -21,102 +21,73 @@ void pushInput(HWND hwnd, WindowInput input) {
     window->pushInput(input);
 }
 
-KeyCode vkToKeyCode(WPARAM vk) {
-    switch (vk) { // Crap
-        case 'Q': return KeyCode::Q;
-        case 'W': return KeyCode::W;
-        case 'E': return KeyCode::E;
-        case 'R': return KeyCode::R;
-        case 'T': return KeyCode::T;
-        case 'Y': return KeyCode::Y;
-        case 'U': return KeyCode::U;
-        case 'I': return KeyCode::I;
-        case 'O': return KeyCode::O;
-        case 'P': return KeyCode::P;
-        case 'A': return KeyCode::A;
-        case 'S': return KeyCode::S;
-        case 'D': return KeyCode::D;
-        case 'F': return KeyCode::F;
-        case 'G': return KeyCode::G;
-        case 'H': return KeyCode::H;
-        case 'J': return KeyCode::J;
-        case 'K': return KeyCode::K;
-        case 'L': return KeyCode::L;
-        case 'Z': return KeyCode::Z;
-        case 'X': return KeyCode::X;
-        case 'C': return KeyCode::C;
-        case 'V': return KeyCode::V;
-        case 'B': return KeyCode::B;
-        case 'N': return KeyCode::N;
-        case 'M': return KeyCode::M;
+static const std::pair<WPARAM, KeyCode> keyPairs[] = {
+    {'Q', KeyCode::Q}, {'W', KeyCode::W}, { 'E', KeyCode::E},
+    {'R', KeyCode::R}, {'T', KeyCode::T}, { 'Y', KeyCode::Y},
+    {'U', KeyCode::U}, {'I', KeyCode::I}, { 'O', KeyCode::O},
+    {'P', KeyCode::P}, {'A', KeyCode::A}, { 'S', KeyCode::S},
+    {'D', KeyCode::D}, {'F', KeyCode::F}, { 'G', KeyCode::G},
+    {'H', KeyCode::H}, {'J', KeyCode::J}, { 'K', KeyCode::K},
+    {'L', KeyCode::L}, {'Z', KeyCode::Z}, { 'X', KeyCode::X},
+    {'C', KeyCode::C}, {'V', KeyCode::V}, { 'B', KeyCode::B},
+    {'N', KeyCode::N}, {'M', KeyCode::M},
 
-        case '1': return KeyCode::One;
-        case '2': return KeyCode::Two;
-        case '3': return KeyCode::Three;
-        case '4': return KeyCode::Four;
-        case '5': return KeyCode::Five;
-        case '6': return KeyCode::Six;
-        case '7': return KeyCode::Seven;
-        case '8': return KeyCode::Eight;
-        case '9': return KeyCode::Nine;
-        case '0': return KeyCode::Zero;
+    {'1', KeyCode::One}, {'2', KeyCode::Two}, {'3', KeyCode::Three},
+    {'4', KeyCode::Four}, {'5', KeyCode::Five}, {'6', KeyCode::Six},
+    {'7', KeyCode::Seven}, {'8', KeyCode::Eight}, {'9', KeyCode::Nine},
+    {'0', KeyCode::Zero},
 
-        case VK_SPACE: return KeyCode::Space;
+    {VK_SPACE, KeyCode::Space},
+    {VK_OEM_3, KeyCode::BackQuote}, {VK_OEM_MINUS, KeyCode::Minus},
+    {VK_OEM_PLUS, KeyCode::Equals}, {VK_OEM_4, KeyCode::LeftSquareBracket},
+    {VK_OEM_6, KeyCode::RightSquareBracket}, {VK_OEM_5, KeyCode::BackSlash},
+    {VK_OEM_1, KeyCode::Semicolon}, {VK_OEM_7, KeyCode::SingleQuote},
+    {VK_OEM_COMMA, KeyCode::Comma}, {VK_OEM_PERIOD, KeyCode::Period},
+    {VK_OEM_2, KeyCode::Slash},
 
-        case VK_OEM_3: return KeyCode::BackQuote;
-        case VK_OEM_MINUS: return KeyCode::Minus;
-        case VK_OEM_PLUS: return KeyCode::Equals;
-        case VK_OEM_4: return KeyCode::LeftSquareBracket;
-        case VK_OEM_6: return KeyCode::RightSquareBracket;
-        case VK_OEM_5: return KeyCode::BackSlash;
-        case VK_OEM_1: return KeyCode::Semicolon;
-        case VK_OEM_7: return KeyCode::SingleQuote;
-        case VK_OEM_COMMA: return KeyCode::Comma;
-        case VK_OEM_PERIOD: return KeyCode::Period;
-        case VK_OEM_2: return KeyCode::Slash;
+    {VK_ESCAPE, KeyCode::Escape}, {VK_F1, KeyCode::F1},
+    {VK_F2, KeyCode::F2}, {VK_F3, KeyCode::F3}, {VK_F4, KeyCode::F4},
+    {VK_F5, KeyCode::F5}, {VK_F6, KeyCode::F6}, {VK_F7, KeyCode::F7},
+    {VK_F8, KeyCode::F8}, {VK_F9, KeyCode::F9}, {VK_F10, KeyCode::F10},
+    {VK_F11, KeyCode::F11}, {VK_F12, KeyCode::F12},
+    {VK_DELETE, KeyCode::Delete},
 
-        case VK_ESCAPE: return KeyCode::Escape;
-        case VK_F1: return KeyCode::F1;
-        case VK_F2: return KeyCode::F2;
-        case VK_F3: return KeyCode::F3;
-        case VK_F4: return KeyCode::F4;
-        case VK_F5: return KeyCode::F5;
-        case VK_F6: return KeyCode::F6;
-        case VK_F7: return KeyCode::F7;
-        case VK_F8: return KeyCode::F8;
-        case VK_F9: return KeyCode::F9;
-        case VK_F10: return KeyCode::F10;
-        case VK_F11: return KeyCode::F11;
-        case VK_F12: return KeyCode::F12;
-        case VK_DELETE: return KeyCode::Delete;
+    {VK_TAB, KeyCode::Tab}, {VK_CAPITAL, KeyCode::CapsLock},
+    {VK_SHIFT, KeyCode::Shift}, {VK_CONTROL, KeyCode::Control},
+    {VK_LWIN, KeyCode::Super}, {VK_RWIN, KeyCode::Super},
+    {VK_MENU, KeyCode::Alt}, {VK_RETURN, KeyCode::Enter},
+    {VK_BACK, KeyCode::Back},
 
-        case VK_TAB: return KeyCode::Tab;
-        case VK_CAPITAL: return KeyCode::CapsLock;
-        case VK_SHIFT: return KeyCode::Shift;
-        case VK_LSHIFT: return KeyCode::Shift;
-        case VK_RSHIFT: return KeyCode::Shift;
-        case VK_CONTROL: return KeyCode::Control;
-        case VK_LCONTROL: return KeyCode::Control;
-        case VK_RCONTROL: return KeyCode::Control;
-        case VK_LWIN: return KeyCode::Super;
-        case VK_RWIN: return KeyCode::Super;
-        case VK_MENU: return KeyCode::Alt;
-        case VK_LMENU: return KeyCode::Alt;
-        case VK_RMENU: return KeyCode::Alt;
-        case VK_RETURN: return KeyCode::Enter;
-        case VK_BACK: return KeyCode::Back;
+    {VK_LEFT, KeyCode::Left}, {VK_RIGHT, KeyCode::Right},
+    {VK_UP, KeyCode::Up}, {VK_DOWN, KeyCode::Down},
+    {VK_HOME, KeyCode::Home}, {VK_END, KeyCode::End},
+    {VK_PRIOR, KeyCode::PageUp}, {VK_NEXT, KeyCode::PageDown},
+};
 
-        case VK_LEFT: return KeyCode::Left;
-        case VK_RIGHT: return KeyCode::Right;
-        case VK_UP: return KeyCode::Up;
-        case VK_DOWN: return KeyCode::Down;
+static std::unordered_map<WPARAM, KeyCode> vkToKey;
+static std::unordered_map<KeyCode, WPARAM> keyToVk;
 
-        case VK_HOME: return KeyCode::Home;
-        case VK_END: return KeyCode::End;
-        case VK_PRIOR: return KeyCode::PageUp;
-        case VK_NEXT: return KeyCode::PageDown;
+static void initKeyMaps() {
+    static bool initialized = false;
+    if (initialized) return;
+    initialized = true;
+
+    for (auto [vk, key] : keyPairs) {
+        vkToKey[vk] = key;
+        keyToVk[key] = vk;
     }
-    return KeyCode::Unknown;
+}
+
+KeyCode vkToKeyCode(WPARAM vk) {
+    initKeyMaps();
+    auto it = vkToKey.find(vk);
+    return (it != vkToKey.end()) ? it->second : KeyCode::Unknown;
+}
+
+WPARAM keyCodeToVk(KeyCode key) {
+    initKeyMaps();
+    auto it = keyToVk.find(key);
+    return (it != keyToVk.end()) ? it->second : 0;
 }
 
 // Window procedure
@@ -189,9 +160,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_MOUSEMOVE: {
             WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
 
+            int x = GET_X_LPARAM(lParam);
+            int y = int(window->getSize().y) - GET_Y_LPARAM(lParam);
+            Vector2 currentPos(x, y);
+
+            Vector2 delta(0, 0);
+            if (window->hasLastMousePos && !window->ignoreMouseDelta) {
+                delta = currentPos - window->lastMousePos;
+            }
+
+            window->lastMousePos = currentPos;
+            window->hasLastMousePos = true;
+            window->ignoreMouseDelta = false;
+
             WindowInput input;
             input.type = WindowInputType::MouseMove;
-            input.mouse.position = Vector2(GET_X_LPARAM(lParam), int(window->getSize().y) - GET_Y_LPARAM(lParam));
+            input.mouse.position = currentPos;
+            input.mouse.delta = delta; // store delta in your struct
 
             pushInput(hwnd, input);
             return 0;
@@ -268,11 +253,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             WindowInput input;
             input.type = WindowInputType::MouseScroll;
             
-            POINT point;
-            point.x = GET_X_LPARAM(lParam);
-            point.y = GET_Y_LPARAM(lParam);
-            ScreenToClient(hwnd, &point); // convert to window-relative space because its in display-relative space for some reason
-            input.mouse.position = Vector2(float(point.x), window->getSize().y - float(GET_Y_LPARAM(lParam))); // convert from weird Windows types to real values
+            input.mouse.position = window->lastMousePos; // Dumb
 
             input.mouse.scroll = Vector2(0.0f, float(GET_WHEEL_DELTA_WPARAM(wParam)) / 120.0f);
 
@@ -439,8 +420,8 @@ void WindowWin32::bindGLContext() {
     pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
-    int pf = ChoosePixelFormat(hdc, &pfd);
-    SetPixelFormat(hdc, pf, &pfd);
+    int tempPF = ChoosePixelFormat(hdc, &pfd);
+    SetPixelFormat(hdc, tempPF, &pfd);
 
     // Create dummy context (we need it to move out of caveman GL)
     HGLRC dummyCtx = wglCreateContext(hdc);
@@ -453,6 +434,29 @@ void WindowWin32::bindGLContext() {
         wglDeleteContext(dummyCtx);
         return;
     }
+
+    // Create pixel format attributes
+    int pixelFormatAttribs[] = {
+        WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+        WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+        WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+        WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+        WGL_COLOR_BITS_ARB, 32,
+        WGL_DEPTH_BITS_ARB, 24,
+        WGL_STENCIL_BITS_ARB, 8,
+        WGL_SAMPLE_BUFFERS_ARB, GL_TRUE, // Request MSAA buffer
+        WGL_SAMPLES_ARB, 4, // 4x MSAA
+        0
+    };
+
+    int pf;
+    UINT numFormats;
+    if (!wglChoosePixelFormatARB(hdc, pixelFormatAttribs, nullptr, 1, &pf, &numFormats) || numFormats == 0) {
+        Logger::warn("MSAA pixel format not supported, falling back to standard format");
+        pf = ChoosePixelFormat(hdc, &pfd);
+    }
+
+    SetPixelFormat(hdc, pf, &pfd);
 
     // Attributes list for modern GL (4.6)
     int attribs[] = {
@@ -506,6 +510,44 @@ Vector2 WindowWin32::getPosition() {
     RECT rect;
     GetClientRect(hwnd, &rect);
     return Vector2(float(rect.left), float(rect.top));
+}
+
+bool WindowWin32::isKeyDown(KeyCode key) {
+    // Fetch key state
+    SHORT keyState = GetAsyncKeyState(keyCodeToVk(key));
+
+    // Test high bit
+    if (( 1 << 15 ) & keyState) return true; // if set, key was down when GetAsyncKeyState was called
+    return false;
+}
+
+void WindowWin32::setMousePosition(const Vector2& position) {
+    ignoreMouseDelta = true;
+
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    POINT clientPoint = {static_cast<int>(position.x), static_cast<int>(rect.bottom - position.y)};
+    ClientToScreen(hwnd, &clientPoint);
+
+    SetCursorPos(clientPoint.x, clientPoint.y);
+
+    lastMousePos = position;
+    hasLastMousePos = true;
+}
+
+void WindowWin32::freezeMouse() {
+    POINT mouse;
+    GetCursorPos(&mouse);
+    RECT rect;
+    rect.left = mouse.x;
+    rect.top = mouse.y;
+    rect.right = mouse.x + 1;
+    rect.bottom = mouse.y + 1;
+    ClipCursor(&rect);
+}
+
+void WindowWin32::unfreezeMouse() {
+    ClipCursor(NULL);
 }
 
 void WindowWin32::setCursor(Cursor cursor) {

@@ -26,6 +26,7 @@ public:
     RendererImpl(WindowImpl* w);
 
     float scale(float value) {return value * currentScale;}
+    float divide(float value) {return value / currentScale;}
     Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
     AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
     UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);

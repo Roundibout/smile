@@ -19,7 +19,6 @@ struct LogEntry {
     std::string timestamp;
 };
 
-
 inline std::string getCurrentTimestamp() {
     using namespace std::chrono;
     auto now = system_clock::now();
@@ -48,24 +47,41 @@ namespace Logger {
     // Callback functions for new log events
     inline std::vector<std::function<void(const LogEntry&)>> callbacks;
 
+    template<typename... Args>
+    inline std::string concat(const Args&... args) {
+        std::ostringstream oss;
+        (oss << ... << args);
+        return oss.str();
+    }
+
     inline void log(LogLevel level, const std::string& message) {
+        ///*
         if (logs.size() > 500) {
             logs.erase(logs.begin());
         }
         LogEntry entry{level, message, getCurrentTimestamp()};
         logs.push_back(entry);
         for (auto& callback : callbacks) callback(entry);
+        //*/
     }
 
-    inline void print(const std::string& message) {log(LogLevel::Info, message);}
-    inline void warn(const std::string& message) {log(LogLevel::Warning, message);}
-    inline void error(const std::string& message) {log(LogLevel::Error, message);}
+    template<typename... Args>
+    inline void print(const Args&... args) {log(LogLevel::Info, concat(args...));}
+    
+    template<typename... Args>
+    inline void warn(const Args&... args) {log(LogLevel::Warning, concat(args...));}
 
-    inline void append(const std::string& message) {
+    template<typename... Args>
+    inline void error(const Args&... args) {log(LogLevel::Error, concat(args...));}
+
+    template<typename... Args>
+    inline void append(const Args&... args) {
+        ///*
         if (!logs.empty()) {
-            logs.back().message += message;
+            logs.back().message += concat(args...);
             for (auto& callback : callbacks) callback(logs.back());
         }
+        //*/
     }
 
     // Allow other systems to subscribe to new logs (console)
@@ -75,3 +91,8 @@ namespace Logger {
 
     inline const std::vector<LogEntry>& getAllLogs() {return logs;}
 }
+
+using Logger::print;
+using Logger::warn;
+using Logger::error;
+using Logger::append;
