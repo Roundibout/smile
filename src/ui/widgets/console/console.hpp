@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <deque>
+
 #include <ui/widgets/widget.hpp>
 
 #include <util/logger.hpp>

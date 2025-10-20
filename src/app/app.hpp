@@ -34,10 +34,11 @@ private:
     App& operator=(const App&) = delete;
 
     bool running = false;
-    int fps = 360;
+    int fps = 240;
+    std::chrono::time_point<std::chrono::steady_clock> previousTime = std::chrono::steady_clock::now();
+
     bool needsRender = false;
     float uiScale = 1.0f;
-    std::chrono::time_point<std::chrono::steady_clock> previousTime = std::chrono::steady_clock::now();
 
     std::unordered_map<uint32_t, std::shared_ptr<Window>> windows;
     uint32_t nextId = 1;

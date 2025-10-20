@@ -50,7 +50,7 @@ std::chrono::time_point<std::chrono::steady_clock> App::step() {
     using clock = std::chrono::steady_clock;
 
     // Get current time
-    std::chrono::time_point<std::chrono::steady_clock> currentTime = clock::now();
+    std::chrono::time_point<clock> currentTime = clock::now();
     std::chrono::duration<float> elapsed = currentTime - previousTime; // Get how much time has passed
     previousTime = currentTime; // Set previous time to now
 
@@ -61,7 +61,7 @@ std::chrono::time_point<std::chrono::steady_clock> App::step() {
         window->update(deltaTime);
     }
 
-    // Render all windows (in the future only render if something changed, returned by update)
+    // Render all windows
     for (auto& [id, window] : windows) {
         if (needsRender == true) {
             window->renderer.dirty();
@@ -80,26 +80,30 @@ void App::run() {
     running = true;
 
     using clock = std::chrono::steady_clock;
-    std::chrono::milliseconds frameDuration(1000 / fps);
     previousTime = clock::now();
+    std::chrono::duration<float> frameDuration(1.0f / fps);
 
     while (running) {
-        // Process all windows' native windows (can lead to a freeze on Win32 when moving and resizing, is fixed internally)
+        // Process all windows' native windows (can lead to a freeze on Windows when moving and resizing, is fixed internally)
         for (auto& [id, window] : windows) {
             window->process();
         }
 
-        auto currentTime = App::get().step();
+        auto frameStart = previousTime;
+        auto currentTime = App::get().step(); // step() can be called independently elsewhere
 
-        auto frameTime = clock::now() - currentTime;
-        auto sleepTime = frameDuration - frameTime;
+        auto frameEnd = clock::now();
+        auto elapsed = frameEnd - frameStart;
 
-        if (sleepTime > std::chrono::milliseconds(2)) {
-            std::this_thread::sleep_for(sleepTime - std::chrono::milliseconds(1));
+        if (elapsed < frameDuration) {
+            auto sleepTime = frameDuration - elapsed;
+
+            if (sleepTime > std::chrono::milliseconds(2))
+                std::this_thread::sleep_for(sleepTime - std::chrono::milliseconds(1));
+
+            // Busy-wait for remaining ~1ms for precision
+            while (clock::now() < frameStart + frameDuration) {}
         }
-
-        // Busy-wait the remaining ~1ms
-        while ((clock::now() - currentTime) < frameDuration) { }
 
         // TEMP
         // Quit app once there are no windows

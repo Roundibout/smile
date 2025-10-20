@@ -68,7 +68,11 @@ endif()
 target_include_directories(Smile PRIVATE extern/lua extern/glad/include extern/freetype/include extern src ${CMAKE_SOURCE_DIR})
 
 # Link libraries
-target_link_libraries(Smile PRIVATE lua glad opengl32 dwmapi freetype)
+target_link_libraries(Smile PRIVATE lua glad opengl32 freetype)
+
+if(WIN32)
+    target_link_libraries(Smile PRIVATE dwmapi winmm)
+endif()
 
 if (MINGW)
     # bundle these so it works everywhere

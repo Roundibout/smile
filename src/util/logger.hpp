@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <deque>
 #include <functional>
 #include <chrono>
 #include <iomanip>
@@ -43,7 +43,8 @@ inline std::string getCurrentTimestamp() {
 }
 
 namespace Logger {
-    inline std::vector<LogEntry> logs;
+    inline std::deque<LogEntry> logs;
+    constexpr size_t MAX_LOGS = 500;
     // Callback functions for new log events
     inline std::vector<std::function<void(const LogEntry&)>> callbacks;
 
@@ -55,14 +56,12 @@ namespace Logger {
     }
 
     inline void log(LogLevel level, const std::string& message) {
-        ///*
-        if (logs.size() > 500) {
-            logs.erase(logs.begin());
-        }
+        if (logs.size() >= MAX_LOGS) logs.pop_front();
+
         LogEntry entry{level, message, getCurrentTimestamp()};
         logs.push_back(entry);
+        
         for (auto& callback : callbacks) callback(entry);
-        //*/
     }
 
     template<typename... Args>
@@ -76,12 +75,10 @@ namespace Logger {
 
     template<typename... Args>
     inline void append(const Args&... args) {
-        ///*
         if (!logs.empty()) {
             logs.back().message += concat(args...);
             for (auto& callback : callbacks) callback(logs.back());
         }
-        //*/
     }
 
     // Allow other systems to subscribe to new logs (console)
@@ -89,7 +86,7 @@ namespace Logger {
         callbacks.push_back(cb);
     }
 
-    inline const std::vector<LogEntry>& getAllLogs() {return logs;}
+    inline const std::deque<LogEntry>& getAllLogs() {return logs;}
 }
 
 using Logger::print;

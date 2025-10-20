@@ -249,7 +249,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             }
 
             float oldRotation = viewRotation;
-            viewRotation += PI * input.mouse.delta.y * 0.001f;
+            viewRotation += PI * input.mouse.delta.y * -0.001f;
 
             cosR = std::cosf(viewRotation);
             sinR = std::sinf(viewRotation);

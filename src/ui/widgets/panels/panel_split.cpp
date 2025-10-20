@@ -117,18 +117,15 @@ bool PanelSplit::processWindowInput(WindowInput& input, const UIBounds& bounds, 
             stopResizing();
         }
     } else if (input.type == WindowInputType::MouseMove) {
-        if (input.mouse.button == MouseButton::Left) {
+        if (isOverResizeArea(input.mouse.position, bounds)) {
+            container->setResizeHovered(direction);
+        }
 
-            if (isOverResizeArea(input.mouse.position, bounds)) {
-                container->setResizeHovered(direction);
-            }
-
-            if (resizing == true) {
-                ratio = getPositionOverArea(input.mouse.position, bounds);
-                window->renderer.dirty();
-
-                consumed = true;
-            }
+        if (resizing == true) {
+            ratio = getPositionOverArea(input.mouse.position, bounds);
+            window->renderer.dirty();
+            
+            consumed = true;
         }
     }
 

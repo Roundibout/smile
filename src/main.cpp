@@ -15,6 +15,10 @@ License:
 
 #include <sol/sol.hpp>
 
+#ifdef _WIN32
+    #include <windows.h>
+#endif
+
 #include <app/app.hpp>
 #include <util/logger.hpp>
 
@@ -22,6 +26,11 @@ extern void register_bindings(sol::state& lua);
 
 int main(int argc, char *argv[]) {
     Logger::print("Initializing smile...");
+
+    // Windows stuff
+    #ifdef _WIN32
+        timeBeginPeriod(1); // set minimum timer resolution
+    #endif
     
     sol::state lua;
     lua.open_libraries(

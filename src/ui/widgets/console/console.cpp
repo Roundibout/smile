@@ -4,6 +4,7 @@
 void Console::update(float deltaTime, const UIBounds& bounds) {
     if (newEntry) {
         window->renderer.dirty();
+        newEntry = false;
     }
 }
 
@@ -24,7 +25,7 @@ void Console::render(const UIBounds& bounds) {
     float height = window->renderer.resolveLayout(content, bounds).rect.size.y + Theme::metric(ThemeMetric::ConsoleTextSize); // add 20 for one extra line so hanging letters aren't cut
     int absoluteLineHeight = static_cast<int>(window->renderer.scale(Theme::metric(ThemeMetric::ConsoleTextSize)));
 
-    const std::vector<LogEntry>& logs = Logger::getAllLogs();
+    const std::deque<LogEntry>& logs = Logger::getAllLogs();
 
     int textHeight = 10;
     int currentHeight = static_cast<int>(window->renderer.scale(10.0f));
