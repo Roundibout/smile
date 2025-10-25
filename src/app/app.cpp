@@ -45,7 +45,7 @@ void App::setUIScale(float scale) {
     needsRender = true;
 }
 
-std::chrono::time_point<std::chrono::steady_clock> App::step() {
+void App::step() {
     // Get clock
     using clock = std::chrono::steady_clock;
 
@@ -66,22 +66,17 @@ std::chrono::time_point<std::chrono::steady_clock> App::step() {
         if (needsRender == true) {
             window->renderer.dirty();
         }
+        window->renderer.dirty();
         window->render(uiScale);
     }
     needsRender = false;
-
-    return currentTime; // Return time for use in main loop
 }
 
 void App::run() {
     // Stop if the app is already running
-    if (running == true) {return;}
+    if (running == true) return;
 
     running = true;
-
-    using clock = std::chrono::steady_clock;
-    previousTime = clock::now();
-    std::chrono::duration<float> frameDuration(1.0f / fps);
 
     while (running) {
         // Process all windows' native windows (can lead to a freeze on Windows when moving and resizing, is fixed internally)
@@ -89,21 +84,7 @@ void App::run() {
             window->process();
         }
 
-        auto frameStart = previousTime;
-        auto currentTime = App::get().step(); // step() can be called independently elsewhere
-
-        auto frameEnd = clock::now();
-        auto elapsed = frameEnd - frameStart;
-
-        if (elapsed < frameDuration) {
-            auto sleepTime = frameDuration - elapsed;
-
-            if (sleepTime > std::chrono::milliseconds(2))
-                std::this_thread::sleep_for(sleepTime - std::chrono::milliseconds(1));
-
-            // Busy-wait for remaining ~1ms for precision
-            while (clock::now() < frameStart + frameDuration) {}
-        }
+        step();
 
         // TEMP
         // Quit app once there are no windows

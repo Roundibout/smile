@@ -404,7 +404,7 @@ void WindowWin32::bindGLContext() {
         Logger::print("Render context already bound");
         return;
     }
-
+    
     // Set variables for the backend used and that it is set
     rbackend = RenderBackend::GL;
     rbackendSet = true;
@@ -480,12 +480,19 @@ void WindowWin32::bindGLContext() {
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(glContext);
     }
+
+    // Enable VSync
+    wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
+    wglSwapIntervalEXT(1);
 }
 
 void WindowWin32::makeGLCurrent() {
     if (rbackendSet && rbackend == RenderBackend::GL) {
         // Just make the context current
         wglMakeCurrent(hdc, glContext);
+
+        // Enable VSync
+        wglSwapIntervalEXT(1);
     } else {
         Logger::error("Render context either does not exist or is not OpenGL");
     }

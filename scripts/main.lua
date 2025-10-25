@@ -18,6 +18,7 @@ config.color = Theme:GetColor(ThemeColor.WindowBackground)
 config.maximized = true
 
 local window = App:CreateWindow(config)
+local window2 = App:CreateWindow(config)
 
 local scale = 1
 

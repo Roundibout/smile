@@ -38,6 +38,7 @@ private:
     HDC hdc;
 
     HGLRC glContext;
+    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
     
     std::queue<WindowInput> inputs;
 
