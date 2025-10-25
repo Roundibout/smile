@@ -72,6 +72,11 @@ target_link_libraries(Smile PRIVATE lua glad opengl32 freetype)
 
 if(WIN32)
     target_link_libraries(Smile PRIVATE dwmapi winmm)
+    add_custom_command(TARGET Smile POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/extern/zlib1.dll"
+            $<TARGET_FILE_DIR:Smile>
+    )
 endif()
 
 if (MINGW)

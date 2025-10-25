@@ -23,7 +23,7 @@ void Viewport::update(float deltaTime, const UIBounds& bounds) {
 
 void Viewport::render(const UIBounds& bounds) {
     layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
-    window->renderer.drawRoundedRect(layout, bounds, Color4(0.0f, 0.0f, 0.0f));
+    window->renderer.drawRoundedRect(layout, bounds, Color4(0.1f, 0.1f, 0.1f));
 
     window->renderer.beginStencil();
     window->renderer.drawRoundedRect(layout, bounds);

@@ -241,7 +241,7 @@ void RendererGL::beginFrame(float scale) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Enable multisampling
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE);
 
     // Clear the screen
     Color4 color = window->getConfig().color;

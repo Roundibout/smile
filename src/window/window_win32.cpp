@@ -341,14 +341,9 @@ WindowWin32::WindowWin32(const uint32_t& i, const WindowConfig& c) : WindowImpl(
     // Create window style from config
     DWORD style = WS_OVERLAPPEDWINDOW;
 
-    if (!config.resizable)
-        style &= ~WS_SIZEBOX;
-
-    if (!config.maximizable)
-        style &= ~WS_MAXIMIZEBOX;
-
-    if (!config.minimizable)
-        style &= ~WS_MINIMIZEBOX;
+    if (!config.resizable) style &= ~WS_SIZEBOX;
+    if (!config.maximizable) style &= ~WS_MAXIMIZEBOX;
+    if (!config.minimizable) style &= ~WS_MINIMIZEBOX;
     
     // Create a window associated with Smile
     hwnd = CreateWindow(
@@ -409,6 +404,23 @@ void WindowWin32::bindGLContext() {
     rbackend = RenderBackend::GL;
     rbackendSet = true;
 
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+    // Create a dummy
+    HWND dummyHwnd = CreateWindow(
+        "SmileWindow",
+        "Dummy",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        1, 1,
+        nullptr, nullptr, hInstance, nullptr
+    );
+
+    ShowWindow(dummyHwnd, SW_HIDE);
+
+    // Get dummy display context
+    HDC dummyHdc = GetDC(dummyHwnd);
+
     // Create a PIXEL FORMAT DESCRIPTOR
     PIXELFORMATDESCRIPTOR pfd = {};
     pfd.nSize = sizeof(pfd);
@@ -420,18 +432,19 @@ void WindowWin32::bindGLContext() {
     pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
-    int tempPF = ChoosePixelFormat(hdc, &pfd);
-    SetPixelFormat(hdc, tempPF, &pfd);
+    int tempPF = ChoosePixelFormat(dummyHdc, &pfd);
+    SetPixelFormat(dummyHdc, tempPF, &pfd);
 
     // Create dummy context (we need it to move out of caveman GL)
-    HGLRC dummyCtx = wglCreateContext(hdc);
-    wglMakeCurrent(hdc, dummyCtx); // Make it current so we can use it
+    HGLRC dummyCtx = wglCreateContext(dummyHdc);
+    wglMakeCurrent(dummyHdc, dummyCtx); // Make it current so we can use it
 
     // Load WGL extensions (needed for core context creation)
-    if (!gladLoaderLoadWGL(hdc)) {
+    if (!gladLoaderLoadWGL(dummyHdc)) {
         Logger::error("Failed to load WGL extensions");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(dummyCtx);
+        DestroyWindow(dummyHwnd);
         return;
     }
 

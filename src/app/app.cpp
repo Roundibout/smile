@@ -66,7 +66,6 @@ void App::step() {
         if (needsRender == true) {
             window->renderer.dirty();
         }
-        window->renderer.dirty();
         window->render(uiScale);
     }
     needsRender = false;

@@ -47,11 +47,11 @@ private:
 
         metrics[ThemeMetric::ConsoleTextSize] = 20.0f;
         // Initialize default colors
-        colors[ThemeColor::WindowBackground] = Color4(0.12f, 0.12f, 0.12f);
+        colors[ThemeColor::WindowBackground] = Color4(0.08f, 0.08f, 0.08f);
         colors[ThemeColor::Panel] = Color4(0.2f, 0.2f, 0.2f);
         colors[ThemeColor::PanelStroke] = Color4(0.3f, 0.3f, 0.3f);
 
-        colors[ThemeColor::ConsoleBackground] = Color4(0.0f, 0.0f, 0.0f);
+        colors[ThemeColor::ConsoleBackground] = Color4(0.1f, 0.1f, 0.1f);
         colors[ThemeColor::ConsoleTimestamp] = Color4(0.5f, 0.5f, 0.5f);
         colors[ThemeColor::ConsoleInfo] = Color4(0.9f, 0.9f, 0.9f);
         colors[ThemeColor::ConsoleWarning] = Color4(0.9f, 0.6f, 0.1f);
