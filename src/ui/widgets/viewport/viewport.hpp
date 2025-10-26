@@ -15,7 +15,12 @@ private:
 
     bool movingView = false;
     bool rotatingView = false;
+    bool tooCloseToRotate = false;
+    float lastRotation = 0.0f;
+    float firstRotation = 0.0f;
     Vector2 rotatePivot;
+    Vector2 rotatePosition;
+    Vector2 rotateMirrors;
     bool zoomingView = false;
     Vector2 zoomCenter;
 

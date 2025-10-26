@@ -39,6 +39,72 @@ void Renderer::drawQuad(const UIDim2& position1, const UIDim2& position2, const 
     impl->drawQuad(position1, position2, position3, position4, bounds, color);
 }
 
+void Renderer::drawLine(const UIDim2& position1, const UIDim2& position2, const UIBounds& bounds, const Color4& color, float thickness) {
+    float dx = position2.x.offset - position1.x.offset;
+    float dy = position2.y.offset - position1.y.offset;
+    float len = std::sqrt(dx*dx + dy*dy);
+
+    if (len == 0) return; // Skip degenerate line
+
+    dx /= len;
+    dy /= len;
+
+    float px = -dy;
+    float py = dx;
+
+    px *= thickness / 2;
+    py *= thickness / 2;
+
+    UIDim2 offset1(0.0f, px, 0.0f, py);
+    UIDim2 offset2(0.0f, -px, 0.0f, -py);
+
+    impl->drawQuad(
+        position1 + offset1,
+        position1 + offset2,
+        position2 + offset2,
+        position2 + offset1,
+        bounds, color
+    );
+}
+
+void Renderer::drawDottedLine(const UIDim2& position1, const UIDim2& position2, const UIBounds& bounds, const Color4& color, float thickness, float dotLength, float spacing) {
+    float dx = position2.x.offset - position1.x.offset;
+    float dy = position2.y.offset - position1.y.offset;
+    float len = std::sqrt(dx*dx + dy*dy);
+
+    if (len == 0) return; // Skip degenerate line
+
+    float dirX = dx / len;
+    float dirY = dy / len;
+
+    float currentPos = 0.0f;
+
+    while (currentPos < len) {
+        float startOffset = currentPos;
+        float endOffset = std::min(currentPos + dotLength, len);
+
+        UIDim2 dotStart(
+            position1.x.scale,
+            position1.x.offset + dirX * startOffset,
+            position1.y.scale,
+            position1.y.offset + dirY * startOffset
+        );
+
+        UIDim2 dotEnd(
+            position1.x.scale,
+            position1.x.offset + dirX * endOffset,
+            position1.y.scale,
+            position1.y.offset + dirY * endOffset
+        );
+
+        // Draw the dot as a line
+        drawLine(dotStart, dotEnd, bounds, color, thickness);
+
+        // Advance to the next dot
+        currentPos += dotLength + spacing;
+    }
+}
+
 void Renderer::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     impl->drawRect(layout, bounds, color);
 }

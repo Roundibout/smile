@@ -19,8 +19,8 @@ Vector2 RendererImpl::resolvePosition(const UIDim2& position, const UIBounds& bo
     UIBounds applied = applyLayout(bounds, UILayout(UIRect(position, UIDim2())));
 
     return Vector2(
-        static_cast<int>(applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale),
-        static_cast<int>(applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale)
+        applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale,
+        applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale
     );
 }
 

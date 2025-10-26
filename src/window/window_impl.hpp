@@ -12,7 +12,7 @@ License:
 #pragma once
 
 #include <string>
-#include <queue>
+#include <deque>
 #include <optional>
 
 #include <glad/gl.h>
@@ -54,7 +54,7 @@ protected:
 public:
     WindowImpl(const uint32_t& i, const WindowConfig& c);
     virtual ~WindowImpl() = default;
-    virtual std::queue<WindowInput> update() = 0;
+    virtual std::deque<WindowInput> update() = 0;
 
     virtual void bindGLContext() = 0;
     virtual void makeGLCurrent() = 0;

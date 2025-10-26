@@ -46,26 +46,12 @@ void Viewport::render(const UIBounds& bounds) {
             UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
             UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
 
-            float dx = position2.x.offset - position1.x.offset;
-            float dy = position2.y.offset - position1.y.offset;
-            float len = std::sqrt(dx*dx + dy*dy);
-            if (len == 0) continue; // Skip degenerate line
-            dx /= len;
-            dy /= len;
-            float px = -dy;
-            float py = dx;
-            px *= 1.0f;
-            py *= 1.0f;
-
-            UIDim2 offset1(0.0f, px, 0.0f, py);
-            UIDim2 offset2(0.0f, -px, 0.0f, -py);
-
-            window->renderer.drawQuad(
-                position1 + offset1,
-                position1 + offset2,
-                position2 + offset2,
-                position2 + offset1,
-                bounds, Color4()
+            window->renderer.drawLine(
+                position1,
+                position2,
+                bounds, 
+                Color4(), 
+                2.0f
             );
         }
 
@@ -108,28 +94,14 @@ void Viewport::render(const UIBounds& bounds) {
             UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
             UIDim2 midPos = UIDim2(0.0f, (position1.x.offset + position2.x.offset) / 2, 0.0f, (position1.y.offset + position2.y.offset) / 2);
 
-            float dx = position2.x.offset - position1.x.offset;
-            float dy = position2.y.offset - position1.y.offset;
-            float len = std::sqrt(dx*dx + dy*dy);
-            if (len == 0) continue; // Skip degenerate edge
-            dx /= len;
-            dy /= len;
-            float px = -dy;
-            float py = dx;
-            px *= 1.0f;
-            py *= 1.0f;
-
-            UIDim2 offset1(0.0f, px, 0.0f, py);
-            UIDim2 offset2(0.0f, -px, 0.0f, -py);
-
             float blue = static_cast<float>(edge.id) / static_cast<float>(obj.nextEdgeId - 1);
 
-            window->renderer.drawQuad(
-                position1 + offset1,
-                position1 + offset2,
-                position2 + offset2,
-                position2 + offset1,
-                bounds, Color4(1.0f - blue, 0.0f, blue)
+            window->renderer.drawLine(
+                position1,
+                position2,
+                bounds, 
+                Color4(1.0f - blue, 0.0f, blue), 
+                4.0f
             );
             //window->renderer.drawText(midPos - UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(edge.id), Theme::font(ThemeFont::Bold), 20, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2));
         }
@@ -143,6 +115,27 @@ void Viewport::render(const UIBounds& bounds) {
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     }
+    
+    if (rotatingView) {
+        window->renderer.drawDottedLine(
+            UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y - 2.0f),
+            UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y - 2.0f),
+            bounds, 
+            Color4(0.0f, 0.0f, 0.0f, 0.8f), 
+            2.0f, 4.0f, 4.0f
+        );
+        
+        Color4 color = Color4();
+        if (tooCloseToRotate) color = Color4(1.0f, 0.5f, 0.5f);
+
+        window->renderer.drawDottedLine(
+            UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y),
+            UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y),
+            bounds, 
+            color, 
+            2.0f, 4.0f, 4.0f
+        );
+    }
 
     window->renderer.endStencil();
 }
@@ -152,6 +145,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     if (input.type == WindowInputType::MouseScroll) {
         if (!movingView && !rotatingView && UITools::isPointOverRoundedRect(input.mouse.position, applied)) {
             if (window->isKeyDown(KeyCode::Shift)) {
+                if (rotatingView) return true;
+
                 Vector2 mousePos(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);   
 
                 float oldRotation = viewRotation;
@@ -160,7 +155,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 } else if (input.mouse.scroll.y < 0) {
                     viewRotation += PI / 24;
                 }
-
+                
                 cosR = std::cosf(viewRotation);
                 sinR = std::sinf(viewRotation);
 
@@ -178,6 +173,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
 
                 Logger::print("Rotated by increment");
             } else {
+                if (zoomingView) return true;
+
                 Vector2 mousePos(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
 
                 float oldScale = viewScale;
@@ -203,7 +200,11 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             if (UITools::isPointOverRoundedRect(input.mouse.position, applied)) {
                 if (window->isKeyDown(KeyCode::Shift)) {
                     rotatingView = true;
+                    tooCloseToRotate = true;
+                    lastRotation = viewRotation;
                     rotatePivot = Vector2(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
+                    rotatePosition = rotatePivot;
+                    rotateMirrors = Vector2();
                     Logger::print("Rotating");
                 } else if (window->isKeyDown(KeyCode::Control)) {
                     zoomingView = true;
@@ -213,6 +214,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                     movingView = true;
                     Logger::print("Moving");
                 }
+                window->renderer.dirty();
                 window->setCapture();
                 return true;
             }
@@ -225,6 +227,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 return true;
             } else if (rotatingView) {
                 rotatingView = false;
+                window->renderer.dirty();
                 window->releaseCapture();
                 return true;
             } else if (zoomingView) {
@@ -244,12 +247,47 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             window->renderer.dirty();
             return true;
         } else if (rotatingView) {
+            rotatePosition = Vector2(
+                input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2 + applied.rect.size.x * rotateMirrors.x, 
+                input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2 + applied.rect.size.y * rotateMirrors.y
+            );
+
             if (!UITools::isPointOverRect(input.mouse.position, applied)) {
-                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, applied));
+                if (input.mouse.position.x > applied.rect.position.x + applied.rect.size.x) {
+                    rotateMirrors.x += 1;
+                } else if (input.mouse.position.x < applied.rect.position.x) {
+                    rotateMirrors.x -= 1;
+                }
+                if (input.mouse.position.y > applied.rect.position.y + applied.rect.size.y) {
+                    rotateMirrors.y += 1;
+                } else if (input.mouse.position.y < applied.rect.position.y) {
+                    rotateMirrors.y -= 1;
+                }
+                Vector2 newMousePos = UITools::mirrorPointAcrossRect(input.mouse.position, applied);
+                window->setMousePosition(newMousePos);
+            }   
+
+            float dx = rotatePosition.x - rotatePivot.x;
+            float dy = rotatePosition.y - rotatePivot.y;
+
+            if (sqrtf(dx*dx + dy*dy) < window->renderer.scale(30.0f)) {
+                if (!tooCloseToRotate) {
+                    lastRotation = viewRotation;
+                }
+                tooCloseToRotate = true;
+                window->renderer.dirty();
+                return true;
             }
 
             float oldRotation = viewRotation;
-            viewRotation += PI * input.mouse.delta.y * -0.001f;
+            float mouseRotation = atan2f(rotatePosition.y - rotatePivot.y, rotatePosition.x - rotatePivot.x) - PI / 2;
+
+            if (tooCloseToRotate) {
+                firstRotation = mouseRotation;
+            }
+            tooCloseToRotate = false;
+
+            viewRotation = mouseRotation - firstRotation + lastRotation;
 
             cosR = std::cosf(viewRotation);
             sinR = std::sinf(viewRotation);
@@ -288,6 +326,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             viewPosition = (viewPosition - zoomCenter) * scaleFactor + zoomCenter;
 
             window->renderer.dirty();
+            return true;
         }
     }
     return false;

@@ -16,7 +16,7 @@ License:
 #include <unordered_map>
 #include <memory>
 #include <iostream>
-#include <queue>
+#include <deque>
 
 #include <sol/sol.hpp>
 
@@ -42,7 +42,7 @@ enum class WindowEvent {
 class Window {
 private:
     std::unique_ptr<WindowImpl> impl;
-    std::queue<WindowInput> inputs;
+    std::deque<WindowInput> inputs;
 
     std::vector<std::unique_ptr<Widget>> widgets;
 

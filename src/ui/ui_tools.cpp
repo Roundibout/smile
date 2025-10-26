@@ -57,16 +57,16 @@ Vector2 UITools::clampPointWithinRect(const Vector2& point, const AbsoluteLayout
 Vector2 UITools::mirrorPointAcrossRect(const Vector2& point, const AbsoluteLayout& layout) {
     Vector2 mirrored;
     if (point.x < layout.rect.position.x) {
-        mirrored.x = layout.rect.position.x + layout.rect.size.x - 1;
+        mirrored.x = layout.rect.position.x + layout.rect.size.x - 4;
     } else if (point.x > layout.rect.position.x + layout.rect.size.x) {
-        mirrored.x = layout.rect.position.x + 1;
+        mirrored.x = layout.rect.position.x + 4;
     } else {
         mirrored.x = point.x;
     }
     if (point.y < layout.rect.position.y) {
-        mirrored.y = layout.rect.position.y + layout.rect.size.y - 1;
+        mirrored.y = layout.rect.position.y + layout.rect.size.y - 4;
     } else if (point.y > layout.rect.position.y + layout.rect.size.y) {
-        mirrored.y = layout.rect.position.y + 1;
+        mirrored.y = layout.rect.position.y + 4;
     } else {
         mirrored.y = point.y;
     }

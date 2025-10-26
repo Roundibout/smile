@@ -46,7 +46,7 @@ void Window::process() {
     // Process inputs
     while (!inputs.empty()) {
         WindowInput& input = inputs.front();
-
+        
         // Process input on widgets first
         bool consumed = false;
         for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
@@ -72,9 +72,9 @@ void Window::process() {
             lastSize = impl->getSize();
         }
 
-        inputs.pop(); // remove the input
+        inputs.pop_front(); // remove the input
     }
-
+    
     if (overdirtied == true) {
         renderer.dirty();
     }

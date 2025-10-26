@@ -164,14 +164,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             int y = int(window->getSize().y) - GET_Y_LPARAM(lParam);
             Vector2 currentPos(x, y);
 
+            if (window->reachingMouseGoal) { // I do not like this scuffed fix. There has to be a better way!
+                float dx = currentPos.x - window->mouseGoal.x;
+                float dy = currentPos.y - window->mouseGoal.y;
+
+                if (sqrtf(dx*dx + dy*dy) <= 10) {
+                    window->reachingMouseGoal = false;
+                } else {
+                    // Try to set the position again because Win32
+                    RECT rect;
+                    GetClientRect(hwnd, &rect);
+                    POINT clientPoint = {static_cast<int>(window->mouseGoal.x), static_cast<int>(rect.bottom - window->mouseGoal.y)};
+                    ClientToScreen(hwnd, &clientPoint);
+
+                    SetCursorPos(clientPoint.x, clientPoint.y);
+
+                    return 0;
+                }
+            }
+
             Vector2 delta(0, 0);
-            if (window->hasLastMousePos && !window->ignoreMouseDelta) {
+            if (window->hasLastMousePos) {
                 delta = currentPos - window->lastMousePos;
             }
 
             window->lastMousePos = currentPos;
             window->hasLastMousePos = true;
-            window->ignoreMouseDelta = false;
 
             WindowInput input;
             input.type = WindowInputType::MouseMove;
@@ -379,7 +397,7 @@ WindowWin32::WindowWin32(const uint32_t& i, const WindowConfig& c) : WindowImpl(
     UpdateWindow(hwnd);
 }
 
-std::queue<WindowInput> WindowWin32::update() {
+std::deque<WindowInput> WindowWin32::update() {
     MSG msg;
     // Process all pending messages
     while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
@@ -387,8 +405,31 @@ std::queue<WindowInput> WindowWin32::update() {
         DispatchMessage(&msg);
     }
 
+    // Merge all mouse move events into one
+    WindowInput merged{};
+    bool haveMerged = false;
+    
+    for (auto it = inputs.begin(); it != inputs.end();) {
+        if (it->type == WindowInputType::MouseMove) {
+            if (!haveMerged) {
+                merged = *it;
+                haveMerged = true;
+            } else {
+                merged.mouse.delta += it->mouse.delta;
+                merged.mouse.position = it->mouse.position;
+            }
+            it = inputs.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    if (haveMerged) {
+        inputs.push_back(merged);
+    }
+
     // Copy inputs to a new queue for use outside
-    std::queue<WindowInput> inputsCopy;
+    std::deque<WindowInput> inputsCopy;
     std::swap(inputsCopy, inputs);
 
     return inputsCopy;
@@ -542,8 +583,9 @@ bool WindowWin32::isKeyDown(KeyCode key) {
 }
 
 void WindowWin32::setMousePosition(const Vector2& position) {
-    ignoreMouseDelta = true;
-
+    mouseGoal = position;
+    reachingMouseGoal = true;
+    
     RECT rect;
     GetClientRect(hwnd, &rect);
     POINT clientPoint = {static_cast<int>(position.x), static_cast<int>(rect.bottom - position.y)};
@@ -598,7 +640,7 @@ void WindowWin32::releaseCapture() {
 }
 
 void WindowWin32::pushInput(WindowInput input) {
-    inputs.push(input);
+    inputs.push_back(input);
 }
 
 WindowWin32::~WindowWin32() {

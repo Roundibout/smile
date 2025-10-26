@@ -15,6 +15,7 @@ License:
 #include <optional>
 #include <algorithm>
 #include <unordered_map>
+#include <deque>
 #include <utility>
 
 #include <glad/wgl.h>
@@ -40,13 +41,13 @@ private:
     HGLRC glContext;
     PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
     
-    std::queue<WindowInput> inputs;
+    std::deque<WindowInput> inputs;
 
     LPCSTR cursorId = IDC_ARROW;
 public:
     WindowWin32(const uint32_t& i, const WindowConfig& c);
     ~WindowWin32();
-    std::queue<WindowInput> update() override;
+    std::deque<WindowInput> update() override;
 
     // OpenGL
 
@@ -75,5 +76,7 @@ public:
 
     Vector2 lastMousePos;
     bool hasLastMousePos = false;
-    bool ignoreMouseDelta = false;
+
+    Vector2 mouseGoal;
+    bool reachingMouseGoal = false;
 };
