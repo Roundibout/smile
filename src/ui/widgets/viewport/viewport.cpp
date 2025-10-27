@@ -29,6 +29,8 @@ void Viewport::render(const UIBounds& bounds) {
     window->renderer.drawRoundedRect(layout, bounds);
     window->renderer.useStencil();
 
+    window->renderer.enableSubpixel();
+
     AbsoluteLayout appliedLayout = window->renderer.resolveLayout(layout, bounds);
     appliedViewPosition = Vector2(appliedLayout.rect.size.x / 2 + viewPosition.x, appliedLayout.rect.size.y / 2 + viewPosition.y);
 
@@ -136,6 +138,8 @@ void Viewport::render(const UIBounds& bounds) {
             2.0f, 4.0f, 4.0f
         );
     }
+
+    window->renderer.disableSubpixel();
 
     window->renderer.endStencil();
 }

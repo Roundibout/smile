@@ -21,14 +21,15 @@ class RendererImpl {
 protected:
     WindowImpl* window;
     float currentScale = 1.0f;
+    bool subpixelEnabled = false;
     bool stencilActive = false;
 public:
     RendererImpl(WindowImpl* w);
 
     float scale(float value) {return value * currentScale;}
     float divide(float value) {return value / currentScale;}
-    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
-    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
+    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds, bool subpixel = false);
+    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds, bool subpixel = false);
     UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);
 
     virtual void beginFrame(float scale) = 0;
@@ -40,6 +41,9 @@ public:
     virtual void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) = 0;
     virtual void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) = 0;
     virtual void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) = 0;
+
+    void enableSubpixel();
+    void disableSubpixel();
 
     virtual void beginStencil() = 0;
     virtual void useStencil() = 0;

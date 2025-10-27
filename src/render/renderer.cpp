@@ -15,12 +15,12 @@ Renderer::Renderer(WindowImpl* window) {
     impl = std::make_unique<RendererGL>(window); // only OpenGL for now (a while probably)
 }
 
-Vector2 Renderer::resolvePosition(const UIDim2& position, const UIBounds& bounds) {
-    return impl->resolvePosition(position, bounds);
+Vector2 Renderer::resolvePosition(const UIDim2& position, const UIBounds& bounds, bool subpixel) {
+    return impl->resolvePosition(position, bounds, subpixel);
 }
 
-AbsoluteLayout Renderer::resolveLayout(const UILayout& layout, const UIBounds& bounds) {
-    return impl->resolveLayout(layout, bounds);
+AbsoluteLayout Renderer::resolveLayout(const UILayout& layout, const UIBounds& bounds, bool subpixel) {
+    return impl->resolveLayout(layout, bounds, subpixel);
 }
 
 UIBounds Renderer::applyLayout(const UIBounds& bounds, const UILayout& layout) {
@@ -123,6 +123,14 @@ void Renderer::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bou
 
 void Renderer::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
     impl->drawText(position, bounds, text, path, size, color);
+}
+
+void Renderer::enableSubpixel() {
+    impl->enableSubpixel();
+}
+
+void Renderer::disableSubpixel() {
+    impl->disableSubpixel();
 }
 
 void Renderer::beginStencil() {

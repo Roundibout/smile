@@ -266,9 +266,9 @@ void RendererGL::drawTriangle(const UIDim2& position1, const UIDim2& position2, 
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    Vector2 resolved1 = resolvePosition(position1, bounds);
-    Vector2 resolved2 = resolvePosition(position2, bounds);
-    Vector2 resolved3 = resolvePosition(position3, bounds);
+    Vector2 resolved1 = resolvePosition(position1, bounds, subpixelEnabled);
+    Vector2 resolved2 = resolvePosition(position2, bounds, subpixelEnabled);
+    Vector2 resolved3 = resolvePosition(position3, bounds, subpixelEnabled);
 
     BasicVertex v0{{resolved1.x, resolved1.y}, color};
     BasicVertex v1{{resolved2.x, resolved2.y}, color};
@@ -286,10 +286,10 @@ void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, cons
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    Vector2 resolved1 = resolvePosition(position1, bounds);
-    Vector2 resolved2 = resolvePosition(position2, bounds);
-    Vector2 resolved3 = resolvePosition(position3, bounds);
-    Vector2 resolved4 = resolvePosition(position4, bounds);
+    Vector2 resolved1 = resolvePosition(position1, bounds, subpixelEnabled);
+    Vector2 resolved2 = resolvePosition(position2, bounds, subpixelEnabled);
+    Vector2 resolved3 = resolvePosition(position3, bounds, subpixelEnabled);
+    Vector2 resolved4 = resolvePosition(position4, bounds, subpixelEnabled);
 
     BasicVertex v0{{resolved1.x, resolved1.y}, color};
     BasicVertex v1{{resolved2.x, resolved2.y}, color};
@@ -311,7 +311,7 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    AbsoluteLayout resolved = resolveLayout(layout, bounds, subpixelEnabled);
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
@@ -339,7 +339,7 @@ void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds,
     if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
 
-    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    AbsoluteLayout resolved = resolveLayout(layout, bounds, subpixelEnabled);
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
@@ -363,7 +363,7 @@ void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& b
 
     stroke = static_cast<int>(std::round(stroke * currentScale));
 
-    AbsoluteLayout resolved = resolveLayout(layout, bounds);
+    AbsoluteLayout resolved = resolveLayout(layout, bounds, subpixelEnabled);
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
@@ -493,7 +493,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
         return;
     }
 
-    Vector2 resolved = resolvePosition(position, bounds);
+    Vector2 resolved = resolvePosition(position, bounds, subpixelEnabled);
     float x = resolved.x;
     float y = resolved.y;
 
@@ -595,5 +595,10 @@ void RendererGL::endFrame() {
     flushTriangleBatch();
     flushTextBatch();
     flushRoundedBatch();
+    if (stencilActive) {
+        glDisable(GL_STENCIL_TEST);
+        stencilActive = false;
+    }
+    disableSubpixel();
     window->swapGLBuffers();
 }

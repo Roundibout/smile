@@ -29,8 +29,8 @@ public:
 
     float scale(float value) {return impl->scale(value);}
     float divide(float value) {return impl->divide(value);}
-    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds);
-    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds);
+    Vector2 resolvePosition(const UIDim2& position, const UIBounds& bounds, bool subpixel = false);
+    AbsoluteLayout resolveLayout(const UILayout& layout, const UIBounds& bounds, bool subpixel = false);
     UIBounds applyLayout(const UIBounds& bounds, const UILayout& layout);
 
     void beginFrame(float scale);
@@ -44,6 +44,9 @@ public:
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4());
     void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color = Color4(), int stroke = 1, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f), const UIStrokeAlignment& strokeAlignment = UIStrokeAlignment::Outside);
     void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color);
+
+    void enableSubpixel();
+    void disableSubpixel();
 
     void beginStencil();
     void useStencil();

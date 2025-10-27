@@ -15,16 +15,23 @@ RendererImpl::RendererImpl(WindowImpl* w) {
     window = w;
 }
 
-Vector2 RendererImpl::resolvePosition(const UIDim2& position, const UIBounds& bounds) {
+Vector2 RendererImpl::resolvePosition(const UIDim2& position, const UIBounds& bounds, bool subpixel) {
     UIBounds applied = applyLayout(bounds, UILayout(UIRect(position, UIDim2())));
 
-    return Vector2(
-        applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale,
-        applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale
-    );
+    if (subpixel) {
+        return Vector2(
+            applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale,
+            applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale
+        );
+    } else {
+        return Vector2(
+            std::roundf(applied.absolute.x * applied.layout.rect.position.x.scale + applied.layout.rect.position.x.offset * currentScale),
+            std::roundf(applied.absolute.y * applied.layout.rect.position.y.scale + applied.layout.rect.position.y.offset * currentScale)
+        );
+    }
 }
 
-AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBounds& bounds) {
+AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBounds& bounds, bool subpixel) {
     UIBounds applied = applyLayout(bounds, layout);
 
     AbsoluteLayout resolved(
@@ -40,6 +47,13 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
     resolved.cornerLT = applied.layout.cornerLT.offset * currentScale;
     resolved.cornerRB = applied.layout.cornerRB.offset * currentScale;
     resolved.cornerLB = applied.layout.cornerLB.offset * currentScale;
+
+    if (!subpixel) {
+        resolved.rect.position.x = std::roundf(resolved.rect.position.x);
+        resolved.rect.position.y = std::roundf(resolved.rect.position.y);
+        resolved.rect.size.x = std::roundf(resolved.rect.size.x);
+        resolved.rect.size.y = std::roundf(resolved.rect.size.y);
+    }
 
     float sizeX = resolved.rect.size.x;
     float sizeY = resolved.rect.size.y;
@@ -82,4 +96,12 @@ UIBounds RendererImpl::applyLayout(const UIBounds& bounds, const UILayout& child
     applied.layout.cornerLB = childLayout.cornerLB;
 
     return applied;
+}
+
+void RendererImpl::enableSubpixel() {
+    subpixelEnabled = true;
+}
+
+void RendererImpl::disableSubpixel() {
+    subpixelEnabled = false;
 }
