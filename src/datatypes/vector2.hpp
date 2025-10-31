@@ -74,5 +74,17 @@ struct Vector2 {
         return *this;
     }
 
+    Vector2& operator*=(float scalar) {
+        x *= scalar; 
+        y *= scalar; 
+        return *this;
+    }
+
+    Vector2& operator/=(float scalar) {
+        x /= scalar; 
+        y /= scalar; 
+        return *this;
+    }
+
     std::string to_string() const;
 };

@@ -22,6 +22,9 @@ void Viewport::update(float deltaTime, const UIBounds& bounds) {
 }
 
 void Viewport::render(const UIBounds& bounds) {
+
+    // Draw viewport contents
+
     layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
     window->renderer.drawRoundedRect(layout, bounds, Color4(0.1f, 0.1f, 0.1f));
 
@@ -119,6 +122,8 @@ void Viewport::render(const UIBounds& bounds) {
     }
     
     if (rotatingView) {
+        Vector2 delta = rotatePosition - rotatePivot;
+
         window->renderer.drawDottedLine(
             UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y - 2.0f),
             UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y - 2.0f),
@@ -137,8 +142,37 @@ void Viewport::render(const UIBounds& bounds) {
             color, 
             2.0f, 4.0f, 4.0f
         );
+
+        float angle = std::atan2(delta.x, -delta.y);
+        float cosA = std::cosf(angle);
+        float sinA = std::sinf(angle);
+
+        Vector2 offset(8, 0);
+        offset = Vector2(
+            (offset.x * cosA - offset.y * sinA),
+            (offset.x * sinA + offset.y * cosA)
+        );
+        
+        window->renderer.drawStrokeArrow(
+            UIDim2(0.5f, rotatePosition.x + offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y + offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
+            bounds, 
+            angle - PI / 2, 
+            color, 
+            16, 10, 2);
+        window->renderer.drawStrokeArrow(
+            UIDim2(0.5f, rotatePosition.x - offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y - offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
+            bounds, 
+            angle + PI / 2, 
+            color, 
+            16, 10, 2);
     }
 
+    window->renderer.disableSubpixel();
+
+    // Draw viewport UI
+
+    window->renderer.enableSubpixel();
+    window->renderer.drawSolidStrokeArrow(UIDim2(1.0f, -400, 1.0f, -400), bounds, viewRotation, Color4(), Vector2(30, 40), Vector2(60, 40), 2);
     window->renderer.disableSubpixel();
 
     window->renderer.endStencil();
@@ -184,9 +218,9 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 float oldScale = viewScale;
 
                 if (input.mouse.scroll.y > 0) {
-                    viewScale *= 1.1f;
+                    viewScale = std::clamp(viewScale * 1.1f, MIN_SCALE, MAX_SCALE);
                 } else if (input.mouse.scroll.y < 0) {
-                    viewScale /= 1.1f;
+                    viewScale = std::clamp(viewScale / 1.1f, MIN_SCALE, MAX_SCALE);
                 }
 
                 float scaleFactor = viewScale / oldScale;
@@ -209,6 +243,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                     rotatePivot = Vector2(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
                     rotatePosition = rotatePivot;
                     rotateMirrors = Vector2();
+                    window->hideCursor();
                     Logger::print("Rotating");
                 } else if (window->isKeyDown(KeyCode::Control)) {
                     zoomingView = true;
@@ -233,6 +268,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 rotatingView = false;
                 window->renderer.dirty();
                 window->releaseCapture();
+                window->showCursor();
                 return true;
             } else if (zoomingView) {
                 zoomingView = false;
@@ -255,7 +291,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2 + applied.rect.size.x * rotateMirrors.x, 
                 input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2 + applied.rect.size.y * rotateMirrors.y
             );
-
+            
             if (!UITools::isPointOverRect(input.mouse.position, applied)) {
                 if (input.mouse.position.x > applied.rect.position.x + applied.rect.size.x) {
                     rotateMirrors.x += 1;
@@ -319,9 +355,9 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             float zoom = input.mouse.delta.y * 0.005f;
 
             if (zoom > 0) {
-                viewScale *= 1.0f + abs(zoom);
+                viewScale = std::clamp(viewScale * (1.0f + abs(zoom)), MIN_SCALE, MAX_SCALE);
             } else if (zoom < 0) {
-                viewScale /= 1.0f + abs(zoom);
+                viewScale = std::clamp(viewScale / (1.0f + abs(zoom)), MIN_SCALE, MAX_SCALE);
             }
 
             float scaleFactor = viewScale / oldScale;

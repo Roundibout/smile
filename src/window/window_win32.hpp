@@ -63,6 +63,8 @@ public:
     void setMousePosition(const Vector2& position) override;
 
     void setCursor(Cursor cursor) override;
+    void hideCursor();
+    void showCursor();
 
     void freezeMouse() override;
     void unfreezeMouse() override;

@@ -72,6 +72,8 @@ public:
     virtual void unfreezeMouse() = 0;
 
     virtual void setCursor(Cursor cursor) = 0;
+    virtual void hideCursor() = 0;
+    virtual void showCursor() = 0;
 
     virtual void setCapture() = 0;
     virtual void releaseCapture() = 0;

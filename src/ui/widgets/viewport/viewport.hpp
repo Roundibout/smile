@@ -4,6 +4,9 @@
 
 #include <core/object.hpp>
 
+constexpr float MAX_SCALE = 100000.0f;
+constexpr float MIN_SCALE = 0.1f;
+
 class Viewport : public Widget {
 private:
     Object obj;

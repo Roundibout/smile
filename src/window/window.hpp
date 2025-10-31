@@ -69,6 +69,8 @@ public:
     void unfreezeMouse();
 
     void setCursor(Cursor cursor);
+    void hideCursor();
+    void showCursor();
 
     void setCapture();
     void releaseCapture();

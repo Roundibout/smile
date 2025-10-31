@@ -149,6 +149,14 @@ void Window::setCursor(Cursor cursor) {
     impl->setCursor(cursor);
 }
 
+void Window::hideCursor() {
+    impl->hideCursor();
+}
+
+void Window::showCursor() {
+    impl->showCursor();
+}
+
 void Window::setCapture() {
     impl->setCapture();
 }

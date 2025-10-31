@@ -631,6 +631,14 @@ void WindowWin32::setCursor(Cursor cursor) {
     SetClassLongPtr(hwnd, GCLP_HCURSOR, reinterpret_cast<LONG_PTR>(LoadCursor(nullptr, cursorId)));
 }
 
+void WindowWin32::hideCursor() {
+    ShowCursor(FALSE);
+}
+
+void WindowWin32::showCursor() {
+    ShowCursor(TRUE);
+}
+
 void WindowWin32::setCapture() {
     SetCapture(hwnd);
 }
