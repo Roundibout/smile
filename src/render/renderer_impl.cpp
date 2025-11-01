@@ -43,6 +43,9 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
         )
     );
 
+    resolved.rotation = layout.rotation * PI_180;
+    resolved.anchorPoint = layout.anchorPoint;
+
     resolved.cornerRT = applied.layout.cornerRT.offset * currentScale;
     resolved.cornerLT = applied.layout.cornerLT.offset * currentScale;
     resolved.cornerRB = applied.layout.cornerRB.offset * currentScale;

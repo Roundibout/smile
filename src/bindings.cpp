@@ -1,3 +1,4 @@
+#define SOL_STD_OPTIONAL 1
 #include <sol/sol.hpp>
 
 #include <datatypes/vector2.hpp>

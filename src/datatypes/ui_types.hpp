@@ -105,6 +105,9 @@ struct AbsoluteLayout {
 
     float cornerRT, cornerLT, cornerRB, cornerLB = 0.0f;
 
+    float rotation = 0;
+    Vector2 anchorPoint{};
+
     AbsoluteLayout() : rect(Rect()) {}
     AbsoluteLayout(const Rect& rect) : rect(rect) {}
 };
@@ -116,6 +119,9 @@ struct UILayout {
     UIDim cornerLT{};
     UIDim cornerRB{};
     UIDim cornerLB{};
+
+    float rotation = 0;
+    Vector2 anchorPoint{};
 
     UILayout() : rect(UIRect()) {}
     UILayout(const UIRect& rect) : rect(rect) {}

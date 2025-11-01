@@ -42,6 +42,7 @@ struct RoundedVertex {
     Vector2 rectSize;
     Color4 color;
     float corners[4];
+    float rotation;
 };
 
 class GLTexture {

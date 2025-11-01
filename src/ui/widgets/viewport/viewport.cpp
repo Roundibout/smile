@@ -1,3 +1,4 @@
+
 #include "viewport.hpp"
 #include <window/window.hpp>
 
@@ -124,33 +125,28 @@ void Viewport::render(const UIBounds& bounds) {
     if (rotatingView) {
         Vector2 delta = rotatePosition - rotatePivot;
 
-        window->renderer.drawDottedLine(
-            UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y - 2.0f),
-            UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y - 2.0f),
-            bounds, 
-            Color4(0.0f, 0.0f, 0.0f, 0.8f), 
-            2.0f, 4.0f, 4.0f
-        );
-        
-        Color4 color = Color4();
-        if (tooCloseToRotate) color = Color4(1.0f, 0.5f, 0.5f);
+        Color4 color = Theme::color(ThemeColor::Cursor);
+        Color4 strokeColor = Theme::color(ThemeColor::CursorStroke);
 
-        window->renderer.drawDottedLine(
+        if (tooCloseToRotate) color = Theme::color(ThemeColor::Invalid);
+
+        window->renderer.drawStrokeDottedLine(
             UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y),
             UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y),
             bounds, 
             color, 
-            2.0f, 4.0f, 4.0f
+            2, 4, 4, 2,
+            strokeColor
         );
 
         float angle = std::atan2(delta.x, -delta.y);
-        float cosA = std::cosf(angle);
-        float sinA = std::sinf(angle);
+        float cos = std::cosf(angle);
+        float sin = std::sinf(angle);
 
         Vector2 offset(8, 0);
         offset = Vector2(
-            (offset.x * cosA - offset.y * sinA),
-            (offset.x * sinA + offset.y * cosA)
+            (offset.x * cos - offset.y * sin),
+            (offset.x * sin + offset.y * cos)
         );
         
         window->renderer.drawStrokeArrow(
@@ -158,13 +154,17 @@ void Viewport::render(const UIBounds& bounds) {
             bounds, 
             angle - PI / 2, 
             color, 
-            16, 10, 2);
+            16, 10, 2, 2,
+            strokeColor
+        );
         window->renderer.drawStrokeArrow(
             UIDim2(0.5f, rotatePosition.x - offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y - offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
             bounds, 
             angle + PI / 2, 
             color, 
-            16, 10, 2);
+            16, 10, 2, 2, 
+            strokeColor
+        );
     }
 
     window->renderer.disableSubpixel();
@@ -172,7 +172,40 @@ void Viewport::render(const UIBounds& bounds) {
     // Draw viewport UI
 
     window->renderer.enableSubpixel();
-    window->renderer.drawSolidStrokeArrow(UIDim2(1.0f, -400, 1.0f, -400), bounds, viewRotation, Color4(), Vector2(30, 40), Vector2(60, 40), 2);
+
+    // Rotation indicator
+    Vector2 rotationIndicatorBL(
+        (-50 * cosR - -50 * sinR),
+        (-50 * sinR + -50 * cosR)
+    );
+    Vector2 rotationIndicatorBR(
+        (50 * cosR - -50 * sinR),
+        (50 * sinR + -50 * cosR)
+    );
+    Vector2 rotationIndicatorTL(
+        (-50 * cosR - 50 * sinR),
+        (-50 * sinR + 50 * cosR)
+    );
+    Vector2 rotationIndicatorTR(
+        (50 * cosR - 50 * sinR),
+        (50 * sinR + 50 * cosR)
+    );
+    window->renderer.drawQuad(
+        UIDim2(1.0f, -100 + rotationIndicatorBL.x, 1.0f, -100 + rotationIndicatorBL.y), 
+        UIDim2(1.0f, -100 + rotationIndicatorBR.x, 1.0f, -100 + rotationIndicatorBR.y), 
+        UIDim2(1.0f, -100 + rotationIndicatorTR.x, 1.0f, -100 + rotationIndicatorTR.y), 
+        UIDim2(1.0f, -100 + rotationIndicatorTL.x, 1.0f, -100 + rotationIndicatorTL.y), 
+        bounds, 
+        Theme::color(ThemeColor::ViewportRotationIndicator)
+    );
+
+    Vector2 rotationIndicatorOffset(0, 10);
+    rotationIndicatorOffset = Vector2(
+        (rotationIndicatorOffset.x * cosR - rotationIndicatorOffset.y * sinR),
+        (rotationIndicatorOffset.x * sinR + rotationIndicatorOffset.y * cosR)
+    );
+    window->renderer.drawSolidArrow(UIDim2(1.0f, -100 + rotationIndicatorOffset.x, 1.0f, -100 + rotationIndicatorOffset.y), bounds, viewRotation, Theme::color(ThemeColor::ViewportRotationIndicatorArrow), Vector2(15, 15), Vector2(30, 15));
+
     window->renderer.disableSubpixel();
 
     window->renderer.endStencil();

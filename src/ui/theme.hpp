@@ -14,10 +14,19 @@ enum class ThemeMetric {
 };
 
 enum class ThemeColor {
+    Selection,
+    Invalid,
+
     WindowBackground,
 
     Panel,
     PanelStroke,
+
+    Cursor,
+    CursorStroke,
+
+    ViewportRotationIndicator,
+    ViewportRotationIndicatorArrow,
 
     ConsoleBackground,
     ConsoleTimestamp,
@@ -46,16 +55,27 @@ private:
         metrics[ThemeMetric::PanelStroke] = 2.0f;
 
         metrics[ThemeMetric::ConsoleTextSize] = 20.0f;
+
         // Initialize default colors
+        colors[ThemeColor::Selection] = Color4(1.0f, 1.0f, 1.0f);
+        colors[ThemeColor::Invalid] = Color4(1.0f, 0.5f, 0.5f);
+
         colors[ThemeColor::WindowBackground] = Color4(0.08f, 0.08f, 0.08f);
         colors[ThemeColor::Panel] = Color4(0.2f, 0.2f, 0.2f);
         colors[ThemeColor::PanelStroke] = Color4(0.3f, 0.3f, 0.3f);
+
+        colors[ThemeColor::Cursor] = Color4(1.0f, 1.0f, 1.0f);
+        colors[ThemeColor::CursorStroke] = Color4(0.0f, 0.0f, 0.0f);
+
+        colors[ThemeColor::ViewportRotationIndicator] = Color4(0.8f, 0.8f, 0.8f, 0.2f); 
+        colors[ThemeColor::ViewportRotationIndicatorArrow] = Color4(0.7f, 0.7f, 0.7f);
 
         colors[ThemeColor::ConsoleBackground] = Color4(0.1f, 0.1f, 0.1f);
         colors[ThemeColor::ConsoleTimestamp] = Color4(0.5f, 0.5f, 0.5f);
         colors[ThemeColor::ConsoleInfo] = Color4(0.9f, 0.9f, 0.9f);
         colors[ThemeColor::ConsoleWarning] = Color4(0.9f, 0.6f, 0.1f);
         colors[ThemeColor::ConsoleError] = Color4(0.9f, 0.1f, 0.05f);
+
         // Initialize default fonts
         fonts[ThemeFont::Regular] = "assets/fonts/Inter_18pt-Regular.ttf";
         fonts[ThemeFont::Italic] = "assets/fonts/Inter_18pt-Italic.ttf";

@@ -102,6 +102,8 @@ RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, corners));
     glEnableVertexAttribArray(4);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(RoundedVertex), (void*)offsetof(RoundedVertex, rotation));
+    glEnableVertexAttribArray(5);
 
     glBindVertexArray(0);
 
@@ -315,6 +317,8 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
+    // TODO: make rotation work
+
     BasicVertex v0{{position.x, position.y}, color};
     BasicVertex v1{{position.x + size.x, position.y}, color};
     BasicVertex v2{{position.x + size.x, position.y + size.y}, color};
@@ -331,7 +335,7 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
 }
 
 void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
-    stroke = static_cast<int>(std::round(stroke * currentScale));
+    stroke = static_cast<int>(std::round(stroke * currentScale)); // TODO: make this work
 }
 
 void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
@@ -343,10 +347,12 @@ void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds,
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
 
-    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
-    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
-    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
-    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}};
+    // TODO: make rotation work
+
+    RoundedVertex v0{{0.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}, resolved.rotation};
+    RoundedVertex v1{{1.0f, 0.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}, resolved.rotation};
+    RoundedVertex v2{{1.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}, resolved.rotation};
+    RoundedVertex v3{{0.0f, 1.0f}, position, size, color, {resolved.cornerLB, resolved.cornerRB, resolved.cornerRT, resolved.cornerLT}, resolved.rotation};
 
     roundedBatchVertices.push_back(v0);
     roundedBatchVertices.push_back(v1);
@@ -366,6 +372,8 @@ void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& b
     AbsoluteLayout resolved = resolveLayout(layout, bounds, subpixelEnabled);
     Vector2 position = resolved.rect.position;
     Vector2 size = resolved.rect.size;
+
+    // TODO: make rotation work
 
     { // Stroke
         RoundedVertex vertices[4];

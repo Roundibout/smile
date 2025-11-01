@@ -105,6 +105,37 @@ void Renderer::drawDottedLine(const UIDim2& position1, const UIDim2& position2, 
     }
 }
 
+void Renderer::drawStrokeDottedLine(const UIDim2& position1, const UIDim2& position2, const UIBounds& bounds, const Color4& color, float thickness, float dotLength, float spacing, float stroke, const Color4& strokeColor) {
+    float strokeSpacing = spacing - stroke * 2;
+
+    Vector2 delta = resolvePosition(position2, bounds, true) - resolvePosition(position1, bounds, true);
+    float angle = std::atan2(delta.x, -delta.y);
+
+    float cos = std::cosf(angle);
+    float sin = std::sinf(angle);
+    Vector2 offset(
+        -sin,
+        cos
+    );
+
+    float trim = std::sqrtf(delta.x*delta.x + delta.y*delta.y); // TODO: use this to adjust the dotted stroke
+
+    if (strokeSpacing <= 0) {
+        // TODO: should use draw line instead
+        drawDottedLine(
+            UIDim2(position1.x.scale, position1.x.offset + offset.x * stroke, position1.y.scale, position1.y.offset + offset.y * stroke), 
+            UIDim2(position2.x.scale, position2.x.offset - offset.x * stroke, position2.y.scale, position2.y.offset - offset.y * stroke), 
+            bounds, strokeColor, thickness + stroke * 2, dotLength + stroke * 2, strokeSpacing);
+    } else {
+        drawDottedLine(
+            UIDim2(position1.x.scale, position1.x.offset + offset.x * stroke, position1.y.scale, position1.y.offset + offset.y * stroke), 
+            UIDim2(position2.x.scale, position2.x.offset - offset.x * stroke, position2.y.scale, position2.y.offset - offset.y * stroke), 
+            bounds, strokeColor, thickness + stroke * 2, dotLength + stroke * 2, strokeSpacing);
+    }
+
+    drawDottedLine(position1, position2, bounds, color, thickness, dotLength, spacing);
+}
+
 void Renderer::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
     impl->drawRect(layout, bounds, color);
 }
@@ -121,7 +152,7 @@ void Renderer::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bou
     impl->drawRoundedStrokeRect(layout, bounds, color, stroke, strokeColor, strokeAlignment);
 }
 
-void Renderer::drawArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, int stumpLength, int armLength, int lineThickness) {
+void Renderer::drawArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, float stumpLength, float armLength, float lineThickness) {
     std::vector<Vector2> points;
     
     points.push_back(Vector2(-lineThickness / 2.0f, 0.0f)); // stumpBL 0
@@ -129,7 +160,7 @@ void Renderer::drawArrow(const UIDim2& position, const UIBounds& bounds, float r
     points.push_back(Vector2(-lineThickness / 2.0f, static_cast<float>(stumpLength))); // stumpTL 2
     points.push_back(Vector2(lineThickness / 2.0f, static_cast<float>(stumpLength))); // stumpTR 3
 
-    points.push_back(Vector2(0, stumpLength + lineThickness / 2)); // tip 4
+    points.push_back(Vector2(0.0f, stumpLength + lineThickness / 2)); // tip 4
 
     points.push_back(Vector2(points[4].x + armLength / ROOT2, points[4].y - armLength / ROOT2)); // armRBR 5
     points.push_back(Vector2(points[5].x - lineThickness / ROOT2, points[5].y - lineThickness / ROOT2)); // armRBL 6
@@ -177,7 +208,7 @@ void Renderer::drawArrow(const UIDim2& position, const UIBounds& bounds, float r
     );
 }
 
-void Renderer::drawStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, int stumpLength, int armLength, int lineThickness, int stroke, const Color4& strokeColor) {
+void Renderer::drawStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, float stumpLength, float armLength, float lineThickness, float stroke, const Color4& strokeColor) {
     std::vector<Vector2> points;
     
     points.push_back(Vector2(-lineThickness / 2.0f - stroke, static_cast<float>(-stroke))); // stumpBL 0
@@ -295,7 +326,7 @@ static Vector2 lineIntersection(const Vector2& p1, const Vector2& n1, const Vect
     return p1 + d1 * t;
 }
 
-void Renderer::drawSolidStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, const Vector2& stumpSize, const Vector2& headSize, int stroke, const Color4& strokeColor) {
+void Renderer::drawSolidStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation, const Color4& color, const Vector2& stumpSize, const Vector2& headSize, float stroke, const Color4& strokeColor) {
     std::vector<Vector2> points;
 
     points.push_back(Vector2(-stumpSize.x / 2 - stroke, static_cast<float>(-stroke)));

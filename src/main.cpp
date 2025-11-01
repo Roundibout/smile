@@ -13,6 +13,7 @@ License:
 #include <memory>
 #include <string>
 
+#define SOL_STD_OPTIONAL 1
 #include <sol/sol.hpp>
 
 #ifdef _WIN32

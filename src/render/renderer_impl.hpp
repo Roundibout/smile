@@ -17,6 +17,8 @@ License:
 
 #include <window/window_impl.hpp>
 
+constexpr float PI_180 = 3.1415926f / 180;
+
 class RendererImpl {
 protected:
     WindowImpl* window;

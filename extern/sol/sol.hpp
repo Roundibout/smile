@@ -6752,7 +6752,7 @@ namespace sol {
 			static_assert(std::is_constructible<T, Args&&...>::value, "T must be constructible with Args");
 
 			*this = nullopt;
-			this->construct(std::forward<Args>(args)...);
+			::new (std::addressof(this->value())) T(std::forward<Args>(args)...); // Fix by Smile development team because it broke with newer gcc version (???)
 		}
 
 		/// Swaps this optional with the other.
