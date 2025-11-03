@@ -241,7 +241,7 @@ void Object::compute() {
 
                 if (!earFound) {
                     // Polygon may be self-intersecting or malformed
-                    Logger::error("Ear clipping failed");
+                    //Logger::error("Ear clipping failed");
                     break;
                 }
             }
@@ -291,7 +291,7 @@ void Object::compute() {
         clusters.push_back(cluster);
     }
 
-    Logger::print("CLUSTERS: " + std::to_string(clusters.size()));
+    //Logger::print("CLUSTERS: " + std::to_string(clusters.size()));
 
     for (std::vector<Id> cluster : clusters) {
         Id biggestFace = INVALID_ID;
@@ -313,7 +313,7 @@ void Object::compute() {
                 );
             }
 
-            Logger::print(std::to_string(face) + " area: " + std::to_string(area));
+            //Logger::print(std::to_string(face) + " area: " + std::to_string(area));
 
             if (area > biggestArea) {
                 biggestFace = face;
@@ -322,7 +322,7 @@ void Object::compute() {
         }
 
         if (biggestFace != INVALID_ID) {
-            Logger::print("Biggest Face: " + std::to_string(biggestFace));
+            //Logger::print("Biggest Face: " + std::to_string(biggestFace));
             // Remove from faces vector
             faces.erase(faces.begin() + biggestFace);
 

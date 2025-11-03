@@ -4,7 +4,7 @@
   "runtime": {
     "version": "Lua 5.4",
     "path": [
-      "scripts/?.lua"
+      "extensions/test/?.lua"
     ]
   },
   "workspace": {

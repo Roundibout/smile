@@ -32,7 +32,8 @@ enum class ThemeColor {
     ConsoleTimestamp,
     ConsoleInfo,
     ConsoleWarning,
-    ConsoleError
+    ConsoleError,
+    ConsoleExtension
 };
 
 enum class ThemeFont {
@@ -75,6 +76,7 @@ private:
         colors[ThemeColor::ConsoleInfo] = Color4(0.9f, 0.9f, 0.9f);
         colors[ThemeColor::ConsoleWarning] = Color4(0.9f, 0.6f, 0.1f);
         colors[ThemeColor::ConsoleError] = Color4(0.9f, 0.1f, 0.05f);
+        colors[ThemeColor::ConsoleExtension] = Color4(0.7f, 0.6f, 1.0f);
 
         // Initialize default fonts
         fonts[ThemeFont::Regular] = "assets/fonts/Inter_18pt-Regular.ttf";

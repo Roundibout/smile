@@ -162,7 +162,7 @@ public: // CHANGE AFTER TESTING
         // Return invalid id if we have already traversed this way and set this edge's A and pivot vertex ids depending on direction
         if (direction == EdgeDirection::Forward) {
             if (startEdge.forwardUsed) {
-                Logger::warn("Forward already used");
+                //Logger::warn("Forward already used");
                 return INVALID_ID;
             }
             aId = startEdge.start;
@@ -171,7 +171,7 @@ public: // CHANGE AFTER TESTING
             startEdge.forwardUsed = true; // We're checking forward
         } else if (direction == EdgeDirection::Backward) {
             if (startEdge.backwardUsed) {
-                Logger::warn("Backward already used");
+                //Logger::warn("Backward already used");
                 return INVALID_ID;
             }
             aId = startEdge.end;
@@ -228,10 +228,10 @@ public: // CHANGE AFTER TESTING
         }
 
         if (lowestAngleId != INVALID_ID) {
-            Logger::print("Edge " + std::to_string(startEdge.id) + " Connection");
-            Logger::print("    " + std::to_string(lowestAngleId) + " at angle " + std::to_string(lowestAngle));
+            //Logger::print("Edge " + std::to_string(startEdge.id) + " Connection");
+            //Logger::print("    " + std::to_string(lowestAngleId) + " at angle " + std::to_string(lowestAngle));
         } else {
-            Logger::error("Could not find a next edge");
+            //Logger::error("Could not find a next edge");
         }
 
         return lowestAngleId;
@@ -239,13 +239,13 @@ public: // CHANGE AFTER TESTING
 
     void computeFace(Edge& startEdge, EdgeDirection startDirection) {
         Face face(nextFaceId++);
-        Logger::print("Computing face " + std::to_string(face.id) + " (edge " + std::to_string(startEdge.id));
+        //Logger::print("Computing face " + std::to_string(face.id) + " (edge " + std::to_string(startEdge.id));
         if (startDirection == EdgeDirection::Forward) {
-            Logger::append(" forward");
+            //Logger::append(" forward");
         } else {
-            Logger::append(" backward");
+            //Logger::append(" backward");
         }
-        Logger::append(")");
+        //Logger::append(")");
             
         face.edges.push_back(startEdge.id);
 
@@ -307,9 +307,9 @@ public: // CHANGE AFTER TESTING
         };
 
         if (completed) {
-            Logger::print("FACE " + std::to_string(face.id));
+            //Logger::print("FACE " + std::to_string(face.id));
             for (Id edge : face.edges) {
-                Logger::append("\n    " + std::to_string(edge));
+                //Logger::append("\n    " + std::to_string(edge));
             }
 
             faces.push_back(face); // Add face if it is completed
@@ -317,7 +317,7 @@ public: // CHANGE AFTER TESTING
             --nextFaceId;
         }
 
-        Logger::append("\n");
+        //Logger::append("\n");
     }
 
     bool isCCW(const Face& face) {

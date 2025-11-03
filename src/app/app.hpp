@@ -26,9 +26,7 @@ class Window; // forward declaration
 class App {
 private:
     // Private constructor to prevent direct instantiation (there should be only one app)
-    App() {
-        Logger::print("App created.");
-    }
+    App() {}
     // Delete copy constructor and assignment operator to prevent copying (same reason)
     App(const App&) = delete;
     App& operator=(const App&) = delete;

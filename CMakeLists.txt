@@ -91,11 +91,11 @@ if (MINGW)
     target_link_options(Smile PRIVATE -Wl,--allow-multiple-definition)
 endif()
 
-# Custom target to copy scripts, assets (and licenses) every build
-add_custom_target(copy_scripts
+# Custom target to copy extensions, assets (and licenses) every build
+add_custom_target(copy_extensions
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/scripts"
-        "$<TARGET_FILE_DIR:Smile>/scripts"
+        "${CMAKE_SOURCE_DIR}/extensions"
+        "$<TARGET_FILE_DIR:Smile>/extensions"
 )
 add_custom_target(copy_assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -110,5 +110,5 @@ add_custom_target(copy_licenses
 
 # Make these run as part of ALL builds
 add_custom_target(prebuild ALL
-    DEPENDS copy_scripts copy_assets copy_licenses
+    DEPENDS copy_extensions copy_assets copy_licenses
 )

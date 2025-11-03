@@ -13,57 +13,40 @@ License:
 #include <memory>
 #include <string>
 
-#define SOL_STD_OPTIONAL 1
-#include <sol/sol.hpp>
-
 #ifdef _WIN32
     #include <windows.h>
 #endif
 
 #include <app/app.hpp>
+#include <extension/extension_manager.hpp>
+#include <ui/theme.hpp>
 #include <util/logger.hpp>
 
-extern void register_bindings(sol::state& lua);
+//extern void register_bindings(sol::state& lua);
 
 int main(int argc, char *argv[]) {
-    Logger::print("Initializing smile...");
+    Logger::print("//// Initializing ////\n");
 
     // Windows stuff
     #ifdef _WIN32
         timeBeginPeriod(1); // set minimum timer resolution
     #endif
-    
-    sol::state lua;
-    lua.open_libraries(
-        sol::lib::base,
-        sol::lib::package,
-        sol::lib::string,
-        sol::lib::table,
-        sol::lib::math
-    );
 
-    // Bind usertypes
-    register_bindings(lua);
+    Logger::print("//// Loading extensions ////\n");
 
-    // Run Lua
+    ExtensionManager::get().loadAll();
 
-    // Run a script to set the package path to the scripts folder
-    lua.safe_script("package.path = package.path..';./scripts/?.lua'");
+    Logger::print("\n//// Starting smile ////\n");
 
-    Logger::print("\n---- Starting smile ----\n");
+    WindowConfig config;
+    config.title = "Smile";
+    config.size = Vector2(1920, 1080);
+    config.minSize = Vector2(400, 400);
+    config.color = Theme::color(ThemeColor::WindowBackground);
+    config.maximized = true;
 
-    // Run main Lua entry point
-    auto result = lua.safe_script_file("scripts/main.lua", sol::script_pass_on_error);
-    if (!result.valid()) {
-        sol::error err = result;
-
-        Logger::print("\n---- Smile crashed -----");
-        Logger::print("\n[ ERROR ]\n" + std::string(err.what()));
-        
-        return -1; // Lua error
-    } else {
-        // Valid response
-    }
+    App::get().createWindow(config);
+    App::get().run();
 
     return 0;
 }

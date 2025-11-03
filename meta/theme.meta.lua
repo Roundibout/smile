@@ -32,14 +32,14 @@ Theme = {}
 ---Returns the specified metric from the theme.
 ---@param key ThemeMetric
 ---@return number metric
-function Theme:GetMetric(key) end
+function Theme:getMetric(key) end
 
 ---Returns the specified color from the theme.
 ---@param key ThemeColor
 ---@return Color4 color
-function Theme:GetColor(key) end
+function Theme:getColor(key) end
 
 ---Returns the specified font (file path) from the theme.
 ---@param key ThemeFont
 ---@return string font
-function Theme:GetFont(key) end
+function Theme:getFont(key) end

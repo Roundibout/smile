@@ -10,7 +10,8 @@
 enum class LogLevel {
     Info,
     Warning,
-    Error
+    Error,
+    Extension
 };
 
 struct LogEntry {

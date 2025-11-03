@@ -1,17 +1,34 @@
-#define SOL_STD_OPTIONAL 1
-#include <sol/sol.hpp>
+#include "extension.hpp"
 
-#include <datatypes/vector2.hpp>
-#include <datatypes/rect.hpp>
-#include <datatypes/color4.hpp>
-#include <datatypes/ui_types.hpp>
+Extension::Extension(Id id, std::string name, std::string path) : id(id), name(name), folder(path) {
+    lua.open_libraries(
+        sol::lib::base,
+        sol::lib::package,
+        sol::lib::string,
+        sol::lib::table,
+        sol::lib::math
+    );
 
-#include <window/window.hpp>
-#include <window/window_input.hpp>
-#include <ui/theme.hpp>
-#include <app/app.hpp>
+    // Set package path to the extension folder
+    std::string luaPackagePath = std::filesystem::path(folder).generic_string() + "/?.lua";
+    lua["package"]["path"] = lua["package"]["path"].get<std::string>() + ";" + luaPackagePath;
 
-void register_bindings(sol::state& lua) {
+    // Set console functions
+    lua.set_function("print", [this](sol::variadic_args args) {
+        std::string out = "[" + this->name + "]";
+        for (auto v : args)
+            out += " " + v.get<std::string>();
+        Logger::log(LogLevel::Extension, out);
+    });
+    lua.set_function("warn", [this](sol::variadic_args args) {
+        std::string out = "[" + this->name + "]";
+        for (auto v : args)
+            out += " " + v.get<std::string>();
+        Logger::warn(out);
+    });
+
+    // Bind usertypes
+
     // -- Enums -- //
 
     lua.new_enum<WindowEvent>("WindowEvent",
@@ -66,6 +83,23 @@ void register_bindings(sol::state& lua) {
             {"Outside", UIStrokeAlignment::Outside},
             {"Middle", UIStrokeAlignment::Middle},
             {"Inside", UIStrokeAlignment::Inside}
+        }
+    );
+
+    // Extensions
+    lua.new_enum<ToolMode>("ToolMode",
+        {
+            {"Object", ToolMode::Object},
+            {"Edit", ToolMode::Edit}
+        }
+    );
+    lua.new_enum<ToolCategory>("ToolCategory",
+        {
+            {"Select", ToolCategory::Select},
+            {"Transform", ToolCategory::Transform},
+            {"Add", ToolCategory::Add},
+            {"Modify", ToolCategory::Modify},
+            {"Custom", ToolCategory::Custom}
         }
     );
 
@@ -199,7 +233,7 @@ void register_bindings(sol::state& lua) {
         "cornerRB", &UILayout::cornerRB,
         "cornerLB", &UILayout::cornerLB,
         // Methods
-        "SetCorners", &UILayout::setCorners
+        "setCorners", &UILayout::setCorners
     );
 
     // UIBounds
@@ -255,51 +289,117 @@ void register_bindings(sol::state& lua) {
         "key", &WindowInput::key
     );
 
+    // Extension contributions and configs
+    lua.new_usertype<MenuAction>("MenuAction");
+    lua.new_usertype<ContextAction>("ContextAction");
+    lua.new_usertype<Tool>("Tool");
+
+    lua.new_usertype<MenuActionConfig>("MenuActionConfig",
+        "name", &MenuActionConfig::name
+    );
+    lua.new_usertype<ContextActionConfig>("ContextActionConfig",
+        "name", &ContextActionConfig::name
+    );
+    lua.new_usertype<ToolConfig>("ToolConfig",
+        "name", &ToolConfig::name,
+        "mode", &ToolConfig::mode,
+        "category", &ToolConfig::category
+    );
+
     // -- Classes -- //
 
     lua.new_usertype<Renderer>("Renderer",
-        "Dirty", &Renderer::dirty,
-        "IsDirty", &Renderer::isDirty,
+        "dirty", &Renderer::dirty,
+        "isDirty", &Renderer::isDirty,
 
-        "ResolvePosition", &Renderer::resolvePosition,
-        "ResolveLayout", &Renderer::resolveLayout,
-        "ApplyLayout", &Renderer::applyLayout,
+        "resolvePosition", &Renderer::resolvePosition,
+        "resolveLayout", &Renderer::resolveLayout,
+        "applyLayout", &Renderer::applyLayout,
 
-        "DrawTriangle", &Renderer::drawTriangle,
-        "DrawQuad", &Renderer::drawQuad,
-        "DrawRect", &Renderer::drawRect,
-        "DrawStrokeRect", &Renderer::drawStrokeRect,
-        "DrawRoundedRect", &Renderer::drawRoundedRect,
-        "DrawRoundedRect", &Renderer::drawRoundedStrokeRect,
-        "DrawText", &Renderer::drawText
+        "drawTriangle", &Renderer::drawTriangle,
+        "drawQuad", &Renderer::drawQuad,
+        "drawRect", &Renderer::drawRect,
+        "drawStrokeRect", &Renderer::drawStrokeRect,
+        "drawRoundedRect", &Renderer::drawRoundedRect,
+        "drawRoundedRect", &Renderer::drawRoundedStrokeRect,
+        "drawText", &Renderer::drawText
     );
 
     lua.new_usertype<Window>("Window",
         "renderer", sol::property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct
 
-        "ConnectUpdate", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Update, callback);},
-        "ConnectRender", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Render, callback);},
-        "ConnectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
+        "connectUpdate", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Update, callback);},
+        "connectRender", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Render, callback);},
+        "connectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
+    );
+
+    lua.new_usertype<Extension>("Extension",
+        "registerMenuAction", [](Extension& self, MenuActionConfig config){self.registerMenuAction(config);},
+        "registerContextAction", [](Extension& self, ContextActionConfig config){self.registerContextAction(config);},
+        "registerTool", [](Extension& self, ToolConfig config){self.registerTool(config);}
     );
 
     // -- Singletons -- //
 
     lua.new_usertype<Theme>("Theme",
-        "GetMetric", &Theme::getMetric,
-        "GetColor", &Theme::getColor,
-        "GetFont", &Theme::getFont
+        "getMetric", &Theme::getMetric,
+        "getColor", &Theme::getColor,
+        "getFont", &Theme::getFont
     );
 
+    /* TODO: will we give direct access to this? probably not, or at least not all its functions
     lua.new_usertype<App>("App",
-        "Run", &App::run,
-        "Quit", &App::quit,
+        "run", &App::run,
+        "quit", &App::quit,
 
-        "CreateWindow", &App::createWindow,
+        "createWindow", &App::createWindow,
 
-        "SetUIScale", &App::setUIScale
+        "setUIScale", &App::setUIScale
     );
+    */
 
-    // Assign the singletons to global variables so you don't need the get function
+    // Assign stuff to global variables
+    lua["Extension"] = this;
     lua["Theme"] = &Theme::get();
-    lua["App"] = &App::get();
+}
+
+bool Extension::load() {
+    Logger::print("Loading extension ", id);
+
+    sol::load_result script = lua.load_file(folder + "/main.lua");
+    if (!script.valid()) { // Check if main.lua exists
+        sol::error err = script;
+        Logger::error("Failed to load extension ", name, "\n    ", err.what()); // Syntax/load error
+        return false;
+    }
+
+    // Run it safely
+    sol::protected_function_result result = script();
+    if (!result.valid()) {
+        sol::error err = result;
+        Logger::error("Failed to load extension ", name, "\n    ", err.what()); // Runtime error
+        return false;
+    } else {
+        Logger::print("Successfully loaded extension \"", name, "\"");
+    }
+
+    return true;
+}
+
+std::shared_ptr<MenuAction> Extension::registerMenuAction(MenuActionConfig config) {
+    std::shared_ptr<MenuAction> action = std::make_shared<MenuAction>(config);
+    menuActions.push_back(action);
+    return action;
+}
+
+std::shared_ptr<ContextAction> Extension::registerContextAction(ContextActionConfig config) {
+    std::shared_ptr<ContextAction> action = std::make_shared<ContextAction>(config);
+    contextActions.push_back(action);
+    return action;
+}
+
+std::shared_ptr<Tool> Extension::registerTool(ToolConfig config) {
+    std::shared_ptr<Tool> tool = std::make_shared<Tool>(config);
+    tools.push_back(tool);
+    return tool;
 }

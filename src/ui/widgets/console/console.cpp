@@ -43,6 +43,9 @@ void Console::render(const UIBounds& bounds) {
         } else if (log.level == LogLevel::Error) {
             color = Theme::color(ThemeColor::ConsoleError);
             font = Theme::font(ThemeFont::CodeBold);
+        } else if (log.level == LogLevel::Extension) {
+            color = Theme::color(ThemeColor::ConsoleExtension);
+            font = Theme::font(ThemeFont::CodeRegular);
         }
 
         // Get the width of the timestamp to offset this log's message

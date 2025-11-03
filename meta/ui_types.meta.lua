@@ -38,9 +38,9 @@ function UIDim2.new(x, y) end
 
 ---Creates a UIDim2 from each scale and offset component of its UIDims.
 ---@param scaleX number
----@param offsetX integer
+---@param offsetX number
 ---@param scaleY number
----@param offsetY integer
+---@param offsetY number
 ---@return UIDim2
 function UIDim2.new(scaleX, offsetX, scaleY, offsetY) end
 
@@ -96,7 +96,7 @@ function UILayout.new(rect) end
 
 ---Sets all four corners of the layout to the same value.
 ---@param corner UIDim
-function UILayout.setCorners(corner) end
+function UILayout:setCorners(corner) end
 
 ---@class UIBounds
 ---@field absolute Vector2
