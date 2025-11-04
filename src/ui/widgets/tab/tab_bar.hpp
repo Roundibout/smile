@@ -16,6 +16,8 @@ class TabBar : public Widget {
 private:
     std::vector<Tab> tabs;
     size_t openedTab = 0;
+    int tabLength = 200;
+    int spacing = 10;
 
     TabBarDirection direction;
 public:
@@ -26,5 +28,5 @@ public:
     bool processWindowInput(WindowInput& input, const UIBounds& bounds) override;
     void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
-    Tab& createTab(std::string name);
+    Tab* createTab(std::string name);
 };
