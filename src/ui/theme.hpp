@@ -19,6 +19,10 @@ enum class ThemeColor {
 
     WindowBackground,
 
+    ProjectTab,
+    ProjectTabStroke,
+    ProjectTabSelected,
+
     Panel,
     PanelStroke,
 
@@ -61,7 +65,11 @@ private:
         colors[ThemeColor::Selection] = Color4(1.0f, 1.0f, 1.0f);
         colors[ThemeColor::Invalid] = Color4(1.0f, 0.5f, 0.5f);
 
-        colors[ThemeColor::WindowBackground] = Color4(0.08f, 0.08f, 0.08f);
+        colors[ThemeColor::ProjectTab] = Color4(0.07f, 0.07f, 0.07f);
+        colors[ThemeColor::ProjectTabStroke] = Color4(0.2f, 0.2f, 0.2f);
+        colors[ThemeColor::ProjectTabSelected] = Color4(0.08f, 0.08f, 0.08f);
+
+        colors[ThemeColor::WindowBackground] = Color4(0.06f, 0.06f, 0.06f);
         colors[ThemeColor::Panel] = Color4(0.2f, 0.2f, 0.2f);
         colors[ThemeColor::PanelStroke] = Color4(0.3f, 0.3f, 0.3f);
 
