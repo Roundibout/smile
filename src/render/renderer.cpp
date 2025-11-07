@@ -384,7 +384,10 @@ void Renderer::drawSolidStrokeArrow(const UIDim2& position, const UIBounds& boun
     drawSolidArrow(position, bounds, rotation, color, stumpSize, headSize);
 }
 
-void Renderer::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
+void Renderer::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color, bool shadow) {
+    if (shadow) {
+        impl->drawText(position - UIDim2(0.0f, 0, 0.0f, 2), bounds, text, path, size, Color4(0.0f, 0.0f, 0.0f, color.a * 0.75));
+    }
     impl->drawText(position, bounds, text, path, size, color);
 }
 

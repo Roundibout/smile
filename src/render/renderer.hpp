@@ -51,7 +51,7 @@ public:
     void drawStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation = 0, const Color4& color = Color4(), float stumpLength = 20, float armLength = 14, float lineThickness = 3, float stroke = 2, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f));
     void drawSolidArrow(const UIDim2& position, const UIBounds& bounds, float rotation = 0, const Color4& color = Color4(), const Vector2& stumpSize = Vector2(10, 10), const Vector2& headSize = Vector2(20, 10));
     void drawSolidStrokeArrow(const UIDim2& position, const UIBounds& bounds, float rotation = 0, const Color4& color = Color4(), const Vector2& stumpSize = Vector2(10, 10), const Vector2& headSize = Vector2(20, 10), float stroke = 2, const Color4& strokeColor = Color4(0.0f, 0.0f, 0.0f));
-    void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color);
+    void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color = Color4(), bool shadow = true);
 
     void enableSubpixel();
     void disableSubpixel();
