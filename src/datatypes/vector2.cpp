@@ -11,7 +11,7 @@ License:
 
 #include "vector2.hpp"
 
-std::string Vector2::to_string() const {
+std::string Vector2::toString() const {
     std::string xString, yString;
 
     if (std::fmod(x, 1.0f) != 0.0f) {

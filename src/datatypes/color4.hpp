@@ -30,5 +30,5 @@ struct Color4 {
         a(std::clamp(a, 0.0f, 1.0f)) 
     {};
 
-    std::string to_string() const;
+    std::string toString() const;
 };

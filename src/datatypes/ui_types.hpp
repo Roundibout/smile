@@ -43,7 +43,7 @@ struct UIDim {
         return *this;
     }
 
-    std::string to_string() const;
+    std::string toString() const;
 };
 
 struct UIDim2 {
@@ -82,7 +82,7 @@ struct UIDim2 {
         return *this;
     }
 
-    std::string to_string() const;
+    std::string toString() const;
 };
 
 struct UIRect {

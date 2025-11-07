@@ -1,9 +1,9 @@
 #include "ui_types.hpp"
 
-std::string UIDim::to_string() const {
+std::string UIDim::toString() const {
     return "(" + std::to_string(scale) + ", " + std::to_string(offset) + ")";
 }
 
-std::string UIDim2::to_string() const {
-    return "{" + x.to_string() + ", " + y.to_string() + "}";
+std::string UIDim2::toString() const {
+    return "{" + x.toString() + ", " + y.toString() + "}";
 }
