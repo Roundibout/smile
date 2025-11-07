@@ -125,6 +125,9 @@ struct UILayout {
 
     UILayout() : rect(UIRect()) {}
     UILayout(const UIRect& rect) : rect(rect) {}
+    UILayout(const UIRect& rect, const Vector2& anchorPoint) : rect(rect), anchorPoint(anchorPoint) {}
+    UILayout(const UIDim2& rectPosition, const UIDim2& rectSize) : rect(UIRect(rectPosition, rectSize)) {}
+    UILayout(const UIDim2& rectPosition, const UIDim2& rectSize, const Vector2& anchorPoint) : rect(UIRect(rectPosition, rectSize)), anchorPoint(anchorPoint) {}
 
     void setCorners(const UIDim& corner) {
         cornerRT = corner;

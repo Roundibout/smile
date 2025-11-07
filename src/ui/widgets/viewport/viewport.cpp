@@ -27,7 +27,7 @@ void Viewport::render(const UIBounds& bounds) {
     // Draw viewport contents
 
     layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
-    window->renderer.drawRoundedRect(layout, bounds, Color4(0.1f, 0.1f, 0.1f));
+    window->renderer.drawRoundedRect(layout, bounds, Theme::color(ThemeColor::ViewportBackground));
 
     window->renderer.beginStencil();
     window->renderer.drawRoundedRect(layout, bounds);
@@ -208,135 +208,44 @@ void Viewport::render(const UIBounds& bounds) {
 
     window->renderer.disableSubpixel();
 
+    // Toolbar
+    toolBar->render(bounds);
+
     window->renderer.endStencil();
 }
 
 bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
-    AbsoluteLayout applied = window->renderer.resolveLayout(layout, bounds);
-    if (input.type == WindowInputType::MouseScroll) {
-        if (!movingView && !rotatingView && UITools::isPointOverRoundedRect(input.mouse.position, applied)) {
-            if (window->isKeyDown(KeyCode::Shift)) {
-                if (rotatingView) return true;
+    AbsoluteLayout resolved = window->renderer.resolveLayout(layout, bounds);
 
-                Vector2 mousePos(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);   
-
-                float oldRotation = viewRotation;
-                if (input.mouse.scroll.y > 0) {
-                    viewRotation -= PI / 24;
-                } else if (input.mouse.scroll.y < 0) {
-                    viewRotation += PI / 24;
-                }
-                
-                cosR = std::cosf(viewRotation);
-                sinR = std::sinf(viewRotation);
-
-                float dR = viewRotation - oldRotation;
-                float cosD = std::cosf(dR);
-                float sinD = std::sinf(dR);
-
-                // Rotate view position around the mouse pivot
-                Vector2 offset = viewPosition - mousePos;
-                Vector2 rotatedOffset{
-                    offset.x * cosD - offset.y * sinD,
-                    offset.x * sinD + offset.y * cosD
-                };
-                viewPosition = mousePos + rotatedOffset;
-
-                Logger::print("Rotated by increment");
-            } else {
-                if (zoomingView) return true;
-
-                Vector2 mousePos(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
-
-                float oldScale = viewScale;
-
-                if (input.mouse.scroll.y > 0) {
-                    viewScale = std::clamp(viewScale * 1.1f, MIN_SCALE, MAX_SCALE);
-                } else if (input.mouse.scroll.y < 0) {
-                    viewScale = std::clamp(viewScale / 1.1f, MIN_SCALE, MAX_SCALE);
-                }
-
-                float scaleFactor = viewScale / oldScale;
-
-                // Adjust the camera so zoom focuses on mouse point
-                viewPosition = (viewPosition - mousePos) * scaleFactor + mousePos;
-                Logger::print("Zoomed by increment");
-            }
-
-            window->renderer.dirty();
-            return true;
-        }
-    } else if (input.type == WindowInputType::MouseButtonDown) {
-        if (input.mouse.button == MouseButton::Middle) {
-            if (UITools::isPointOverRoundedRect(input.mouse.position, applied)) {
-                if (window->isKeyDown(KeyCode::Shift)) {
-                    rotatingView = true;
-                    tooCloseToRotate = true;
-                    lastRotation = viewRotation;
-                    rotatePivot = Vector2(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
-                    rotatePosition = rotatePivot;
-                    rotateMirrors = Vector2();
-                    window->hideCursor();
-                    Logger::print("Rotating");
-                } else if (window->isKeyDown(KeyCode::Control)) {
-                    zoomingView = true;
-                    zoomCenter = Vector2(input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2, input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2);
-                    Logger::print("Zooming");
-                } else {
-                    movingView = true;
-                    Logger::print("Moving");
-                }
-                window->renderer.dirty();
-                window->setCapture();
-                return true;
-            }
-        }
-    } else if (input.type == WindowInputType::MouseButtonUp) {
-        if (input.mouse.button == MouseButton::Middle) {
-            if (movingView) {
-                movingView = false;
-                window->releaseCapture();
-                return true;
-            } else if (rotatingView) {
-                rotatingView = false;
-                window->renderer.dirty();
-                window->releaseCapture();
-                window->showCursor();
-                return true;
-            } else if (zoomingView) {
-                zoomingView = false;
-                window->releaseCapture();
-                return true;
-            }
-        }
-    } else if (input.type == WindowInputType::MouseMove) {
+    // Viewport action moves and ends
+    if (input.type == WindowInputType::MouseMove) {
         if (movingView) {
             viewPosition = Vector2(viewPosition.x + window->renderer.divide(input.mouse.delta.x), viewPosition.y + window->renderer.divide(input.mouse.delta.y));
 
-            if (!UITools::isPointOverRect(input.mouse.position, applied)) {
-                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, applied));
+            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
+                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, resolved));
             }
 
             window->renderer.dirty();
             return true;
         } else if (rotatingView) {
             rotatePosition = Vector2(
-                input.mouse.position.x - applied.rect.position.x - applied.rect.size.x / 2 + applied.rect.size.x * rotateMirrors.x, 
-                input.mouse.position.y - applied.rect.position.y - applied.rect.size.y / 2 + applied.rect.size.y * rotateMirrors.y
+                input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2 + resolved.rect.size.x * rotateMirrors.x, 
+                input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2 + resolved.rect.size.y * rotateMirrors.y
             );
             
-            if (!UITools::isPointOverRect(input.mouse.position, applied)) {
-                if (input.mouse.position.x > applied.rect.position.x + applied.rect.size.x) {
+            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
+                if (input.mouse.position.x > resolved.rect.position.x + resolved.rect.size.x) {
                     rotateMirrors.x += 1;
-                } else if (input.mouse.position.x < applied.rect.position.x) {
+                } else if (input.mouse.position.x < resolved.rect.position.x) {
                     rotateMirrors.x -= 1;
                 }
-                if (input.mouse.position.y > applied.rect.position.y + applied.rect.size.y) {
+                if (input.mouse.position.y > resolved.rect.position.y + resolved.rect.size.y) {
                     rotateMirrors.y += 1;
-                } else if (input.mouse.position.y < applied.rect.position.y) {
+                } else if (input.mouse.position.y < resolved.rect.position.y) {
                     rotateMirrors.y -= 1;
                 }
-                Vector2 newMousePos = UITools::mirrorPointAcrossRect(input.mouse.position, applied);
+                Vector2 newMousePos = UITools::mirrorPointAcrossRect(input.mouse.position, resolved);
                 window->setMousePosition(newMousePos);
             }   
 
@@ -380,8 +289,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             window->renderer.dirty();
             return true;
         } else if (zoomingView) {
-            if (!UITools::isPointOverRect(input.mouse.position, applied)) {
-                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, applied));
+            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
+                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, resolved));
             }
 
             float oldScale = viewScale;
@@ -400,6 +309,108 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
 
             window->renderer.dirty();
             return true;
+        }
+    } else if (input.type == WindowInputType::MouseButtonUp) {
+        if (input.mouse.button == MouseButton::Middle) {
+            if (movingView) {
+                movingView = false;
+                window->releaseCapture();
+                return true;
+            } else if (rotatingView) {
+                rotatingView = false;
+                window->renderer.dirty();
+                window->releaseCapture();
+                window->showCursor();
+                return true;
+            } else if (zoomingView) {
+                zoomingView = false;
+                window->releaseCapture();
+                return true;
+            }
+        }
+    }
+
+    // UI
+    if (toolBar->processWindowInput(input, bounds)) return true;
+
+    // Viewport action starts
+    if (input.type == WindowInputType::MouseScroll) {
+        if (!movingView && !rotatingView && UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+            if (window->isKeyDown(KeyCode::Shift)) {
+                if (rotatingView) return true;
+
+                Vector2 mousePos(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);   
+
+                float oldRotation = viewRotation;
+                if (input.mouse.scroll.y > 0) {
+                    viewRotation -= PI / 24;
+                } else if (input.mouse.scroll.y < 0) {
+                    viewRotation += PI / 24;
+                }
+                
+                cosR = std::cosf(viewRotation);
+                sinR = std::sinf(viewRotation);
+
+                float dR = viewRotation - oldRotation;
+                float cosD = std::cosf(dR);
+                float sinD = std::sinf(dR);
+
+                // Rotate view position around the mouse pivot
+                Vector2 offset = viewPosition - mousePos;
+                Vector2 rotatedOffset{
+                    offset.x * cosD - offset.y * sinD,
+                    offset.x * sinD + offset.y * cosD
+                };
+                viewPosition = mousePos + rotatedOffset;
+
+                Logger::print("Rotated by increment");
+            } else {
+                if (zoomingView) return true;
+
+                Vector2 mousePos(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
+
+                float oldScale = viewScale;
+
+                if (input.mouse.scroll.y > 0) {
+                    viewScale = std::clamp(viewScale * 1.1f, MIN_SCALE, MAX_SCALE);
+                } else if (input.mouse.scroll.y < 0) {
+                    viewScale = std::clamp(viewScale / 1.1f, MIN_SCALE, MAX_SCALE);
+                }
+
+                float scaleFactor = viewScale / oldScale;
+
+                // Adjust the camera so zoom focuses on mouse point
+                viewPosition = (viewPosition - mousePos) * scaleFactor + mousePos;
+                Logger::print("Zoomed by increment");
+            }
+
+            window->renderer.dirty();
+            return true;
+        }
+    } else if (input.type == WindowInputType::MouseButtonDown) {
+        if (input.mouse.button == MouseButton::Middle) {
+            if (UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+                if (window->isKeyDown(KeyCode::Shift)) {
+                    rotatingView = true;
+                    tooCloseToRotate = true;
+                    lastRotation = viewRotation;
+                    rotatePivot = Vector2(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
+                    rotatePosition = rotatePivot;
+                    rotateMirrors = Vector2();
+                    window->hideCursor();
+                    Logger::print("Rotating");
+                } else if (window->isKeyDown(KeyCode::Control)) {
+                    zoomingView = true;
+                    zoomCenter = Vector2(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
+                    Logger::print("Zooming");
+                } else {
+                    movingView = true;
+                    Logger::print("Moving");
+                }
+                window->renderer.dirty();
+                window->setCapture();
+                return true;
+            }
         }
     }
     return false;

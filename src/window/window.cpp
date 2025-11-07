@@ -11,33 +11,13 @@ License:
 
 #include "window.hpp"
 
-#include <ui/widgets/tab/tab.hpp>
-#include <ui/widgets/tab/tab_bar.hpp>
-#include <ui/widgets/panels/panel_container.hpp>
-#include <ui/widgets/viewport/viewport.hpp>
-#include <ui/widgets/console/console.hpp>
-
 Window::Window(const uint32_t& id, const WindowConfig& config)
     #ifdef _WIN32
         : impl(std::make_unique<WindowWin32>(id, config)), // initializer shenanigans
         renderer(impl.get()),
         lastSize(config.size)
     #endif
-{
-    // maybe do other stuff later
-    PanelContainer* container = addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 30), UIDim2(1.0f, 0, 1.0f, -120))));
-    PanelLeaf* viewportPanel = static_cast<PanelLeaf*>(container->getPanel());
-    viewportPanel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
-    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.8f, PanelSplitPlacement::First);
-    PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::Second);
-    PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.5f, PanelSplitPlacement::First);
-    PanelLeaf* consolePanel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::First));
-    consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
-
-    TabBar* tabBar = addWidget<TabBar>(UILayout(UIRect(UIDim2(0.0f, 10, 1.0f, -90), UIDim2(1.0f, -20, 0.0f, 50))), TabBarDirection::Horizontal);
-    Tab* tab1 = tabBar->createTab("Tab1");
-    Tab* tab2 = tabBar->createTab("Tab2");
-}
+{}
 
 void Window::process() {
     // Clean renderer

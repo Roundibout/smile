@@ -144,9 +144,9 @@ public:
     void drawTriangle(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIBounds& bounds, const Color4& color = Color4()) override;
     void drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color = Color4()) override;
     void drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
-    void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
+    void drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
     void drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) override;
-    void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
+    void drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) override;
     void drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) override;
 
     void beginStencil() override;

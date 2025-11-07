@@ -1,21 +1,27 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 #include <ui/widgets/widget.hpp>
 
-#include <ui/widgets/tab/tab.hpp>
+using TabId = uint32_t;
 
 enum class TabBarDirection {
     Horizontal,
     Vertical
 };
 
+struct Tab {
+    std::string name;
+};
+
 class TabBar : public Widget {
 private:
-    std::vector<Tab> tabs;
-    size_t openedTab = 0;
+    std::unordered_map<TabId, Tab> tabs;
+    TabId nextId = 0;
+
+    TabId openedId = 0;
     int tabLength = 200;
     int spacing = 10;
 
@@ -28,5 +34,5 @@ public:
     bool processWindowInput(WindowInput& input, const UIBounds& bounds) override;
     void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
-    Tab* createTab(std::string name);
+    TabId addTab(std::string name);
 };

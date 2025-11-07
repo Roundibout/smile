@@ -14,21 +14,28 @@ enum class ThemeMetric {
 };
 
 enum class ThemeColor {
-    Selection,
+    Accent,
+    AccentHighlight,
     Invalid,
 
     WindowBackground,
+
+    Button,
+    ButtonStroke,
+    ButtonHovered,
+    ButtonStrokeHovered,
+
+    Panel,
+    PanelStroke,
 
     ProjectTab,
     ProjectTabStroke,
     ProjectTabSelected,
 
-    Panel,
-    PanelStroke,
-
     Cursor,
     CursorStroke,
 
+    ViewportBackground,
     ViewportRotationIndicator,
     ViewportRotationIndicatorArrow,
 
@@ -62,20 +69,27 @@ private:
         metrics[ThemeMetric::ConsoleTextSize] = 20.0f;
 
         // Initialize default colors
-        colors[ThemeColor::Selection] = Color4(1.0f, 1.0f, 1.0f);
+        colors[ThemeColor::Accent] = Color4(0.5f, 0.2f, 0.2f);
+        colors[ThemeColor::AccentHighlight] = Color4(0.9f, 0.5f, 0.5f);
         colors[ThemeColor::Invalid] = Color4(1.0f, 0.5f, 0.5f);
-
-        colors[ThemeColor::ProjectTab] = Color4(0.07f, 0.07f, 0.07f);
-        colors[ThemeColor::ProjectTabStroke] = Color4(0.2f, 0.2f, 0.2f);
-        colors[ThemeColor::ProjectTabSelected] = Color4(0.08f, 0.08f, 0.08f);
 
         colors[ThemeColor::WindowBackground] = Color4(0.06f, 0.06f, 0.06f);
         colors[ThemeColor::Panel] = Color4(0.2f, 0.2f, 0.2f);
         colors[ThemeColor::PanelStroke] = Color4(0.3f, 0.3f, 0.3f);
 
+        colors[ThemeColor::Button] = Color4(0.08f, 0.08f, 0.08f);
+        colors[ThemeColor::ButtonStroke] = Color4(0.1f, 0.1f, 0.1f);
+        colors[ThemeColor::ButtonHovered] = Color4(0.14f, 0.14f, 0.14f);
+        colors[ThemeColor::ButtonStrokeHovered] = Color4(0.18f, 0.18f, 0.18f);
+
+        colors[ThemeColor::ProjectTab] = Color4(0.07f, 0.07f, 0.07f);
+        colors[ThemeColor::ProjectTabStroke] = Color4(0.2f, 0.2f, 0.2f);
+        colors[ThemeColor::ProjectTabSelected] = Color4(0.08f, 0.08f, 0.08f);
+
         colors[ThemeColor::Cursor] = Color4(1.0f, 1.0f, 1.0f);
         colors[ThemeColor::CursorStroke] = Color4(0.0f, 0.0f, 0.0f);
 
+        colors[ThemeColor::ViewportBackground] = Color4(0.15f, 0.15f, 0.15f);
         colors[ThemeColor::ViewportRotationIndicator] = Color4(0.8f, 0.8f, 0.8f, 0.2f); 
         colors[ThemeColor::ViewportRotationIndicatorArrow] = Color4(0.7f, 0.7f, 0.7f);
 

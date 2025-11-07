@@ -334,7 +334,7 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     triCount += 2;
 }
 
-void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
     stroke = static_cast<int>(std::round(stroke * currentScale)); // TODO: make this work
 }
 
@@ -362,7 +362,7 @@ void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds,
     ++roundedCount;
 }
 
-void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, int stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
     if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
