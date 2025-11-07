@@ -10,4 +10,13 @@ properties panel
     selection properties (object mode only)
     document properties
 
-artboards (no creation tool yet, just a single artboard)
+layers panel
+    allow the user to select and change the order only for now
+
+artboards (no creation tool yet, just internals)
+
+export action (export artboard to png only)
+
+frame animation panel (make frame-by-frame animation work)
+
+add png spritesheet to export action for animation
