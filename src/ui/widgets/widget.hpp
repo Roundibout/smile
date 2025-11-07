@@ -10,10 +10,10 @@
 class Window; // Forward declaration (we don't need the actual window class)
 
 class Widget {
-protected:
+public:
     UILayout layout;
     Window* window;
-public:
+    
     Widget(Window* window, UILayout layout) : window(window), layout(layout) {}
     virtual ~Widget() = default;
 

@@ -27,8 +27,6 @@ License:
 #include <ui/widgets/console/console.hpp>
 #include <ui/widgets/tab/tab_bar.hpp>
 
-//extern void register_bindings(sol::state& lua);
-
 int main(int argc, char *argv[]) {
     Logger::print("//// Initializing ////\n");
 
@@ -60,6 +58,8 @@ int main(int argc, char *argv[]) {
     PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.5f, PanelSplitPlacement::First);
     PanelLeaf* consolePanel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::First));
     consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
+    PanelLeaf* viewport2Panel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::Second));
+    viewport2Panel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
 
     TabBar* tabBar = window->addWidget<TabBar>(UILayout(UIRect(UIDim2(0.0f, 10, 1.0f, -90), UIDim2(1.0f, -20, 0.0f, 50))), TabBarDirection::Horizontal);
     TabId tab1 = tabBar->addTab("Tab1");

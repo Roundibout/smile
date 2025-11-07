@@ -18,7 +18,7 @@
 #include <datatypes/object/edge.hpp>
 #include <datatypes/object/face.hpp>
 
-#include <core/instance.hpp>
+#include <document/instance.hpp>
 
 #include <util/logger.hpp>
 

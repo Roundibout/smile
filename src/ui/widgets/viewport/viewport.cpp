@@ -23,7 +23,7 @@ void Viewport::update(float deltaTime, const UIBounds& bounds) {
 }
 
 void Viewport::render(const UIBounds& bounds) {
-
+    Object* obj = dynamic_cast<Object*>(DocumentManager::get().getCurrentDocument()->instances[0].get()); // Testing
     // Draw viewport contents
 
     layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
@@ -44,9 +44,9 @@ void Viewport::render(const UIBounds& bounds) {
     if (!computedRender) {
         window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
-        for (const Line& line : obj.lines) {
-            const Point* point1 = obj.getPoint(line.point1);
-            const Point* point2 = obj.getPoint(line.point2);
+        for (const Line& line : obj->lines) {
+            const Point* point1 = obj->getPoint(line.point1);
+            const Point* point2 = obj->getPoint(line.point2);
             Vector2 applied1 = applyViewTransform(point1->x, point1->y);
             Vector2 applied2 = applyViewTransform(point2->x, point2->y);
             UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
@@ -61,7 +61,7 @@ void Viewport::render(const UIBounds& bounds) {
             );
         }
 
-        for (const Point& point : obj.points) {
+        for (const Point& point : obj->points) {
             Vector2 applied = applyViewTransform(point.x, point.y);
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
@@ -72,14 +72,14 @@ void Viewport::render(const UIBounds& bounds) {
     } else {
         window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
-        for (const Face& face : obj.faces) {
+        for (const Face& face : obj->faces) {
 
-            float blue = static_cast<float>(face.id) / static_cast<float>(obj.nextFaceId - 1);
+            float blue = static_cast<float>(face.id) / static_cast<float>(obj->nextFaceId - 1);
 
             for (const Triangle& triangle : face.triangles) {
-                const Vertex& vertex1 = obj.vertices[triangle.vertex1];
-                const Vertex& vertex2 = obj.vertices[triangle.vertex2];
-                const Vertex& vertex3 = obj.vertices[triangle.vertex3];
+                const Vertex& vertex1 = obj->vertices[triangle.vertex1];
+                const Vertex& vertex2 = obj->vertices[triangle.vertex2];
+                const Vertex& vertex3 = obj->vertices[triangle.vertex3];
                 Vector2 applied1 = applyViewTransform(vertex1.x, vertex1.y);
                 Vector2 applied2 = applyViewTransform(vertex2.x, vertex2.y);
                 Vector2 applied3 = applyViewTransform(vertex3.x, vertex3.y);
@@ -91,16 +91,16 @@ void Viewport::render(const UIBounds& bounds) {
             }
         }
 
-        for (const Edge& edge : obj.edges) {
-            const Vertex& vertex1 = obj.vertices[edge.start];
-            const Vertex& vertex2 = obj.vertices[edge.end];
+        for (const Edge& edge : obj->edges) {
+            const Vertex& vertex1 = obj->vertices[edge.start];
+            const Vertex& vertex2 = obj->vertices[edge.end];
             Vector2 applied1 = applyViewTransform(vertex1.x, vertex1.y);
             Vector2 applied2 = applyViewTransform(vertex2.x, vertex2.y);
             UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
             UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
             UIDim2 midPos = UIDim2(0.0f, (position1.x.offset + position2.x.offset) / 2, 0.0f, (position1.y.offset + position2.y.offset) / 2);
 
-            float blue = static_cast<float>(edge.id) / static_cast<float>(obj.nextEdgeId - 1);
+            float blue = static_cast<float>(edge.id) / static_cast<float>(obj->nextEdgeId - 1);
 
             window->renderer.drawLine(
                 position1,
@@ -112,7 +112,7 @@ void Viewport::render(const UIBounds& bounds) {
             //window->renderer.drawText(midPos - UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(edge.id), Theme::font(ThemeFont::Bold), 20, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2));
         }
 
-        for (const Vertex& vertex : obj.vertices) {
+        for (const Vertex& vertex : obj->vertices) {
             Vector2 applied = applyViewTransform(vertex.x, vertex.y);
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout vertexLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
@@ -209,7 +209,8 @@ void Viewport::render(const UIBounds& bounds) {
     window->renderer.disableSubpixel();
 
     // Toolbar
-    toolBar->render(bounds);
+    ViewportManager::get().toolBar->window = window;
+    ViewportManager::get().toolBar->render(bounds);
 
     window->renderer.endStencil();
 }
@@ -331,7 +332,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     }
 
     // UI
-    if (toolBar->processWindowInput(input, bounds)) return true;
+    ViewportManager::get().toolBar->window = window;
+    if (ViewportManager::get().toolBar->processWindowInput(input, bounds)) return true;
 
     // Viewport action starts
     if (input.type == WindowInputType::MouseScroll) {
