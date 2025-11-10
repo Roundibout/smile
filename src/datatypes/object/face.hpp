@@ -5,9 +5,9 @@
 
 #include <datatypes/object/triangle.hpp>
 
-using Id = uint32_t;
-
 struct Face {
+    using Id = uint32_t;
+
     Id id;
     std::vector<Id> edges; // Edge ids
     std::vector<Id> vertices; // Vertex ids

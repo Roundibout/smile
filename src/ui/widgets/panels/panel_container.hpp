@@ -14,7 +14,7 @@ private:
     PanelSplitDirection hoveredDirection;
     bool resizing = false;
 public:
-    PanelContainer(Window* window, UILayout layout);
+    PanelContainer(App& app, Window* window, UILayout layout);
 
     void update(float deltaTime, const UIBounds& bounds) override;
     void render(const UIBounds& bounds) override;

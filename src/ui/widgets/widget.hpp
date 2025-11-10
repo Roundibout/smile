@@ -7,14 +7,16 @@
 #include <ui/theme.hpp>
 #include <ui/ui_tools.hpp>
 
-class Window; // Forward declaration (we don't need the actual window class)
+class App;
+class Window;
 
 class Widget {
 public:
-    UILayout layout;
+    App& app;
     Window* window;
+    UILayout layout;
     
-    Widget(Window* window, UILayout layout) : window(window), layout(layout) {}
+    Widget(App& app, Window* window, UILayout layout) : app(app), window(window), layout(layout) {}
     virtual ~Widget() = default;
 
     virtual void update(float deltaTime, const UIBounds& bounds) = 0;

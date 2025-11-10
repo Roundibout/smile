@@ -1,4 +1,5 @@
 #include "container_widget.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 void ContainerWidget::update(float deltaTime, const UIBounds& bounds) {

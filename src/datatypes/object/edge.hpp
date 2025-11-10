@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-using Id = uint32_t;
-
 struct Edge {
+    using Id = uint32_t;
+
     Id id;
     Id start, end;
     bool forwardUsed = false;

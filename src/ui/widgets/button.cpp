@@ -1,4 +1,5 @@
 #include "button.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 void Button::deselect() {

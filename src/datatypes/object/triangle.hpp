@@ -2,11 +2,10 @@
 
 #include <cstdint>
 #include <vector>
-
-using Id = uint32_t;
+#include <datatypes/object/vertex.hpp>
 
 struct Triangle {
-    Id vertex1, vertex2, vertex3;
+    Vertex::Id vertex1, vertex2, vertex3;
 
-    Triangle(Id vertex1, Id vertex2, Id vertex3) : vertex1(vertex1), vertex2(vertex2), vertex3(vertex3) {}
+    Triangle(Vertex::Id vertex1, Vertex::Id vertex2, Vertex::Id vertex3) : vertex1(vertex1), vertex2(vertex2), vertex3(vertex3) {}
 };

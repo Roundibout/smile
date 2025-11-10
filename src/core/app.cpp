@@ -11,23 +11,24 @@ License:
 
 #include "app.hpp"
 
-std::shared_ptr<Window> App::createWindow(const WindowConfig& config) {
+Window* App::createWindow(const WindowConfig& config) {
     Logger::print("Creating window");
 
     // Create window and associate it with the next window id
-    std::shared_ptr<Window> window = std::make_shared<Window>(nextId, config);
-    windows[nextId] = window;
+    std::unique_ptr<Window> window = std::make_unique<Window>(*this, nextId, config);
+    Window* ptr = window.get();
+    windows[nextId] = std::move(window);
 
     // Increment window id
     nextId++;
 
-    return window;
+    return ptr;
 }
 
-std::shared_ptr<Window> App::getWindowById(const uint32_t& id) {
+Window* App::getWindowById(const uint32_t& id) {
     auto it = windows.find(id);
     if (it != windows.end()) {
-        return it->second; // Found it
+        return it->second.get(); // Found it
     } else {
         return nullptr; // Doesn't exist
     }

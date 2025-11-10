@@ -1,5 +1,5 @@
-
 #include "viewport.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 Vector2 Viewport::applyViewTransform(float x, float y) {
@@ -7,6 +7,30 @@ Vector2 Viewport::applyViewTransform(float x, float y) {
         (x * cosR - y * sinR) * viewScale + appliedViewPosition.x,
         (x * sinR + y * cosR) * viewScale + appliedViewPosition.y
     );
+}
+
+Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
+    layout.setCorners(UIDim(0.0f, app.theme.getMetricInt(ThemeMetric::PanelCorner)));
+
+    toolBar = std::make_unique<CategoryToolBar>(app, window, UILayout(UIDim2(0.0f, 10, 0.0f, 0), UIDim2(0.0f, 60, 1.0f, -50)));
+
+    for (auto& tool : app.extensionRegistry->getTools()) {
+        Tool* ptr = tool.get();
+        ToolConfig config = ptr->getConfig();
+        ToolEntryId entry = toolBar->addTool(config.name, "A");
+        toolToToolBarEntry[ptr] = entry;
+    }
+
+    toolRegisteredConnection = app.extensionRegistry->onToolRegistered.connect([this](Tool* tool) {
+        ToolConfig config = tool->getConfig();
+        ToolEntryId entry = toolBar->addTool(config.name, "A");
+        toolToToolBarEntry[tool] = entry;
+    });
+
+    toolRemovedConnection = app.extensionRegistry->onToolRemoved.connect([this](Tool* tool) {
+        toolBar->removeTool(toolToToolBarEntry[tool]);
+        toolToToolBarEntry.erase(tool);
+    });
 }
 
 void Viewport::update(float deltaTime, const UIBounds& bounds) {
@@ -22,27 +46,25 @@ void Viewport::update(float deltaTime, const UIBounds& bounds) {
     }
 }
 
-void Viewport::render(const UIBounds& bounds) {
-    Object* obj = dynamic_cast<Object*>(DocumentManager::get().getCurrentDocument()->instances[0].get()); // Testing
-    // Draw viewport contents
+void Viewport::drawCanvas(Canvas* canvas, const UIBounds& bounds) {
+    Rect rect = canvas->getSize();
 
-    layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
-    window->renderer.drawRoundedRect(layout, bounds, Theme::color(ThemeColor::ViewportBackground));
+    Vector2 applied1 = applyViewTransform(rect.position.x, rect.position.y);
+    Vector2 applied2 = applyViewTransform(rect.position.x + rect.size.x, rect.position.y);
+    Vector2 applied3 = applyViewTransform(rect.position.x + rect.size.x, rect.position.y + rect.size.y);
+    Vector2 applied4 = applyViewTransform(rect.position.x, rect.position.y + rect.size.y);
 
-    window->renderer.beginStencil();
-    window->renderer.drawRoundedRect(layout, bounds);
-    window->renderer.useStencil();
+    UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
+    UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
+    UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
+    UIDim2 position4 = UIDim2(0.0f, applied4.x, 0.0f, applied4.y);
 
-    window->renderer.enableSubpixel();
+    window->renderer.drawQuad(position1, position2, position3, position4, bounds, canvas->getColor());
+}
 
-    AbsoluteLayout appliedLayout = window->renderer.resolveLayout(layout, bounds);
-    appliedViewPosition = Vector2(appliedLayout.rect.size.x / 2 + viewPosition.x, appliedLayout.rect.size.y / 2 + viewPosition.y);
-
-    cosR = std::cosf(viewRotation);
-    sinR = std::sinf(viewRotation);
-
+void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
     if (!computedRender) {
-        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
+        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
         for (const Line& line : obj->lines) {
             const Point* point1 = obj->getPoint(line.point1);
@@ -56,7 +78,7 @@ void Viewport::render(const UIBounds& bounds) {
                 position1,
                 position2,
                 bounds, 
-                Color4(), 
+                Color4(0.0f, 1.0f, 0.0f), 
                 2.0f
             );
         }
@@ -66,11 +88,11 @@ void Viewport::render(const UIBounds& bounds) {
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
             pointLayout.setCorners(UIDim(1.0f, 0));
-            window->renderer.drawRoundedRect(pointLayout, bounds, Color4());
+            window->renderer.drawRoundedRect(pointLayout, bounds, Color4(0.0f, 1.0f, 0.0f));
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     } else {
-        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
+        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
         for (const Face& face : obj->faces) {
 
@@ -117,60 +139,65 @@ void Viewport::render(const UIBounds& bounds) {
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout vertexLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
             vertexLayout.setCorners(UIDim(1.0f, 0));
-            window->renderer.drawRoundedRect(vertexLayout, bounds, Color4());
+
+            float blue = static_cast<float>(vertex.id) / static_cast<float>(obj->nextVertexId - 1);
+
+            window->renderer.drawRoundedRect(vertexLayout, bounds, Color4(1.0f - blue, 0.0f, blue));
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     }
+}
+
+void Viewport::drawRotationCursor(const AbsoluteLayout& appliedLayout, const UIBounds& bounds) {
+    window->renderer.enableSubpixel();
+
+    Vector2 delta = rotatePosition - rotatePivot;
+
+    Color4 color = app.theme.getColor(ThemeColor::Cursor);
+    Color4 strokeColor = app.theme.getColor(ThemeColor::CursorStroke);
+
+    if (tooCloseToRotate) color = app.theme.getColor(ThemeColor::Invalid);
+
+    window->renderer.drawStrokeDottedLine(
+        UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y),
+        UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y),
+        bounds, 
+        color, 
+        2, 4, 5, 2,
+        strokeColor
+    );
+
+    float angle = std::atan2(delta.x, -delta.y);
+    float cos = std::cosf(angle);
+    float sin = std::sinf(angle);
+
+    Vector2 offset(8, 0);
+    offset = Vector2(
+        (offset.x * cos - offset.y * sin),
+        (offset.x * sin + offset.y * cos)
+    );
     
-    if (rotatingView) {
-        Vector2 delta = rotatePosition - rotatePivot;
-
-        Color4 color = Theme::color(ThemeColor::Cursor);
-        Color4 strokeColor = Theme::color(ThemeColor::CursorStroke);
-
-        if (tooCloseToRotate) color = Theme::color(ThemeColor::Invalid);
-
-        window->renderer.drawStrokeDottedLine(
-            UIDim2(0.5f, rotatePosition.x, 0.5f, rotatePosition.y),
-            UIDim2(0.5f, rotatePivot.x, 0.5f, rotatePivot.y),
-            bounds, 
-            color, 
-            2, 4, 4, 2,
-            strokeColor
-        );
-
-        float angle = std::atan2(delta.x, -delta.y);
-        float cos = std::cosf(angle);
-        float sin = std::sinf(angle);
-
-        Vector2 offset(8, 0);
-        offset = Vector2(
-            (offset.x * cos - offset.y * sin),
-            (offset.x * sin + offset.y * cos)
-        );
-        
-        window->renderer.drawStrokeArrow(
-            UIDim2(0.5f, rotatePosition.x + offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y + offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
-            bounds, 
-            angle - PI / 2, 
-            color, 
-            16, 10, 2, 2,
-            strokeColor
-        );
-        window->renderer.drawStrokeArrow(
-            UIDim2(0.5f, rotatePosition.x - offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y - offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
-            bounds, 
-            angle + PI / 2, 
-            color, 
-            16, 10, 2, 2, 
-            strokeColor
-        );
-    }
+    window->renderer.drawStrokeArrow(
+        UIDim2(0.5f, rotatePosition.x + offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y + offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
+        bounds, 
+        angle - PI / 2, 
+        color, 
+        16, 10, 2, 2,
+        strokeColor
+    );
+    window->renderer.drawStrokeArrow(
+        UIDim2(0.5f, rotatePosition.x - offset.x - appliedLayout.rect.size.x * rotateMirrors.x, 0.5f, rotatePosition.y - offset.y - appliedLayout.rect.size.y * rotateMirrors.y), 
+        bounds, 
+        angle + PI / 2, 
+        color, 
+        16, 10, 2, 2, 
+        strokeColor
+    );
 
     window->renderer.disableSubpixel();
+}
 
-    // Draw viewport UI
-
+void Viewport::drawRotationIndicator(const UIBounds& bounds) {
     window->renderer.enableSubpixel();
 
     // Rotation indicator
@@ -196,7 +223,7 @@ void Viewport::render(const UIBounds& bounds) {
         UIDim2(1.0f, -100 + rotationIndicatorTR.x, 1.0f, -100 + rotationIndicatorTR.y), 
         UIDim2(1.0f, -100 + rotationIndicatorTL.x, 1.0f, -100 + rotationIndicatorTL.y), 
         bounds, 
-        Theme::color(ThemeColor::ViewportRotationIndicator)
+        app.theme.getColor(ThemeColor::ViewportRotationIndicator)
     );
 
     Vector2 rotationIndicatorOffset(0, 10);
@@ -204,13 +231,57 @@ void Viewport::render(const UIBounds& bounds) {
         (rotationIndicatorOffset.x * cosR - rotationIndicatorOffset.y * sinR),
         (rotationIndicatorOffset.x * sinR + rotationIndicatorOffset.y * cosR)
     );
-    window->renderer.drawSolidArrow(UIDim2(1.0f, -100 + rotationIndicatorOffset.x, 1.0f, -100 + rotationIndicatorOffset.y), bounds, viewRotation, Theme::color(ThemeColor::ViewportRotationIndicatorArrow), Vector2(15, 15), Vector2(30, 15));
+    window->renderer.drawSolidArrow(UIDim2(1.0f, -100 + rotationIndicatorOffset.x, 1.0f, -100 + rotationIndicatorOffset.y), bounds, viewRotation, app.theme.getColor(ThemeColor::ViewportRotationIndicatorArrow), Vector2(15, 15), Vector2(30, 15));
 
     window->renderer.disableSubpixel();
+}
+
+void Viewport::render(const UIBounds& bounds) {
+    Document* document = app.documents.getCurrentDocument(); // Get current document
+
+    layout.setCorners(UIDim(0.0f, app.theme.getMetricInt(ThemeMetric::PanelCorner)));
+    window->renderer.drawRoundedRect(layout, bounds, app.theme.getColor(ThemeColor::ViewportBackground)); // Draw background (TODO: allow the panel background behind to be changed)
+
+    window->renderer.beginStencil();
+    window->renderer.drawRoundedRect(layout, bounds);
+    window->renderer.useStencil();
+
+    AbsoluteLayout appliedLayout = window->renderer.resolveLayout(layout, bounds);
+    appliedViewPosition = Vector2(appliedLayout.rect.size.x / 2 + viewPosition.x, appliedLayout.rect.size.y / 2 + viewPosition.y);
+
+    cosR = std::cosf(viewRotation);
+    sinR = std::sinf(viewRotation);
+
+    // Draw document's canvases and objects
+
+    window->renderer.enableSubpixel();
+
+    for (std::unique_ptr<Canvas>& canvasPtr : document->canvases) {
+        Canvas* canvas = canvasPtr.get();
+
+        drawCanvas(canvas, bounds);
+    }
+
+    for (std::unique_ptr<Instance>& instancePtr : document->instances) {
+        Instance* instance = instancePtr.get();
+
+        if (Object* object = dynamic_cast<Object*>(instance)) {
+            drawObject(object, bounds);
+        }
+    }
+
+    window->renderer.disableSubpixel();
+    
+    if (rotatingView) {
+        // If rotating the view, draw the rotation cursor
+        drawRotationCursor(appliedLayout, bounds);
+    }
+
+    // Draw viewport UI
+    drawRotationIndicator(bounds);
 
     // Toolbar
-    ViewportManager::get().toolBar->window = window;
-    ViewportManager::get().toolBar->render(bounds);
+    toolBar->render(bounds);
 
     window->renderer.endStencil();
 }
@@ -332,8 +403,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     }
 
     // UI
-    ViewportManager::get().toolBar->window = window;
-    if (ViewportManager::get().toolBar->processWindowInput(input, bounds)) return true;
+    if (toolBar->processWindowInput(input, bounds)) return true;
 
     // Viewport action starts
     if (input.type == WindowInputType::MouseScroll) {

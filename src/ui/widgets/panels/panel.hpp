@@ -7,7 +7,8 @@
 #include <ui/theme.hpp>
 #include <ui/ui_tools.hpp>
 
-class Window; // Forward declaration (we don't need the actual window class)
+class App;
+class Window;
 class PanelContainer;
 
 struct PanelAdjacency {
@@ -16,11 +17,12 @@ struct PanelAdjacency {
 
 class Panel {
 protected:
-    UILayout layout;
+    App& app;
     Window* window;
+    UILayout layout;
     PanelContainer* container;
 public:
-    Panel(Window* window, PanelContainer* container) : window(window), container(container), layout(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0)))) {}
+    Panel(App& app, Window* window, PanelContainer* container) : app(app), window(window), container(container), layout(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0)))) {}
 
     virtual void update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) = 0;
     virtual void render(const UIBounds& bounds, PanelAdjacency adjacency) = 0;

@@ -1,4 +1,5 @@
 #include "tool_bar.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 void ToolBar::render(const UIBounds& bounds) {
@@ -7,28 +8,28 @@ void ToolBar::render(const UIBounds& bounds) {
     // Render non-hovered and non-selected tools first
     runForEach([this, applied](const UILayout& toolLayout, const ToolBarEntry& tool) {
         if ((hovered && hoveredTool == tool.id) || selectedTool == tool.id) return;
-        Color4 color = Theme::color(ThemeColor::Button);
-        Color4 stroke = Theme::color(ThemeColor::ButtonStroke);
+        Color4 color = app.theme.getColor(ThemeColor::Button);
+        Color4 stroke = app.theme.getColor(ThemeColor::ButtonStroke);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, Theme::font(ThemeFont::Regular), 20, Color4());
+        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 
     // Render hovered tools to appear between
     runForEach([this, applied](const UILayout& toolLayout, const ToolBarEntry& tool) {
         if (!hovered || hoveredTool != tool.id || selectedTool == tool.id) return;
-        Color4 color = Theme::color(ThemeColor::ButtonHovered);
-        Color4 stroke = Theme::color(ThemeColor::ButtonStrokeHovered);
+        Color4 color = app.theme.getColor(ThemeColor::ButtonHovered);
+        Color4 stroke = app.theme.getColor(ThemeColor::ButtonStrokeHovered);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, Theme::font(ThemeFont::Regular), 20, Color4());
+        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 
     // Render selected tools to appear on top
     runForEach([this, applied](const UILayout& toolLayout, const ToolBarEntry& tool) {
         if (selectedTool != tool.id) return;
-        Color4 color = Theme::color(ThemeColor::Accent);
-        Color4 stroke = Theme::color(ThemeColor::AccentHighlight);
+        Color4 color = app.theme.getColor(ThemeColor::Accent);
+        Color4 stroke = app.theme.getColor(ThemeColor::AccentHighlight);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, Theme::font(ThemeFont::Regular), 20, Color4());
+        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 };
 
@@ -105,7 +106,29 @@ ToolEntryId ToolBar::addTool(std::string name) {
     return toolId;
 }
 
+bool ToolBar::removeTool(ToolEntryId id) {
+    for (auto it = tools.begin(); it != tools.end(); ++it) {
+        if (it->id == id) {
+            tools.erase(it);
+
+            // Clean up state if needed
+            if (selectedTool == id) selectedTool = 0;
+            if (selectingTool == id) selecting = false;
+            if (hoveredTool == id) hoveredTool = false;
+
+            return true; // Found
+        }
+    }
+    return false; // Not found
+}
+
 void ToolBar::clearTools() {
     tools.clear();
     nextId = 0;
+
+    selectedTool = 0;
+    selecting = false;
+    selectingTool = 0;
+    hovered = false;
+    hoveredTool = 0;
 }

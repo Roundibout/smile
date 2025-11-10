@@ -25,49 +25,50 @@
 constexpr float EPSILON = 1e-6f;
 constexpr float PI = 3.1415926f;
 
-using Id = uint32_t;
-constexpr Id INVALID_ID = UINT32_MAX;
-
 enum class EdgeDirection {
     Forward,
     Backward
 };
 
+constexpr uint32_t INVALID_ID = UINT32_MAX;
+
 class Object : public Instance {
+public:
+    using Id = uint32_t;
 public: // CHANGE AFTER TESTING
     // EXTERNAL
 
     // Points
     std::vector<Point> points;
-    std::unordered_map<Id, size_t> pointIdToIndex;
-    std::vector<Id> freePointIds;
-    Id nextPointId = 0;
+    std::unordered_map<Point::Id, size_t> pointIdToIndex;
+    std::vector<Point::Id> freePointIds;
+    Point::Id nextPointId = 0;
 
     // Lines
     std::vector<Line> lines;
-    std::unordered_map<Id, size_t> lineIdToIndex;
-    std::vector<Id> freeLineIds;
-    Id nextLineId = 0;
+    std::unordered_map<Line::Id, size_t> lineIdToIndex;
+    std::vector<Line::Id> freeLineIds;
+    Line::Id nextLineId = 0;
 
     // Shapes
     std::vector<Shape> shapes;
-    std::unordered_map<Id, size_t> shapeIdToIndex;
-    std::vector<Id> freeShapeIds;
-    Id nextShapeId = 0;
+    std::unordered_map<Shape::Id, size_t> shapeIdToIndex;
+    std::vector<Shape::Id> freeShapeIds;
+    Shape::Id nextShapeId = 0;
 
     // INTERNAL
 
     // Vertices
     std::vector<Vertex> vertices;
-    Id nextVertexId = 0;
+    Vertex::Id nextVertexId = 0;
 
     // Edges
     std::vector<Edge> edges;
-    Id nextEdgeId = 0;
+    Edge::Id nextEdgeId = 0;
 
     // Faces
     std::vector<Face> faces;
-    Id nextFaceId = 0;
+    Face::Id nextFaceId = 0;
 
     bool lineSegmentIntersection(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& intersection) {
         // Represent lines as p + r*t and q + s*u
@@ -111,7 +112,7 @@ public: // CHANGE AFTER TESTING
 
         // Sort by projection t along AB
         std::sort(verticesOnLine.begin(), verticesOnLine.end(),
-            [&](Id lhs, Id rhs) {
+            [&](Vertex::Id lhs, Vertex::Id rhs) {
                 const Vertex& v1 = vertices[lhs];
                 const Vertex& v2 = vertices[rhs];
 
@@ -155,9 +156,9 @@ public: // CHANGE AFTER TESTING
         return angle;
     }
 
-    Id traverseEdge(Edge& startEdge, EdgeDirection direction) { 
-        Id aId;
-        Id pivotId;
+    Vertex::Id traverseEdge(Edge& startEdge, EdgeDirection direction) { 
+        Vertex::Id aId;
+        Vertex::Id pivotId;
 
         // Return invalid id if we have already traversed this way and set this edge's A and pivot vertex ids depending on direction
         if (direction == EdgeDirection::Forward) {
@@ -180,8 +181,8 @@ public: // CHANGE AFTER TESTING
             startEdge.backwardUsed = true; // We're checking backward
         }
 
-        std::vector<Id> edgesConnectedByStart;
-        std::vector<Id> edgesConnectedByEnd;
+        std::vector<Edge::Id> edgesConnectedByStart;
+        std::vector<Edge::Id> edgesConnectedByEnd;
 
         // Find edges connected to the pivot
         for (const Edge& edge : edges) {
@@ -199,10 +200,10 @@ public: // CHANGE AFTER TESTING
         const Vertex& pivot = vertices[pivotId];
 
         // Find lowest angle
-        Id lowestAngleId = INVALID_ID;
+        Edge::Id lowestAngleId = INVALID_ID;
         float lowestAngle = 360.0f;
 
-        for (Id edgeId : edgesConnectedByStart) {
+        for (Edge::Id edgeId : edgesConnectedByStart) {
             Edge& edge = edges[edgeId];
 
             const Vertex& b = vertices[edge.end];
@@ -214,7 +215,7 @@ public: // CHANGE AFTER TESTING
                 lowestAngle = angle;
             }
         }
-        for (Id edgeId : edgesConnectedByEnd) {
+        for (Edge::Id edgeId : edgesConnectedByEnd) {
             Edge& edge = edges[edgeId];
 
             const Vertex& b = vertices[edge.start];
@@ -251,10 +252,10 @@ public: // CHANGE AFTER TESTING
 
         bool traversing = true;
         bool completed = false;
-        Id currentEdgeId = startEdge.id;
+        Edge::Id currentEdgeId = startEdge.id;
         EdgeDirection direction = startDirection;
 
-        Id start;
+        Vertex::Id start;
         if (direction == EdgeDirection::Forward) {
             start = startEdge.start;
         } else {
@@ -264,7 +265,7 @@ public: // CHANGE AFTER TESTING
 
         while (traversing) {
             Edge& currentEdge = edges[currentEdgeId];
-            Id nextEdgeId = traverseEdge(currentEdge, direction);
+            Edge::Id nextEdgeId = traverseEdge(currentEdge, direction);
 
             if (nextEdgeId == INVALID_ID) { // Failed
                 traversing = false;
@@ -274,7 +275,7 @@ public: // CHANGE AFTER TESTING
             face.edges.push_back(nextEdgeId);
 
             const Edge& nextEdge = edges[nextEdgeId];
-            Id pivot;
+            Vertex::Id pivot;
             if (direction == EdgeDirection::Forward) {
                 pivot = currentEdge.end;
             } else {
@@ -308,7 +309,7 @@ public: // CHANGE AFTER TESTING
 
         if (completed) {
             //Logger::print("FACE " + std::to_string(face.id));
-            for (Id edge : face.edges) {
+            for (Edge::Id edge : face.edges) {
                 //Logger::append("\n    " + std::to_string(edge));
             }
 
@@ -347,17 +348,17 @@ public:
 
     // POINTS
 
-    Id createPoint(const Vector2& position);
-    void deletePoint(Id id);
+    Point::Id createPoint(const Vector2& position);
+    void deletePoint(Point::Id id);
 
-    const Point* getPoint(Id id);
+    const Point* getPoint(Point::Id id);
 
     // LINES
 
-    Id createLine(Id point1, Id point2);
-    void deleteLine(Id id);
+    Line::Id createLine(Point::Id point1, Point::Id point2);
+    void deleteLine(Line::Id id);
 
-    const Line* getLine(Id id);
+    const Line* getLine(Line::Id id);
 
     // INTERNAL
 

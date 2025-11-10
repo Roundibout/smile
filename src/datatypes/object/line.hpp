@@ -4,9 +4,9 @@
 
 #include <datatypes/color4.hpp>
 
-using Id = uint32_t;
-
 struct Line {
+    using Id = uint32_t;
+    
     Id id;
     Id point1, point2;
 

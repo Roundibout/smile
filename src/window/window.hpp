@@ -33,6 +33,8 @@ License:
 
 #include <ui/widgets/widget.hpp>
 
+class App;
+
 enum class WindowEvent {
     Update,
     Render,
@@ -41,6 +43,8 @@ enum class WindowEvent {
 
 class Window {
 private:
+    App& app;
+
     std::unique_ptr<WindowImpl> impl;
     std::deque<WindowInput> inputs;
 
@@ -53,7 +57,7 @@ private:
 public:
     Renderer renderer;
 
-    Window(const uint32_t& id, const WindowConfig& config);
+    Window(App& app, const uint32_t& id, const WindowConfig& config);
 
     void process();
     void update(float deltaTime);
@@ -79,7 +83,7 @@ public:
     T* addWidget(Args&&... args) {
         static_assert(std::is_base_of<Widget, T>::value, "T must be a Widget");
 
-        auto widget = std::make_unique<T>(this, std::forward<Args>(args)...);
+        auto widget = std::make_unique<T>(app, this, std::forward<Args>(args)...);
         T* ptr = widget.get(); // Keep raw pointer for return
         widgets.push_back(std::move(widget));
 

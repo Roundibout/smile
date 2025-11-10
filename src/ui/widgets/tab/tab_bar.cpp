@@ -1,4 +1,5 @@
 #include "tab_bar.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 void TabBar::update(float deltaTime, const UIBounds& bounds) {
@@ -16,7 +17,7 @@ void TabBar::render(const UIBounds& bounds) {
     int position = 0;
     for (auto& [tabId, tab] : tabs) {
         tabLayout.rect.position.x.offset = position + spacing / 2;
-        window->renderer.drawRoundedStrokeRect(tabLayout, applied, Theme::color(ThemeColor::ProjectTab), 2, Theme::color(ThemeColor::ProjectTabStroke), UIStrokeAlignment::Outside);
+        window->renderer.drawRoundedStrokeRect(tabLayout, applied, app.theme.getColor(ThemeColor::ProjectTab), 2, app.theme.getColor(ThemeColor::ProjectTabStroke), UIStrokeAlignment::Outside);
 
         position += tabLength + spacing;
     }

@@ -11,7 +11,7 @@ class Console : public Widget {
 private:
     bool newEntry = false;
 public:
-    Console(Window* window, UILayout layout) : Widget(window, layout) {
+    Console(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
         Logger::addCallback([this](const LogEntry& log){
             this->newEntry = true;
         });

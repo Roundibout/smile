@@ -11,4 +11,6 @@ private:
     ContextActionConfig config;
 public:
     ContextAction(ContextActionConfig config);
+
+    ContextActionConfig getConfig() {return config;}
 };

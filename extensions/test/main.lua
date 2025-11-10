@@ -1,8 +1,16 @@
 local toolConfig = ToolConfig.new()
 toolConfig.name = "Test"
-toolConfig.mode = ToolMode.Object
-toolConfig.category = ToolCategory.Add
+toolConfig.mode = EditorMode.Object
+toolConfig.category = ToolCategory.Select
 
-local tool = Extension:registerTool(toolConfig)
+local tool1 = Extension:registerTool(toolConfig)
+local tool2 = Extension:registerTool(toolConfig)
+local tool3 = Extension:registerTool(toolConfig)
 
-print("Done");
+print("Ok");
+
+--[[
+tool:connect(ToolEvent.LeftMouseDown, function(position)
+    
+end)
+]]--

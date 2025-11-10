@@ -4,9 +4,9 @@
 
 #include <datatypes/vector2.hpp>
 
-using Id = uint32_t;
-
 struct Point {
+    using Id = uint32_t;
+
     Id id;
     float x, y = 0.0f;
 

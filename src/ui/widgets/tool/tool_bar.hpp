@@ -58,7 +58,7 @@ private:
         }
     }
 public:
-    ToolBar(Window* window, UILayout layout) : Widget(window, UILayout(layout.rect.position, UIDim2(UIDim(0.0f, 60), layout.rect.size.y))) {} // TODO: add changeable tool size? replace 60 with tool size
+    ToolBar(App& app, Window* window, UILayout layout) : Widget(app, window, UILayout(layout.rect.position, UIDim2(UIDim(0.0f, 60), layout.rect.size.y))) {} // TODO: add changeable tool size? replace 60 with tool size
 
     void update(float deltaTime, const UIBounds& bounds) {}
     void render(const UIBounds& bounds) override;
@@ -66,5 +66,6 @@ public:
     void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
     ToolEntryId addTool(std::string name);
+    bool removeTool(ToolEntryId id);
     void clearTools();
 };

@@ -1,6 +1,7 @@
 #include "extension.hpp"
+#include <core/app.hpp>
 
-Extension::Extension(Id id, std::string name, std::string path) : id(id), name(name), folder(path) {
+Extension::Extension(App& app, Id id, std::string name, std::string path) : app(app), id(id), name(name), folder(path) {
     lua.open_libraries(
         sol::lib::base,
         sol::lib::package,
@@ -87,10 +88,10 @@ Extension::Extension(Id id, std::string name, std::string path) : id(id), name(n
     );
 
     // Extensions
-    lua.new_enum<ToolMode>("ToolMode",
+    lua.new_enum<Editor::Mode>("EditorMode",
         {
-            {"Object", ToolMode::Object},
-            {"Edit", ToolMode::Edit}
+            {"Object", Editor::Mode::Object},
+            {"Edit", Editor::Mode::Edit}
         }
     );
     lua.new_enum<ToolCategory>("ToolCategory",
@@ -100,6 +101,14 @@ Extension::Extension(Id id, std::string name, std::string path) : id(id), name(n
             {"Add", ToolCategory::Add},
             {"Modify", ToolCategory::Modify},
             {"Custom", ToolCategory::Custom}
+        }
+    );
+    lua.new_enum<ToolEventType>("ToolEventType",
+        {
+            {"LeftMouseDown", ToolEventType::LeftMouseDown},
+            {"LeftMouseUp", ToolEventType::LeftMouseUp},
+            {"RightMouseDown", ToolEventType::RightMouseDown},
+            {"RightMouseUp", ToolEventType::RightMouseUp}
         }
     );
 
@@ -292,7 +301,9 @@ Extension::Extension(Id id, std::string name, std::string path) : id(id), name(n
     // Extension contributions and configs
     lua.new_usertype<MenuAction>("MenuAction");
     lua.new_usertype<ContextAction>("ContextAction");
-    lua.new_usertype<Tool>("Tool");
+    lua.new_usertype<Tool>("Tool",
+        "connect", &Tool::connect
+    );
 
     lua.new_usertype<MenuActionConfig>("MenuActionConfig",
         "name", &MenuActionConfig::name
@@ -360,7 +371,7 @@ Extension::Extension(Id id, std::string name, std::string path) : id(id), name(n
 
     // Assign stuff to global variables
     lua["Extension"] = this;
-    lua["Theme"] = &Theme::get();
+    lua["Theme"] = &app.theme;
 }
 
 bool Extension::load() {
@@ -386,20 +397,20 @@ bool Extension::load() {
     return true;
 }
 
-std::shared_ptr<MenuAction> Extension::registerMenuAction(MenuActionConfig config) {
-    std::shared_ptr<MenuAction> action = std::make_shared<MenuAction>(config);
+MenuAction* Extension::registerMenuAction(MenuActionConfig config) {
+    MenuAction* action = app.extensionRegistry->registerMenuAction(config);
     menuActions.push_back(action);
     return action;
 }
 
-std::shared_ptr<ContextAction> Extension::registerContextAction(ContextActionConfig config) {
-    std::shared_ptr<ContextAction> action = std::make_shared<ContextAction>(config);
+ContextAction* Extension::registerContextAction(ContextActionConfig config) {
+    ContextAction* action = app.extensionRegistry->registerContextAction(config);
     contextActions.push_back(action);
     return action;
 }
 
-std::shared_ptr<Tool> Extension::registerTool(ToolConfig config) {
-    std::shared_ptr<Tool> tool = std::make_shared<Tool>(config);
+Tool* Extension::registerTool(ToolConfig config) {
+    Tool* tool = app.extensionRegistry->registerTool(config);
     tools.push_back(tool);
     return tool;
 }

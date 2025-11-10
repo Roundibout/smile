@@ -1,13 +1,14 @@
 #include "panel_split.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 #include <ui/widgets/panels/panel_container.hpp>
 
-PanelSplit::PanelSplit(Window* window, PanelContainer* container, std::unique_ptr<Panel> existingPanel, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) : Panel(window, container), direction(splitDirection), ratio(std::clamp(splitRatio, 0.05f, 0.95f)) {
+PanelSplit::PanelSplit(App& app, Window* window, PanelContainer* container, std::unique_ptr<Panel> existingPanel, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) : Panel(app, window, container), direction(splitDirection), ratio(std::clamp(splitRatio, 0.05f, 0.95f)) {
     if (existingPlacement == PanelSplitPlacement::First) {
         panel1 = std::move(existingPanel);
-        panel2 = std::make_unique<PanelLeaf>(window, container);
+        panel2 = std::make_unique<PanelLeaf>(app, window, container);
     } else {
-        panel1 = std::make_unique<PanelLeaf>(window, container);
+        panel1 = std::make_unique<PanelLeaf>(app, window, container);
         panel2 = std::move(existingPanel);
     }
 }
@@ -29,7 +30,7 @@ void PanelSplit::applyLayoutAndAdjacencies(const UIBounds& bounds, UIBounds& fir
 }
 
 bool PanelSplit::isOverResizeArea(const Vector2& point, const UIBounds& bounds) {
-    int margin = Theme::metricInt(ThemeMetric::PanelMargin);
+    int margin = app.theme.getMetricInt(ThemeMetric::PanelMargin);
 
     UILayout selectionArea;
     if (direction == PanelSplitDirection::Vertical) {
@@ -173,12 +174,12 @@ Panel* PanelSplit::getPanel(PanelSplitPlacement placement) {
 
 PanelSplit* PanelSplit::splitPanel(PanelSplitPlacement placement, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) {
     if (placement == PanelSplitPlacement::First) {
-        std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(window, container, std::move(panel1), splitDirection, splitRatio, existingPlacement);
+        std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(app, window, container, std::move(panel1), splitDirection, splitRatio, existingPlacement);
         PanelSplit* rawPtr = split.get();
         panel1 = std::move(split);
         return rawPtr;
     } else {
-        std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(window, container, std::move(panel2), splitDirection, splitRatio, existingPlacement);
+        std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(app, window, container, std::move(panel2), splitDirection, splitRatio, existingPlacement);
         PanelSplit* rawPtr = split.get();
         panel2 = std::move(split);
         return rawPtr;

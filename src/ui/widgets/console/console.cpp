@@ -1,4 +1,5 @@
 #include "console.hpp"
+#include <core/app.hpp>
 #include <window/window.hpp>
 
 void Console::update(float deltaTime, const UIBounds& bounds) {
@@ -9,21 +10,21 @@ void Console::update(float deltaTime, const UIBounds& bounds) {
 }
 
 void Console::render(const UIBounds& bounds) {
-    window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Console", Theme::font(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
+    window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Console", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
 
     UILayout content(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, -45)));
-    content.cornerRB = UIDim(0.0f, Theme::metric(ThemeMetric::PanelCorner));
-    content.cornerLB = UIDim(0.0f, Theme::metric(ThemeMetric::PanelCorner));
+    content.cornerRB = UIDim(0.0f, app.theme.getMetric(ThemeMetric::PanelCorner));
+    content.cornerLB = UIDim(0.0f, app.theme.getMetric(ThemeMetric::PanelCorner));
 
-    window->renderer.drawRoundedRect(content, bounds, Theme::color(ThemeColor::ConsoleBackground));
+    window->renderer.drawRoundedRect(content, bounds, app.theme.getColor(ThemeColor::ConsoleBackground));
 
     window->renderer.beginStencil();
     window->renderer.drawRoundedRect(content, bounds);
     window->renderer.useStencil();
 
-    int textSize = Theme::metricInt(ThemeMetric::ConsoleTextSize);
-    float height = window->renderer.resolveLayout(content, bounds).rect.size.y + Theme::metric(ThemeMetric::ConsoleTextSize); // add 20 for one extra line so hanging letters aren't cut
-    int absoluteLineHeight = static_cast<int>(window->renderer.scale(Theme::metric(ThemeMetric::ConsoleTextSize)));
+    int textSize = app.theme.getMetricInt(ThemeMetric::ConsoleTextSize);
+    float height = window->renderer.resolveLayout(content, bounds).rect.size.y + app.theme.getMetric(ThemeMetric::ConsoleTextSize); // add 20 for one extra line so hanging letters aren't cut
+    int absoluteLineHeight = static_cast<int>(window->renderer.scale(app.theme.getMetric(ThemeMetric::ConsoleTextSize)));
 
     const std::deque<LogEntry>& logs = Logger::getAllLogs();
 
@@ -35,21 +36,21 @@ void Console::render(const UIBounds& bounds) {
         Color4 color;
         std::string font;
         if (log.level == LogLevel::Info) {
-            color = Theme::color(ThemeColor::ConsoleInfo);
-            font = Theme::font(ThemeFont::CodeRegular);
+            color = app.theme.getColor(ThemeColor::ConsoleInfo);
+            font = app.theme.getFont(ThemeFont::CodeRegular);
         } else if (log.level == LogLevel::Warning) {
-            color = Theme::color(ThemeColor::ConsoleWarning);
-            font = Theme::font(ThemeFont::CodeBold);
+            color = app.theme.getColor(ThemeColor::ConsoleWarning);
+            font = app.theme.getFont(ThemeFont::CodeBold);
         } else if (log.level == LogLevel::Error) {
-            color = Theme::color(ThemeColor::ConsoleError);
-            font = Theme::font(ThemeFont::CodeBold);
+            color = app.theme.getColor(ThemeColor::ConsoleError);
+            font = app.theme.getFont(ThemeFont::CodeBold);
         } else if (log.level == LogLevel::Extension) {
-            color = Theme::color(ThemeColor::ConsoleExtension);
-            font = Theme::font(ThemeFont::CodeRegular);
+            color = app.theme.getColor(ThemeColor::ConsoleExtension);
+            font = app.theme.getFont(ThemeFont::CodeRegular);
         }
 
         // Get the width of the timestamp to offset this log's message
-        int timestampWidth = static_cast<int>(FontManager::get().getTextWidth(log.timestamp, Theme::font(ThemeFont::CodeRegular), textSize));
+        int timestampWidth = static_cast<int>(FontManager::get().getTextWidth(log.timestamp, app.theme.getFont(ThemeFont::CodeRegular), textSize));
         
         // Split message into lines on each "\n"
         std::vector<std::string> lines;
@@ -81,9 +82,9 @@ void Console::render(const UIBounds& bounds) {
                     UIDim2(0.0f, 10, 0.0f, textHeight),
                     bounds,
                     log.timestamp,
-                    Theme::font(ThemeFont::CodeRegular),
+                    app.theme.getFont(ThemeFont::CodeRegular),
                     textSize,
-                    Theme::color(ThemeColor::ConsoleTimestamp)
+                    app.theme.getColor(ThemeColor::ConsoleTimestamp)
                 );
             }
 

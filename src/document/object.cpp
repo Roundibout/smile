@@ -1,7 +1,7 @@
 #include "object.hpp"
 
-Id Object::createPoint(const Vector2& position) {
-    Id id;
+Point::Id Object::createPoint(const Vector2& position) {
+    Point::Id id;
 
     if (!freePointIds.empty()) { // Are there any free points?
         id = freePointIds.back(); // Use it
@@ -17,7 +17,7 @@ Id Object::createPoint(const Vector2& position) {
     return id;
 }
 
-void Object::deletePoint(Id id) {
+void Object::deletePoint(Point::Id id) {
     auto it = pointIdToIndex.find(id); // Get an iterator from the map
     if (it == pointIdToIndex.end()) return; // Invalid id
 
@@ -36,18 +36,18 @@ void Object::deletePoint(Id id) {
     }
 }
 
-const Point* Object::getPoint(Id id) {
+const Point* Object::getPoint(Point::Id id) {
     auto it = pointIdToIndex.find(id); // Get an iterator from the map
     if (it == pointIdToIndex.end()) return nullptr; // Invalid id
     return &points[it->second]; // Return a pointer
 }
 
-Id Object::createLine(Id point1, Id point2) {
+Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
     if (point1 == point2) return INVALID_ID; // Points are the same
     if (pointIdToIndex.find(point1) == pointIdToIndex.end()) return INVALID_ID; // Invalid point1 id
     if (pointIdToIndex.find(point2) == pointIdToIndex.end()) return INVALID_ID; // Invalid point2 id
 
-    Id id;
+    Line::Id id;
 
     if (!freeLineIds.empty()) { // Are there any free lines?
         id = freeLineIds.back(); // Use it
@@ -63,7 +63,7 @@ Id Object::createLine(Id point1, Id point2) {
     return id;
 }
 
-void Object::deleteLine(Id id) {
+void Object::deleteLine(Line::Id id) {
     auto it = lineIdToIndex.find(id); // Get an iterator from the map
     if (it == lineIdToIndex.end()) return; // Invalid id
 
@@ -82,7 +82,7 @@ void Object::deleteLine(Id id) {
     }
 }
 
-const Line* Object::getLine(Id id) {
+const Line* Object::getLine(Line::Id id) {
     auto it = lineIdToIndex.find(id); // Get an iterator from the map
     if (it == lineIdToIndex.end()) return nullptr; // Invalid id
     return &lines[it->second]; // Return a pointer
@@ -145,7 +145,7 @@ void Object::compute() {
                 if (exists) continue;
 
                 // Create the vertex's id
-                Id interId = nextVertexId++;
+                Vertex::Id interId = nextVertexId++;
 
                 vertices.emplace_back(interId, intersection);
                 if (interId >= nextVertexId) nextVertexId = interId + 1;
@@ -175,8 +175,8 @@ void Object::compute() {
 
         // Create edges between consecutive vertices
         for (size_t i = 0; i < verticesOnLine.size() - 1; ++i) {
-            Id v1 = verticesOnLine[i];
-            Id v2 = verticesOnLine[i+1];
+            Vertex::Id v1 = verticesOnLine[i];
+            Vertex::Id v2 = verticesOnLine[i+1];
             Edge edge = Edge(nextEdgeId++, v1, v2);
             edges.push_back(edge);
         }
@@ -194,7 +194,7 @@ void Object::compute() {
             face.triangles.emplace_back(face.vertices[0], face.vertices[1], face.vertices[2]);
         } else if (face.vertices.size() > 3) {
             // Ear clipping
-            std::vector<Id> remainingVertices = face.vertices;
+            std::vector<Vertex::Id> remainingVertices = face.vertices;
 
             // Ensure CCW winding
             if (!isCCW(face)) {
@@ -205,9 +205,9 @@ void Object::compute() {
                 bool earFound = false;
 
                 for (size_t i = 0; i < remainingVertices.size(); i++) {
-                    Id prevId = remainingVertices[(i + remainingVertices.size() - 1) % remainingVertices.size()];
-                    Id currId = remainingVertices[i];
-                    Id nextId = remainingVertices[(i + 1) % remainingVertices.size()];
+                    Vertex::Id prevId = remainingVertices[(i + remainingVertices.size() - 1) % remainingVertices.size()];
+                    Vertex::Id currId = remainingVertices[i];
+                    Vertex::Id nextId = remainingVertices[(i + 1) % remainingVertices.size()];
                     const Vertex& prev = vertices[prevId];
                     const Vertex& curr = vertices[currId];
                     const Vertex& next = vertices[nextId];
@@ -255,31 +255,31 @@ void Object::compute() {
 
     // Remove silhouettes
 
-    std::unordered_map<Id, std::vector<Id>> edgeToFaces;
+    std::unordered_map<Edge::Id, std::vector<Face::Id>> edgeToFaces;
     for (size_t i = 0; i < faces.size(); ++i)
-        for (Id e : faces[i].edges)
+        for (Edge::Id e : faces[i].edges)
             edgeToFaces[e].push_back(i);
 
-    std::vector<std::vector<Id>> clusters; // each cluster = face indices
+    std::vector<std::vector<Vertex::Id>> clusters; // each cluster = face indices
     std::vector<bool> visited(faces.size(), false);
 
     for (size_t i = 0; i < faces.size(); ++i) {
         if (visited[i]) continue;
 
-        std::vector<Id> cluster;
-        std::stack<Id> stack;
+        std::vector<Vertex::Id> cluster;
+        std::stack<Face::Id> stack;
         stack.push(i);
         visited[i] = true;
 
         while (!stack.empty()) {
-            Id fidx = stack.top();
+            Face::Id fidx = stack.top();
             stack.pop();
             cluster.push_back(fidx);
             const Face& f = faces[fidx];
 
             // explore neighbors
-            for (Id v : f.edges) {
-                for (Id neighborIdx : edgeToFaces[v]) {
+            for (Edge::Id v : f.edges) {
+                for (Face::Id neighborIdx : edgeToFaces[v]) {
                     if (!visited[neighborIdx]) {
                         visited[neighborIdx] = true;
                         stack.push(neighborIdx);
@@ -293,12 +293,12 @@ void Object::compute() {
 
     //Logger::print("CLUSTERS: " + std::to_string(clusters.size()));
 
-    for (std::vector<Id> cluster : clusters) {
-        Id biggestFace = INVALID_ID;
+    for (std::vector<Face::Id> cluster : clusters) {
+        Face::Id biggestFace = INVALID_ID;
         float biggestArea = 0.0f;
 
         // Find the face with the biggest area
-        for (Id face : cluster) {
+        for (Face::Id face : cluster) {
             float area = 0.0f;
 
             for (Triangle triangle : faces[face].triangles) {

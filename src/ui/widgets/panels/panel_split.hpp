@@ -30,7 +30,7 @@ private:
     float getPositionOverArea(const Vector2& point, const UIBounds& bounds);
     void stopResizing();
 public:
-    PanelSplit(Window* window, PanelContainer* container, std::unique_ptr<Panel> existingPanel, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement);
+    PanelSplit(App& app, Window* window, PanelContainer* container, std::unique_ptr<Panel> existingPanel, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement);
 
     void update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) override;
     void render(const UIBounds& bounds, PanelAdjacency adjacency) override;

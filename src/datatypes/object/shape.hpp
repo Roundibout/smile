@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <vector>
 
-using Id = uint32_t;
-
 struct Shape {
+    using Id = uint32_t;
+
     Id id;
 
     Shape(Id id) : id(id) {}

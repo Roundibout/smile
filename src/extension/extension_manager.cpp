@@ -1,4 +1,5 @@
 #include "extension_manager.hpp"
+#include <core/app.hpp>
 
 void ExtensionManager::loadAll() {
     if (extensionsFolder.empty())
@@ -44,7 +45,7 @@ void ExtensionManager::loadAll() {
         }
         
         try {
-            auto extension = std::make_unique<Extension>(nextId, extensionName, extensionPath);
+            auto extension = std::make_unique<Extension>(app, nextId, extensionName, extensionPath);
             if (extension->load()) {
                 extensions.push_back(std::move(extension));
                 ++nextId;

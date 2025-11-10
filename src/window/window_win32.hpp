@@ -29,9 +29,10 @@ License:
 #include <datatypes/vector2.hpp>
 
 #include <window/window_impl.hpp>
-#include <app/app.hpp>
 
 #include <util/logger.hpp>
+
+class App;
 
 class WindowWin32 : public WindowImpl {
 private:
@@ -45,7 +46,7 @@ private:
 
     LPCSTR cursorId = IDC_ARROW;
 public:
-    WindowWin32(const uint32_t& i, const WindowConfig& c);
+    WindowWin32(App& app, const uint32_t& i, const WindowConfig& c);
     ~WindowWin32();
     std::deque<WindowInput> update() override;
 

@@ -1,11 +1,17 @@
 #pragma once
 
-#include <core/viewport_manager.hpp>
-#include <core/document_manager.hpp>
+#include <unordered_map>
+
+#include <core/signal.hpp>
 
 #include <ui/widgets/widget.hpp>
 
+#include <ui/widgets/tool/category_tool_bar.hpp>
+
+#include <document/canvas.hpp>
 #include <document/object.hpp>
+
+#include <extension/tool.hpp>
 
 constexpr float MAX_SCALE = 100000.0f;
 constexpr float MIN_SCALE = 0.1f;
@@ -34,13 +40,23 @@ private:
 
     Vector2 applyViewTransform(float x, float y);
 
+    void drawCanvas(Canvas* canvas, const UIBounds& bounds);
+    void drawCanvasOutline(Canvas* canvas, const UIBounds& bounds); // Separate function so overlapping canvases are visible
+    void drawObject(Object* obj, const UIBounds& bounds);
+    void drawRotationCursor(const AbsoluteLayout& appliedLayout, const UIBounds& bounds);
+    void drawRotationIndicator(const UIBounds& bounds);
+
+    // UI elements
+    std::unique_ptr<CategoryToolBar> toolBar;
+    std::unordered_map<Tool*, ToolEntryId> toolToToolBarEntry;
+    Signal<Tool*>::Connection toolRegisteredConnection;
+    Signal<Tool*>::Connection toolRemovedConnection;
+
     // Debug
     float timer = 0.0f;
     bool computedRender = false;
 public:
-    Viewport(Window* window, UILayout layout) : Widget(window, layout) {
-        layout.setCorners(UIDim(0.0f, Theme::metricInt(ThemeMetric::PanelCorner)));
-    }
+    Viewport(App& app, Window* window, UILayout layout);
 
     void update(float deltaTime, const UIBounds& bounds) override;
 

@@ -6,6 +6,8 @@ vector art renderer (nothing fancy, just get fill and stroke working without cur
 
 selection tool (object mode only)
 
+localization (en-us only)
+
 properties panel
     selection properties (object mode only)
     document properties
@@ -13,7 +15,7 @@ properties panel
 layers panel
     allow the user to select and change the order only for now
 
-artboards (no creation tool yet, just internals)
+~~artboards~~ canvases (no creation tool yet, just internals) ✅
 
 export action (export artboard to png only)
 

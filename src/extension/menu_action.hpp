@@ -11,4 +11,6 @@ private:
     MenuActionConfig config;
 public:
     MenuAction(MenuActionConfig config);
+
+    MenuActionConfig getConfig() {return config;}
 };

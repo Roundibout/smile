@@ -21,6 +21,8 @@ License:
 #include <window/window_input.hpp>
 #include <render/renderer_types.hpp>
 
+class App;
+
 struct WindowConfig {
     std::string title = "Window";
     Vector2 size = Vector2(800, 600);
@@ -52,7 +54,7 @@ protected:
     RenderBackend rbackend;
     bool rbackendSet = false;
 public:
-    WindowImpl(const uint32_t& i, const WindowConfig& c);
+    WindowImpl(App& app, const uint32_t& i, const WindowConfig& c);
     virtual ~WindowImpl() = default;
     virtual std::deque<WindowInput> update() = 0;
 
@@ -79,4 +81,6 @@ public:
     virtual void releaseCapture() = 0;
 
     WindowConfig getConfig();
+
+    App& app; // TODO: clean up the win32 stuff so we don't have to do stuff like this
 };

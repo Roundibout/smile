@@ -10,23 +10,21 @@
 #include <util/logger.hpp>
 
 #include <extension/extension.hpp>
+#include <extension/menu_action.hpp>
+#include <extension/context_action.hpp>
+#include <extension/tool.hpp>
+
+class App;
 
 class ExtensionManager {
 private:
-    ExtensionManager() {
-        extensionsFolder = std::filesystem::current_path() / "extensions";
-    }
-    ExtensionManager(const ExtensionManager&) = delete;
-    ExtensionManager& operator=(const ExtensionManager&) = delete;
+    App& app;
 
-    std::filesystem::path extensionsFolder;
+    std::filesystem::path extensionsFolder = "extensions";
     Id nextId = 0;
     std::vector<std::unique_ptr<Extension>> extensions;
 public:
-    static ExtensionManager& get() {
-        static ExtensionManager instance; 
-        return instance;
-    }
+    explicit ExtensionManager(App& app) : app(app) {}
 
     void loadAll();
 };

@@ -27,7 +27,7 @@ private:
 
     TabBarDirection direction;
 public:
-    TabBar(Window* window, UILayout layout, TabBarDirection direction) : Widget(window, layout), direction(direction) {}
+    TabBar(App& app, Window* window, UILayout layout, TabBarDirection direction) : Widget(app, window, layout), direction(direction) {}
 
     void update(float deltaTime, const UIBounds& bounds) override;
     void render(const UIBounds& bounds) override;

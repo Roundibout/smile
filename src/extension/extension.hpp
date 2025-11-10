@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include <cstdint>
 #include <filesystem>
 
@@ -13,35 +12,42 @@
 #include <datatypes/color4.hpp>
 #include <datatypes/ui_types.hpp>
 
+#include <core/editor.hpp>
+
 #include <window/window.hpp>
 #include <window/window_input.hpp>
 #include <ui/theme.hpp>
-#include <app/app.hpp>
 
+#include <extension/extension_registry.hpp>
 #include <extension/menu_action.hpp>
 #include <extension/context_action.hpp>
 #include <extension/tool.hpp>
+
+class App;
 
 using Id = uint32_t;
 
 class Extension {
 private:
+    App& app;
+
     Id id;
     std::string name;
     std::string folder;
 
     sol::state lua;
 
-    std::vector<std::shared_ptr<MenuAction>> menuActions;
-    std::vector<std::shared_ptr<ContextAction>> contextActions;
-    std::vector<std::shared_ptr<Tool>> tools;
-
-    std::shared_ptr<MenuAction> registerMenuAction(MenuActionConfig config);
-    std::shared_ptr<ContextAction> registerContextAction(ContextActionConfig config);
-    std::shared_ptr<Tool> registerTool(ToolConfig config);
+    std::vector<MenuAction*> menuActions;
+    std::vector<ContextAction*> contextActions;
+    std::vector<Tool*> tools;
 public:
-    Extension(Id id, std::string name, std::string path);
+    Extension(App& app, Id id, std::string name, std::string path);
 
     bool load();
     bool unload();
+
+    // Register functions
+    MenuAction* registerMenuAction(MenuActionConfig config);
+    ContextAction* registerContextAction(ContextActionConfig config);
+    Tool* registerTool(ToolConfig config);
 };

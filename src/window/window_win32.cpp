@@ -10,6 +10,7 @@ License:
 */
 
 #include "window_win32.hpp"
+#include <core/app.hpp>
 
 // A value for if the window class already registered, used in the function registerWindowClass
 static bool classRegistered = false;
@@ -92,6 +93,7 @@ WPARAM keyCodeToVk(KeyCode key) {
 
 // Window procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    // TODO: get the window here instead of in each case
     switch (msg) { // Each case has its own scope so the variables don't overlap
         case WM_NCCREATE: {
             // Set the userdata for the window (the window class we create) so we can use it in other cases
@@ -103,19 +105,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_DESTROY: {
             KillTimer(hwnd, 1);
             WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
-            App::get().destroyWindow(window->getId());
+            window->app.destroyWindow(window->getId());
             PostQuitMessage(0);
             return 0;
         }
 
         // FIX FOR STALLING DURING RESIZE AND MOVE
 
-        case WM_SIZE:
-            App::get().step();
+        case WM_SIZE: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+            window->app.step();
             return 0;
-        case WM_MOVE:
-            App::get().step();
+        }
+        case WM_MOVE: {
+            WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
+            window->app.step();
             return 0;
+        }
         case WM_EXITSIZEMOVE: {
             WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
 
@@ -348,7 +354,7 @@ static void registerWindowClass(HINSTANCE hInstance) {
 }
 
 // Win32 window constructor
-WindowWin32::WindowWin32(const uint32_t& i, const WindowConfig& c) : WindowImpl(i, c) {
+WindowWin32::WindowWin32(App& app, const uint32_t& i, const WindowConfig& c) : WindowImpl(app, i, c) {
     SetProcessDPIAware(); // Set this so it isn't blurry
 
     // Get the handle to Smile
