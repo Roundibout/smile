@@ -11,26 +11,28 @@ ToolCategory = {
 
 ---@enum ToolEvent
 ToolEvent = {
-    LeftMouseDown = 0,
-    LeftMouseUp = 1,
-    RightMouseDown = 2,
-    RightMouseUp = 3,
+    Select = 0,
+    Deselect = 1,
+    LeftMouseDown = 2,
+    LeftMouseUp = 3,
+    RightMouseDown = 4,
+    RightMouseUp = 5,
 }
 
----@class ToolConfig
+---@class ToolDefinition
 ---@field name string
 ---@field mode EditorMode
 ---@field category ToolCategory
-ToolConfig = {}
+ToolDefinition = {}
 
 ---Creates a new ToolConfig filled with default fields.
----@return ToolConfig
-function ToolConfig.new() end
+---@return ToolDefinition
+function ToolDefinition.new() end
+
+---Connects a function to a tool definition.
+---@param event ToolEvent
+---@param handler function
+function ToolDefinition:connect(event, handler) end
 
 ---@class Tool
 Tool = {}
-
----Connects a function to a tool event.
----@param event ToolEvent
----@param handler function
-function Tool:connect(event, handler) end

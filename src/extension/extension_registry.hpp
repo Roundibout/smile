@@ -33,9 +33,9 @@ public:
 
     explicit ExtensionRegistry(App& app) : app(app) {}
 
-    MenuAction* registerMenuAction(MenuActionConfig config);
-    ContextAction* registerContextAction(ContextActionConfig config);
-    Tool* registerTool(ToolConfig config);
+    MenuAction* registerMenuAction(MenuActionDefinition definition);
+    ContextAction* registerContextAction(ContextActionDefinition definition);
+    Tool* registerTool(ToolDefinition definition);
 
     const std::vector<std::unique_ptr<MenuAction>>& getMenuActions() const {return menuActions;}
     const std::vector<std::unique_ptr<ContextAction>>& getContextActions() const {return contextActions;}

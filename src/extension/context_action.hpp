@@ -2,15 +2,15 @@
 
 #include <string>
 
-struct ContextActionConfig {
+struct ContextActionDefinition {
     std::string name = "Context Action";
 };
 
 class ContextAction {
 private:
-    ContextActionConfig config;
+    std::string name;
 public:
-    ContextAction(ContextActionConfig config);
+    ContextAction(ContextActionDefinition definition);
 
-    ContextActionConfig getConfig() {return config;}
+    std::string getName() {return name;}
 };

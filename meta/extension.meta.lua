@@ -4,16 +4,13 @@
 Extension = {}
 
 ---Registers a menu action.
----@param config MenuActionConfig
----@return MenuAction
-function Extension:registerMenuAction(config) end
+---@param definition MenuActionDefinition
+function Extension:registerMenuAction(definition) end
 
 ---Registers a context action.
----@param config ContextActionConfig
----@return ContextAction
-function Extension:registerContextAction(config) end
+---@param definition ContextActionDefinition
+function Extension:registerContextAction(definition) end
 
 ---Registers a tool.
----@param config ToolConfig
----@return Tool
-function Extension:registerTool(config) end
+---@param definition ToolDefinition
+function Extension:registerTool(definition) end

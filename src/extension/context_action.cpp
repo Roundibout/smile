@@ -1,5 +1,5 @@
 #include "context_action.hpp"
 
-ContextAction::ContextAction(ContextActionConfig config) : config(config) {
+ContextAction::ContextAction(ContextActionDefinition definition) : name(definition.name) {
     
 }

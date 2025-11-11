@@ -12,11 +12,11 @@ Tool* Editor::getSelectedTool(Mode toolMode) {
 }
 
 void Editor::setSelectedTool(Mode toolMode, Tool* tool) {
-    ToolConfig config = tool->getConfig();
-    if (config.mode != toolMode) {
-        Logger::warn("Tool \"" + config.name + "\" is not of the specified mode");
+    if (tool->getMode() != toolMode) {
+        Logger::warn("Tool \"" + tool->getName() + "\" is not of the specified mode");
         return;
     }
     objectModeTool = tool;
+    tool->fireEvent(ToolEventType::Select);
     onToolSelected.emit(tool, toolMode);
 }

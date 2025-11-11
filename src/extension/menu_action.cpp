@@ -1,5 +1,5 @@
 #include "menu_action.hpp"
 
-MenuAction::MenuAction(MenuActionConfig config) : config(config) {
+MenuAction::MenuAction(MenuActionDefinition definition) : name(definition.name) {
     
 }

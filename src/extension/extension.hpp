@@ -47,7 +47,7 @@ public:
     bool unload();
 
     // Register functions
-    MenuAction* registerMenuAction(MenuActionConfig config);
-    ContextAction* registerContextAction(ContextActionConfig config);
-    Tool* registerTool(ToolConfig config);
+    void registerMenuAction(MenuActionDefinition definition);
+    void registerContextAction(ContextActionDefinition definition);
+    void registerTool(ToolDefinition definition);
 };

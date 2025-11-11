@@ -1,12 +1,12 @@
 ---@meta _
 
----@class MenuActionConfig
+---@class MenuActionDefinition
 ---@field name string
-MenuActionConfig = {}
+MenuActionDefinition = {}
 
----Creates a new MenuActionConfig filled with default fields.
----@return MenuActionConfig
-function MenuActionConfig.new() end
+---Creates a new MenuActionDefinition filled with default fields.
+---@return MenuActionDefinition
+function MenuActionDefinition.new() end
 
 ---@class MenuAction
 MenuAction = {}

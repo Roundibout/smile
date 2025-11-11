@@ -9,20 +9,6 @@ Vector2 Viewport::applyViewTransform(float x, float y) {
     );
 }
 
-void Viewport::fillToolBar() {
-    for (auto& tool : app.extensionRegistry->getTools()) {
-        Tool* ptr = tool.get();
-        ToolConfig config = ptr->getConfig();
-        if (config.mode != app.editor->getMode()) continue;
-
-        ToolEntryId entry = toolBar->addTool(config.name, "A");
-        toolToToolBarEntry[ptr] = entry;
-        toolBarEntryToTool[entry] = ptr;
-
-        if (ptr == app.editor->getSelectedTool(app.editor->getMode())) toolBar->selectTool(entry);
-    }
-}
-
 std::string toolCategoryToString(ToolCategory category) {
     switch (category) {
         case ToolCategory::Select:
@@ -44,6 +30,20 @@ std::string toolCategoryToString(ToolCategory category) {
     return "Custom";
 }
 
+void Viewport::fillToolBar() {
+    for (auto& tool : app.extensionRegistry->getTools()) {
+        Tool* ptr = tool.get();
+        if (tool->getMode() != app.editor->getMode()) continue;
+
+        std::string category = toolCategoryToString(tool->getCategory());
+        ToolEntryId entry = toolBar->addTool(tool->getName(), category);
+        toolToToolBarEntry[ptr] = entry;
+        toolBarEntryToTool[entry] = ptr;
+
+        if (ptr == app.editor->getSelectedTool(app.editor->getMode())) toolBar->selectTool(entry);
+    }
+}
+
 Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
     layout.setCorners(UIDim(0.0f, app.theme.getMetricInt(ThemeMetric::PanelCorner)));
 
@@ -59,9 +59,8 @@ Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, wind
     });
 
     toolRegisteredConnection = app.extensionRegistry->onToolRegistered.connect([this](Tool* tool) {
-        ToolConfig config = tool->getConfig();
-        std::string category = toolCategoryToString(config.category);
-        ToolEntryId entry = toolBar->addTool(config.name, category);
+        std::string category = toolCategoryToString(tool->getCategory());
+        ToolEntryId entry = toolBar->addTool(tool->getName(), category);
         toolToToolBarEntry[tool] = entry;
         toolBarEntryToTool[entry] = tool;
     });

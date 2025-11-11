@@ -103,8 +103,10 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
             {"Custom", ToolCategory::Custom}
         }
     );
-    lua.new_enum<ToolEventType>("ToolEventType",
+    lua.new_enum<ToolEventType>("ToolEvent",
         {
+            {"Select", ToolEventType::Select},
+            {"Deselect", ToolEventType::Deselect},
             {"LeftMouseDown", ToolEventType::LeftMouseDown},
             {"LeftMouseUp", ToolEventType::LeftMouseUp},
             {"RightMouseDown", ToolEventType::RightMouseDown},
@@ -298,23 +300,20 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "key", &WindowInput::key
     );
 
-    // Extension contributions and configs
-    lua.new_usertype<MenuAction>("MenuAction");
-    lua.new_usertype<ContextAction>("ContextAction");
-    lua.new_usertype<Tool>("Tool",
-        "connect", &Tool::connect
+    // Extension contribution definitions
+    lua.new_usertype<MenuActionDefinition>("MenuActionDefinition",
+        "name", &MenuActionDefinition::name
     );
-
-    lua.new_usertype<MenuActionConfig>("MenuActionConfig",
-        "name", &MenuActionConfig::name
+    lua.new_usertype<ContextActionDefinition>("ContextActionDefinition",
+        "name", &ContextActionDefinition::name
     );
-    lua.new_usertype<ContextActionConfig>("ContextActionConfig",
-        "name", &ContextActionConfig::name
-    );
-    lua.new_usertype<ToolConfig>("ToolConfig",
-        "name", &ToolConfig::name,
-        "mode", &ToolConfig::mode,
-        "category", &ToolConfig::category
+    lua.new_usertype<ToolDefinition>("ToolDefinition",
+        "name", &ToolDefinition::name,
+        "mode", &ToolDefinition::mode,
+        "category", &ToolDefinition::category,
+        "connect", [](ToolDefinition& self, ToolEventType type, sol::function func) {
+            self.connect(type, func);
+        }
     );
 
     // -- Classes -- //
@@ -345,9 +344,9 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
     );
 
     lua.new_usertype<Extension>("Extension",
-        "registerMenuAction", [](Extension& self, MenuActionConfig config){self.registerMenuAction(config);},
-        "registerContextAction", [](Extension& self, ContextActionConfig config){self.registerContextAction(config);},
-        "registerTool", [](Extension& self, ToolConfig config){self.registerTool(config);}
+        "registerMenuAction", &Extension::registerMenuAction,
+        "registerContextAction", &Extension::registerContextAction,
+        "registerTool", &Extension::registerTool
     );
 
     // -- Singletons -- //
@@ -397,20 +396,17 @@ bool Extension::load() {
     return true;
 }
 
-MenuAction* Extension::registerMenuAction(MenuActionConfig config) {
-    MenuAction* action = app.extensionRegistry->registerMenuAction(config);
+void Extension::registerMenuAction(MenuActionDefinition definition) {
+    MenuAction* action = app.extensionRegistry->registerMenuAction(definition);
     menuActions.push_back(action);
-    return action;
 }
 
-ContextAction* Extension::registerContextAction(ContextActionConfig config) {
-    ContextAction* action = app.extensionRegistry->registerContextAction(config);
+void Extension::registerContextAction(ContextActionDefinition definition) {
+    ContextAction* action = app.extensionRegistry->registerContextAction(definition);
     contextActions.push_back(action);
-    return action;
 }
 
-Tool* Extension::registerTool(ToolConfig config) {
-    Tool* tool = app.extensionRegistry->registerTool(config);
+void Extension::registerTool(ToolDefinition definition) {
+    Tool* tool = app.extensionRegistry->registerTool(definition);
     tools.push_back(tool);
-    return tool;
 }

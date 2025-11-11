@@ -17,6 +17,8 @@ enum class ToolCategory {
 };
 
 enum class ToolEventType {
+    Select,
+    Deselect,
     LeftMouseDown,
     LeftMouseUp,
     RightMouseDown,
@@ -25,27 +27,36 @@ enum class ToolEventType {
     Count
 };
 
-struct ToolConfig {
-    std::string name = "Tool";
-    Editor::Mode mode = Editor::Mode::Object;
-    ToolCategory category = ToolCategory::Custom;
-};
-
 struct ToolEvent {
     
 };
 
+struct ToolDefinition {
+    std::string name = "Tool";
+    Editor::Mode mode = Editor::Mode::Object;
+    ToolCategory category = ToolCategory::Custom;
+    
+    std::array<std::vector<sol::function>, (size_t)ToolEventType::Count> eventHandlers;
+
+    void connect(ToolEventType type, sol::protected_function handler) {
+        eventHandlers[(size_t)type].push_back(std::move(handler));
+    }
+};
+
 class Tool {
 private:
-    ToolConfig config;
+    std::string name;
+    Editor::Mode mode;
+    ToolCategory category;
 
-    std::array<std::vector<sol::function>, (size_t)ToolEventType::Count> eventHandlers;
+    std::array<std::vector<sol::protected_function>, (size_t)ToolEventType::Count> eventHandlers;
 public:
-    Tool(ToolConfig config);
+    Tool(ToolDefinition definition);
 
-    void fireEvent(ToolEventType type, int x, int y) {
+    template<typename... Args>
+    void fireEvent(ToolEventType type, Args&&... args) {
         for (auto& func : eventHandlers[(size_t)type]) {
-            sol::protected_function_result result = func(x, y);
+            sol::protected_function_result result = func(std::forward<Args>(args)...);
             if (!result.valid()) {
                 sol::error err = result;
                 std::cerr << "Lua event error: " << err.what() << "\n";
@@ -53,10 +64,7 @@ public:
         }
     }
 
-    ToolConfig getConfig() {return config;}
-
-    // Exposed to extension
-    void connect(ToolEventType type, sol::function handler) {
-        eventHandlers[(size_t)type].push_back(std::move(handler));
-    }
+    std::string getName() {return name;}
+    Editor::Mode getMode() {return mode;}
+    ToolCategory getCategory() {return category;}
 };

@@ -1,22 +1,20 @@
-local toolConfig = ToolConfig.new()
-toolConfig.name = "Test"
-toolConfig.mode = EditorMode.Object
-toolConfig.category = ToolCategory.Select
+local toolDef = ToolDefinition.new()
+toolDef.name = "Test"
+toolDef.mode = EditorMode.Object
+toolDef.category = ToolCategory.Select
 
-local tool1 = Extension:registerTool(toolConfig)
-local tool2 = Extension:registerTool(toolConfig)
+toolDef:connect(ToolEvent.Select, function()
+    print("Selected 💀");
+end)
 
-local toolConfig2 = ToolConfig.new()
-toolConfig2.name = "Test"
-toolConfig2.mode = EditorMode.Edit
-toolConfig2.category = ToolCategory.Select
+Extension:registerTool(toolDef)
+Extension:registerTool(toolDef)
 
-local tool3 = Extension:registerTool(toolConfig2)
+local toolDef2 = ToolDefinition.new()
+toolDef2.name = "Test"
+toolDef2.mode = EditorMode.Edit
+toolDef2.category = ToolCategory.Select
+
+Extension:registerTool(toolDef2)
 
 print("Ok");
-
---[[
-tool:connect(ToolEvent.LeftMouseDown, function(position)
-    
-end)
-]]--

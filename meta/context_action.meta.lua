@@ -1,12 +1,12 @@
 ---@meta _
 
----@class ContextActionConfig
+---@class ContextActionDefinition
 ---@field name string
-ContextActionConfig = {}
+ContextActionDefinition = {}
 
----Creates a new ContextActionConfig filled with default fields.
----@return ContextActionConfig
-function ContextActionConfig.new() end
+---Creates a new ContextActionDefinition filled with default fields.
+---@return ContextActionDefinition
+function ContextActionDefinition.new() end
 
 ---@class ContextAction
 ContextAction = {}

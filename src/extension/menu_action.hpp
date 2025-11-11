@@ -2,15 +2,15 @@
 
 #include <string>
 
-struct MenuActionConfig {
+struct MenuActionDefinition {
     std::string name = "Menu Action";
 };
 
 class MenuAction {
 private:
-    MenuActionConfig config;
+    std::string name;
 public:
-    MenuAction(MenuActionConfig config);
+    MenuAction(MenuActionDefinition definition);
 
-    MenuActionConfig getConfig() {return config;}
+    std::string getName() {return name;}
 };
