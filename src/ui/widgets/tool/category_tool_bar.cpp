@@ -79,6 +79,7 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
             } else if (up) {
                 if (selectingTool == tool.id && selectedTool != tool.id) {
                     selectedTool = tool.id;
+                    onToolSelected.emit(selectedTool);
                     window->renderer.dirty();
                 }
             }
@@ -116,6 +117,23 @@ ToolEntryId CategoryToolBar::addTool(std::string name, std::string category) {
     return toolId;
 }
 
+bool CategoryToolBar::selectTool(ToolEntryId id) {
+    for (auto catIt = categories.begin(); catIt != categories.end(); ++catIt) {
+        auto& tools = catIt->tools;
+
+        for (auto toolIt = tools.begin(); toolIt != tools.end(); ++toolIt) {
+            if (toolIt->id == id) {
+                selectedTool = toolIt->id;
+
+                window->renderer.dirty();
+
+                return true; // Found
+            }
+        }
+    }
+    return false; // Not found
+}
+
 bool CategoryToolBar::removeTool(ToolEntryId id) {
     for (auto catIt = categories.begin(); catIt != categories.end(); ++catIt) {
         auto& tools = catIt->tools;
@@ -134,6 +152,8 @@ bool CategoryToolBar::removeTool(ToolEntryId id) {
                 if (selectingTool == id) selecting = false;
                 if (hoveredTool == id) hoveredTool = false;
 
+                window->renderer.dirty();
+
                 return true; // Found
             }
         }
@@ -150,4 +170,6 @@ void CategoryToolBar::clearTools() {
     selectingTool = 0;
     hovered = false;
     hoveredTool = 0;
+
+    window->renderer.dirty();
 }

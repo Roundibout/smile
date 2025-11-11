@@ -19,17 +19,28 @@ Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, wind
         ToolConfig config = ptr->getConfig();
         ToolEntryId entry = toolBar->addTool(config.name, "A");
         toolToToolBarEntry[ptr] = entry;
+        toolBarEntryToTool[entry] = ptr;
     }
 
     toolRegisteredConnection = app.extensionRegistry->onToolRegistered.connect([this](Tool* tool) {
         ToolConfig config = tool->getConfig();
         ToolEntryId entry = toolBar->addTool(config.name, "A");
         toolToToolBarEntry[tool] = entry;
+        toolBarEntryToTool[entry] = tool;
     });
 
     toolRemovedConnection = app.extensionRegistry->onToolRemoved.connect([this](Tool* tool) {
         toolBar->removeTool(toolToToolBarEntry[tool]);
         toolToToolBarEntry.erase(tool);
+    });
+
+    toolSelectedConnection = toolBar->onToolSelected.connect([this](ToolEntryId id) {
+        Tool* tool = toolBarEntryToTool[id];
+        this->app.editor->setSelectedTool(this->app.editor->getMode(), tool);
+    });
+
+    globalToolSelectedConnection = app.editor->onToolSelected.connect([this](Tool* tool, Editor::Mode mode) { // This does get called when this viewport selects a tool, but whatever
+        toolBar->selectTool(toolToToolBarEntry[tool]);
     });
 }
 

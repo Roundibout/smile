@@ -1,6 +1,11 @@
 #pragma once
 
+#include <core/signal.hpp>
+
+#include <util/logger.hpp>
+
 class App;
+class Tool;
 
 class Editor {
 public:
@@ -11,9 +16,24 @@ public:
 private:
     App& app;
 
-    Mode mode;
+    Mode mode = Mode::Object;
+
+    Tool* objectModeTool;
+    Tool* editModeTool;
 public:
+    Signal<Tool*, Mode> onToolSelected;
+
     Editor(App& app) : app(app) {}
 
+    // Getters
+
     Mode getMode() {return mode;}
+
+    Tool* getSelectedTool(Mode toolMode);
+
+    // Setters
+
+    void setMode(Mode newMode) {mode = newMode;}
+
+    void setSelectedTool(Mode toolMode, Tool* tool);
 };

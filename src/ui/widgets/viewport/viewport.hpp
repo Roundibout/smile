@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include <core/signal.hpp>
+#include <core/editor.hpp>
 
 #include <ui/widgets/widget.hpp>
 
@@ -49,8 +50,11 @@ private:
     // UI elements
     std::unique_ptr<CategoryToolBar> toolBar;
     std::unordered_map<Tool*, ToolEntryId> toolToToolBarEntry;
+    std::unordered_map<ToolEntryId, Tool*> toolBarEntryToTool;
     Signal<Tool*>::Connection toolRegisteredConnection;
     Signal<Tool*>::Connection toolRemovedConnection;
+    Signal<ToolEntryId>::Connection toolSelectedConnection;
+    Signal<Tool*, Editor::Mode>::Connection globalToolSelectedConnection;
 
     // Debug
     float timer = 0.0f;

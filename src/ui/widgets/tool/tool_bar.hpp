@@ -5,6 +5,8 @@
 #include <vector>
 #include <cstdint>
 
+#include <core/signal.hpp>
+
 #include <ui/widgets/widget.hpp>
 
 using ToolEntryId = uint32_t;
@@ -58,6 +60,8 @@ private:
         }
     }
 public:
+    Signal<ToolEntryId> onToolSelected;
+
     ToolBar(App& app, Window* window, UILayout layout) : Widget(app, window, UILayout(layout.rect.position, UIDim2(UIDim(0.0f, 60), layout.rect.size.y))) {} // TODO: add changeable tool size? replace 60 with tool size
 
     void update(float deltaTime, const UIBounds& bounds) {}
@@ -66,6 +70,8 @@ public:
     void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
     ToolEntryId addTool(std::string name);
+    // Doesn't fire onToolSelected signal
+    bool selectTool(ToolEntryId id);
     bool removeTool(ToolEntryId id);
     void clearTools();
 };

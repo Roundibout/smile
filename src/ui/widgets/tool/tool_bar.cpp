@@ -79,6 +79,7 @@ bool ToolBar::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             } else if (up) {
                 if (selectingTool == tool.id && selectedTool != tool.id) {
                     selectedTool = tool.id;
+                    onToolSelected.emit(selectedTool);
                     window->renderer.dirty();
                 }
             }
@@ -106,6 +107,19 @@ ToolEntryId ToolBar::addTool(std::string name) {
     return toolId;
 }
 
+bool ToolBar::selectTool(ToolEntryId id) {
+    for (auto it = tools.begin(); it != tools.end(); ++it) {
+        if (it->id == id) {
+            selectedTool = it->id;
+
+            window->renderer.dirty();
+
+            return true; // Found
+        }
+    }
+    return false; // Not found
+}
+
 bool ToolBar::removeTool(ToolEntryId id) {
     for (auto it = tools.begin(); it != tools.end(); ++it) {
         if (it->id == id) {
@@ -115,6 +129,8 @@ bool ToolBar::removeTool(ToolEntryId id) {
             if (selectedTool == id) selectedTool = 0;
             if (selectingTool == id) selecting = false;
             if (hoveredTool == id) hoveredTool = false;
+
+            window->renderer.dirty();
 
             return true; // Found
         }
@@ -131,4 +147,6 @@ void ToolBar::clearTools() {
     selectingTool = 0;
     hovered = false;
     hoveredTool = 0;
+
+    window->renderer.dirty();
 }
