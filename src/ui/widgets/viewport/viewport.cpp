@@ -9,22 +9,59 @@ Vector2 Viewport::applyViewTransform(float x, float y) {
     );
 }
 
+void Viewport::fillToolBar() {
+    for (auto& tool : app.extensionRegistry->getTools()) {
+        Tool* ptr = tool.get();
+        ToolConfig config = ptr->getConfig();
+        if (config.mode != app.editor->getMode()) continue;
+
+        ToolEntryId entry = toolBar->addTool(config.name, "A");
+        toolToToolBarEntry[ptr] = entry;
+        toolBarEntryToTool[entry] = ptr;
+
+        if (ptr == app.editor->getSelectedTool(app.editor->getMode())) toolBar->selectTool(entry);
+    }
+}
+
+std::string toolCategoryToString(ToolCategory category) {
+    switch (category) {
+        case ToolCategory::Select:
+            return "Select";
+            break;
+        case ToolCategory::Transform:
+            return "Transform";
+            break;
+        case ToolCategory::Add:
+            return "Add";
+            break;
+        case ToolCategory::Modify:
+            return "Modify";
+            break;
+        case ToolCategory::Custom:
+            return "Custom"; // TODO: make each individual extension get a different category if custom
+            break;
+    }
+    return "Custom";
+}
+
 Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
     layout.setCorners(UIDim(0.0f, app.theme.getMetricInt(ThemeMetric::PanelCorner)));
 
     toolBar = std::make_unique<CategoryToolBar>(app, window, UILayout(UIDim2(0.0f, 10, 0.0f, 0), UIDim2(0.0f, 60, 1.0f, -50)));
 
-    for (auto& tool : app.extensionRegistry->getTools()) {
-        Tool* ptr = tool.get();
-        ToolConfig config = ptr->getConfig();
-        ToolEntryId entry = toolBar->addTool(config.name, "A");
-        toolToToolBarEntry[ptr] = entry;
-        toolBarEntryToTool[entry] = ptr;
-    }
+    fillToolBar();
+
+    modeChangedConnection = app.editor->onModeChanged.connect([this](Editor::Mode mode) {
+        toolToToolBarEntry.clear();
+        toolBarEntryToTool.clear();
+        toolBar->clearTools();
+        fillToolBar();
+    });
 
     toolRegisteredConnection = app.extensionRegistry->onToolRegistered.connect([this](Tool* tool) {
         ToolConfig config = tool->getConfig();
-        ToolEntryId entry = toolBar->addTool(config.name, "A");
+        std::string category = toolCategoryToString(config.category);
+        ToolEntryId entry = toolBar->addTool(config.name, category);
         toolToToolBarEntry[tool] = entry;
         toolBarEntryToTool[entry] = tool;
     });

@@ -51,10 +51,15 @@ private:
     std::unique_ptr<CategoryToolBar> toolBar;
     std::unordered_map<Tool*, ToolEntryId> toolToToolBarEntry;
     std::unordered_map<ToolEntryId, Tool*> toolBarEntryToTool;
+
+    Signal<Editor::Mode>::Connection modeChangedConnection;
+
     Signal<Tool*>::Connection toolRegisteredConnection;
     Signal<Tool*>::Connection toolRemovedConnection;
     Signal<ToolEntryId>::Connection toolSelectedConnection;
     Signal<Tool*, Editor::Mode>::Connection globalToolSelectedConnection;
+
+    void fillToolBar();
 
     // Debug
     float timer = 0.0f;

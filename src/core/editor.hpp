@@ -21,6 +21,7 @@ private:
     Tool* objectModeTool;
     Tool* editModeTool;
 public:
+    Signal<Mode> onModeChanged;
     Signal<Tool*, Mode> onToolSelected;
 
     Editor(App& app) : app(app) {}
@@ -33,7 +34,10 @@ public:
 
     // Setters
 
-    void setMode(Mode newMode) {mode = newMode;}
+    void setMode(Mode newMode) {
+        mode = newMode;
+        onModeChanged.emit(mode);
+    }
 
     void setSelectedTool(Mode toolMode, Tool* tool);
 };
