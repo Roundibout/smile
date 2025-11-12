@@ -45,13 +45,9 @@ void Window::process() {
             }
         }
 
-        // Find any input callbacks
-        auto it = callbacks.find(WindowEvent::Input);
-        if (it != callbacks.end()) { // Is there any?
-            // Go through all of them and run them
-            for (auto& func : it->second) {
-                func(input, bounds);
-            }
+        // Run input callbacks
+        for (auto& func : inputCallbacks) {
+            func(input, bounds);
         }
 
         // Set dirty overrides
@@ -59,7 +55,7 @@ void Window::process() {
             overdirtied = true;
             lastSize = impl->getSize();
         }
-
+        
         inputs.pop_front(); // remove the input
     }
     
@@ -80,13 +76,9 @@ void Window::update(float deltaTime) {
     for (auto& widget : widgets) {
         widget->update(deltaTime, bounds);
     }
-    // Find any update callbacks
-    auto it = callbacks.find(WindowEvent::Update);
-    if (it != callbacks.end()) { // Is there any?
-        // Go through all of them and run them
-        for (auto& func : it->second) {
-            func(deltaTime, bounds);
-        }
+    // Run update callbacks
+    for (auto& func : updateCallbacks) {
+        func(deltaTime, bounds);
     }
 }
 
@@ -100,21 +92,25 @@ void Window::render(float uiScale) {
         for (auto& widget : widgets) {
             widget->render(bounds);
         }
-        // Find any render callbacks
-        auto it = callbacks.find(WindowEvent::Render);
-        if (it != callbacks.end()) { // Is there any?
-            // Go through all of them and run them
-            for (auto& func : it->second) {
-                func(bounds);
-            }
+        // Run render callbacks
+        for (auto& func : renderCallbacks) {
+            func(bounds);
         }
         // End the frame
         renderer.endFrame();
     }
 }
 
-void Window::connectCallback(WindowEvent event, sol::function callback) {
-    callbacks[event].push_back(callback);
+void Window::connectUpdate(std::function<void(float deltaTime, const UIBounds& bounds)> callback) {
+    updateCallbacks.push_back(callback);
+}
+
+void Window::connectRender(std::function<void(const UIBounds& bounds)> callback) {
+    renderCallbacks.push_back(callback);
+}
+
+void Window::connectInput(std::function<void(WindowInput& input, const UIBounds& bounds)> callback) {
+    inputCallbacks.push_back(callback);
 }
 
 bool Window::isKeyDown(KeyCode key) {

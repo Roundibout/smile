@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <ui/widgets/panels/panel_container.hpp>
 #include <ui/widgets/viewport/viewport.hpp>
 #include <ui/widgets/console/console.hpp>

@@ -61,6 +61,7 @@ public:
 
     void destroyWindow(const uint32_t& id);
 
+    float getUIScale();
     void setUIScale(float scale);
 
     void step();

@@ -338,9 +338,35 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
     lua.new_usertype<Window>("Window",
         "renderer", sol::property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct
 
-        "connectUpdate", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Update, callback);},
-        "connectRender", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Render, callback);},
-        "connectInput", [](Window& self, sol::function callback){self.connectCallback(WindowEvent::Input, callback);}
+        "connectUpdate", [](Window& self, sol::function luaFunc) {
+            self.connectUpdate([luaFunc](float deltaTime, const UIBounds& bounds) {
+                sol::protected_function_result result = luaFunc(deltaTime, bounds);
+                if (!result.valid()) {
+                    sol::error err = result;
+                    Logger::error("Lua update callback error: ", err.what());
+                }
+            });
+        },
+
+        "connectRender", [](Window& self, sol::function luaFunc) {
+            self.connectRender([luaFunc](const UIBounds& bounds) {
+                sol::protected_function_result result = luaFunc(bounds);
+                if (!result.valid()) {
+                    sol::error err = result;
+                    Logger::error("Lua render callback error: ", err.what());
+                }
+            });
+        },
+
+        "connectInput", [](Window& self, sol::function luaFunc) {
+            self.connectInput([luaFunc](WindowInput& input, const UIBounds& bounds) {
+                sol::protected_function_result result = luaFunc(input, bounds);
+                if (!result.valid()) {
+                    sol::error err = result;
+                    Logger::error("Lua input callback error: ", err.what());
+                }
+            });
+        }
     );
 
     lua.new_usertype<Extension>("Extension",

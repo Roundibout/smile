@@ -17,8 +17,7 @@ License:
 #include <memory>
 #include <iostream>
 #include <deque>
-
-#include <sol/sol.hpp>
+#include <functional>
 
 #include <datatypes/vector2.hpp>
 #include <window/window_input.hpp>
@@ -50,7 +49,9 @@ private:
 
     std::vector<std::unique_ptr<Widget>> widgets;
 
-    std::unordered_map<WindowEvent, std::vector<sol::function>> callbacks;
+    std::vector<std::function<void(float deltaTime, const UIBounds& bounds)>> updateCallbacks;
+    std::vector<std::function<void(const UIBounds& bounds)>> renderCallbacks;
+    std::vector<std::function<void(WindowInput& input, const UIBounds& bounds)>> inputCallbacks;
 
     bool blank = true;
     Vector2 lastSize;
@@ -63,7 +64,9 @@ public:
     void update(float deltaTime);
     void render(float uiScale);
 
-    void connectCallback(WindowEvent event, sol::function callback);
+    void connectUpdate(std::function<void(float deltaTime, const UIBounds& bounds)> callback);
+    void connectRender(std::function<void(const UIBounds& bounds)> callback);
+    void connectInput(std::function<void(WindowInput& input, const UIBounds& bounds)> callback);
 
     bool isKeyDown(KeyCode key);
 

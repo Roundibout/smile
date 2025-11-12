@@ -1,20 +1,11 @@
-local toolDef = ToolDefinition.new()
-toolDef.name = "Test"
-toolDef.mode = EditorMode.Object
-toolDef.category = ToolCategory.Select
+local penDef = ToolDefinition.new()
+penDef.name = "Pen"
+penDef.mode = EditorMode.Object
+penDef.category = ToolCategory.Select
 
-toolDef:connect(ToolEvent.Select, function()
-    print("Selected 💀");
+---@param position Vector2
+penDef:connect(ToolEvent.LeftMouseDown, function(position)
+    
 end)
 
-Extension:registerTool(toolDef)
-Extension:registerTool(toolDef)
-
-local toolDef2 = ToolDefinition.new()
-toolDef2.name = "Test"
-toolDef2.mode = EditorMode.Edit
-toolDef2.category = ToolCategory.Select
-
-Extension:registerTool(toolDef2)
-
-print("Ok");
+Extension:registerTool(penDef)

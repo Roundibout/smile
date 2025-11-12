@@ -1,6 +1,9 @@
 #include "main_window.hpp"
 #include <core/app.hpp>
 
+constexpr float UI_SCALE_MAX = 2.0f;
+constexpr float UI_SCALE_MIN = 0.5f;
+
 void MainWindow::create() {
     WindowConfig config;
     config.title = "Smile";
@@ -25,4 +28,18 @@ void MainWindow::create() {
     TabBar* tabBar = window->addWidget<TabBar>(UILayout(UIRect(UIDim2(0.0f, 10, 1.0f, -90), UIDim2(1.0f, -20, 0.0f, 50))), TabBarDirection::Horizontal);
     TabId tab1 = tabBar->addTab("Tab1");
     TabId tab2 = tabBar->addTab("Tab2");
+
+    float scale = 1.0f;
+    
+    window->connectInput([this](WindowInput& input, const UIBounds& bounds) {
+        if (input.type == WindowInputType::KeyDown) {
+            if (input.key == KeyCode::Equals) {
+                app.setUIScale(std::clamp(app.getUIScale() + 0.25f, UI_SCALE_MIN, UI_SCALE_MAX)); 
+                Logger::print("Scale +");
+            } else if (input.key == KeyCode::Minus) {
+                app.setUIScale(std::clamp(app.getUIScale() - 0.25f, UI_SCALE_MIN, UI_SCALE_MAX)); 
+                Logger::print("Scale -");
+            }
+        }
+    });
 }
