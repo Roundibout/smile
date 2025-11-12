@@ -316,6 +316,13 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         }
     );
 
+    // Document
+    lua.new_usertype<Canvas>("Canvas");
+    lua.new_usertype<Object>("Object",
+        "createPoint", &Object::createPoint,
+        "createLine", &Object::createLine
+    );
+
     // -- Classes -- //
 
     lua.new_usertype<Renderer>("Renderer",
@@ -336,7 +343,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
     );
 
     lua.new_usertype<Window>("Window",
-        "renderer", sol::property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct
+        "renderer", sol::readonly_property([](Window& self) -> Renderer& {return self.renderer;}), // nested struct
 
         "connectUpdate", [](Window& self, sol::function luaFunc) {
             self.connectUpdate([luaFunc](float deltaTime, const UIBounds& bounds) {
@@ -369,13 +376,26 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         }
     );
 
+    lua.new_usertype<Document>("Document",
+        "createCanvas", &Document::createCanvas,
+        "createObject", &Document::createObject
+    );
+
     lua.new_usertype<Extension>("Extension",
         "registerMenuAction", &Extension::registerMenuAction,
         "registerContextAction", &Extension::registerContextAction,
         "registerTool", &Extension::registerTool
     );
 
-    // -- Singletons -- //
+    // -- Main systems -- //
+
+    lua.new_usertype<App>("App",
+        "setUIScale", &App::setUIScale
+    );
+
+    lua.new_usertype<DocumentManager>("DocumentManager",
+        "current", sol::readonly_property([](DocumentManager& self) -> Document* {return self.getCurrentDocument();})
+    );
 
     lua.new_usertype<Theme>("Theme",
         "getMetric", &Theme::getMetric,
@@ -383,20 +403,11 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "getFont", &Theme::getFont
     );
 
-    /* TODO: will we give direct access to this? probably not, or at least not all its functions
-    lua.new_usertype<App>("App",
-        "run", &App::run,
-        "quit", &App::quit,
-
-        "createWindow", &App::createWindow,
-
-        "setUIScale", &App::setUIScale
-    );
-    */
-
     // Assign stuff to global variables
-    lua["Extension"] = this;
-    lua["Theme"] = &app.theme;
+    lua["extension"] = this;
+    lua["app"] = &app;
+    lua["documents"] = &app.documents;
+    lua["theme"] = &app.theme;
 }
 
 bool Extension::load() {

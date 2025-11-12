@@ -59,7 +59,7 @@ public:
             sol::protected_function_result result = func(std::forward<Args>(args)...);
             if (!result.valid()) {
                 sol::error err = result;
-                std::cerr << "Lua event error: " << err.what() << "\n";
+                Logger::error("Lua event error: ", err.what());
             }
         }
     }

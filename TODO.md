@@ -1,4 +1,5 @@
-basic pen tool from lua extension
+basic pen tool
+basic rectangle tool
 
 vector art renderer (nothing fancy, just get fill and stroke working without curves)
     GPU rasterizing for display in viewport

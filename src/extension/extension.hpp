@@ -11,8 +11,16 @@
 #include <datatypes/rect.hpp>
 #include <datatypes/color4.hpp>
 #include <datatypes/ui_types.hpp>
+#include <datatypes/object/point.hpp>
+#include <datatypes/object/line.hpp>
+#include <datatypes/object/shape.hpp>
 
 #include <core/editor.hpp>
+
+#include <document/document_manager.hpp>
+#include <document/document.hpp>
+#include <document/canvas.hpp>
+#include <document/object.hpp>
 
 #include <window/window.hpp>
 #include <window/window_input.hpp>

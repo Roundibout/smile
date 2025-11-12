@@ -26,20 +26,20 @@ ThemeFont = {
     CodeBold = 5
 }
 
----@class Theme
-Theme = {}
+---@class theme
+theme = {}
 
 ---Returns the specified metric from the theme.
 ---@param key ThemeMetric
 ---@return number metric
-function Theme:getMetric(key) end
+function theme:getMetric(key) end
 
 ---Returns the specified color from the theme.
 ---@param key ThemeColor
 ---@return Color4 color
-function Theme:getColor(key) end
+function theme:getColor(key) end
 
 ---Returns the specified font (file path) from the theme.
 ---@param key ThemeFont
 ---@return string font
-function Theme:getFont(key) end
+function theme:getFont(key) end

@@ -9,6 +9,15 @@ Vector2 Viewport::applyViewTransform(float x, float y) {
     );
 }
 
+Vector2 Viewport::mouseToWorldSpace(Vector2 mousePos) {
+    float dx = (mousePos.x - viewPosition.x) / viewScale;
+    float dy = (mousePos.y - viewPosition.y) / viewScale;
+    return Vector2(
+        dx * cosR + dy * sinR,
+        -dx * sinR + dy * cosR
+    );
+}
+
 std::string toolCategoryToString(ToolCategory category) {
     switch (category) {
         case ToolCategory::Select:
@@ -449,6 +458,14 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
         }
     }
 
+    if ((
+        input.type == WindowInputType::MouseMove || 
+        input.type == WindowInputType::MouseButtonDown || 
+        input.type == WindowInputType::MouseButtonUp || 
+        input.type == WindowInputType::MouseScroll) 
+        && !UITools::isPointOverRoundedRect(input.mouse.position, resolved)
+    ) return false;
+
     // UI
     if (toolBar->processWindowInput(input, bounds)) return true;
 
@@ -532,5 +549,21 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             }
         }
     }
+
+    // Tools
+    if (input.type == WindowInputType::MouseButtonDown && (input.mouse.button == MouseButton::Left || input.mouse.button == MouseButton::Right)) {
+        // Calculate world position of mouse
+        Vector2 mousePos(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
+        Vector2 worldPos = mouseToWorldSpace(mousePos);
+
+        ToolEventType event;
+        if (input.mouse.button == MouseButton::Left) {
+            event = ToolEventType::LeftMouseDown;
+        } else if (input.mouse.button == MouseButton::Right) {
+            event = ToolEventType::RightMouseDown;
+        }
+        app.editor->getSelectedTool(app.editor->getMode())->fireEvent(event, worldPos);
+    }
+
     return false;
 }

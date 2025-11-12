@@ -40,6 +40,7 @@ private:
     float sinR = std::sinf(viewRotation);
 
     Vector2 applyViewTransform(float x, float y);
+    Vector2 mouseToWorldSpace(Vector2 mousePos);
 
     void drawCanvas(Canvas* canvas, const UIBounds& bounds);
     void drawCanvasOutline(Canvas* canvas, const UIBounds& bounds); // Separate function so overlapping canvases are visible

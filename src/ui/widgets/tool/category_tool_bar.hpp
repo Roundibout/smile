@@ -9,6 +9,8 @@
 
 #include <ui/widgets/widget.hpp>
 
+#include <render/font_manager.hpp>
+
 using ToolEntryId = uint32_t;
 
 struct CategoryToolBarEntry {

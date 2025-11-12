@@ -7,11 +7,16 @@ void CategoryToolBar::render(const UIBounds& bounds) {
 
     // Render non-hovered and non-selected tools first
     runForEach([this, applied](const UILayout& toolLayout, const CategoryToolBarEntry& tool, const ToolBarCategory& category) {
+        // Temporary label
+        UILayout tipLayout(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 20), UIDim2(0.0f, FontManager::get().getTextWidth(tool.name, app.theme.getFont(ThemeFont::Regular), 20) + 20, 0.0f, 40.0f));
+        tipLayout.setCorners(UIDim(0.0f, 8));
+        window->renderer.drawRoundedStrokeRect(tipLayout, applied, Color4(0.1f, 0.1f, 0.1f), 2, Color4(0.13f, 0.13f, 0.13f));
+        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 20, 0.0f, toolSize / 2 - 7), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
+
         if ((hovered && hoveredTool == tool.id) || selectedTool == tool.id) return;
         Color4 color = app.theme.getColor(ThemeColor::Button);
         Color4 stroke = app.theme.getColor(ThemeColor::ButtonStroke);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 
     // Render hovered tools to appear between
@@ -20,7 +25,6 @@ void CategoryToolBar::render(const UIBounds& bounds) {
         Color4 color = app.theme.getColor(ThemeColor::ButtonHovered);
         Color4 stroke = app.theme.getColor(ThemeColor::ButtonStrokeHovered);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 
     // Render selected tools to appear on top
@@ -29,7 +33,6 @@ void CategoryToolBar::render(const UIBounds& bounds) {
         Color4 color = app.theme.getColor(ThemeColor::Accent);
         Color4 stroke = app.theme.getColor(ThemeColor::AccentHighlight);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Outside);
-        window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 10, 0.0f, toolSize / 2 - 10), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
     });
 };
 
