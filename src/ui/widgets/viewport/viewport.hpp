@@ -19,7 +19,7 @@ constexpr float MIN_SCALE = 0.1f;
 
 class Viewport : public Widget {
 private:
-    float viewScale = 100.0f;
+    float viewScale = 2.0f;
     Vector2 viewPosition = Vector2(0, 0);
     float viewRotation = 0.0f;
 

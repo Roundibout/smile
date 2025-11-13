@@ -61,11 +61,13 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
     }
 
     UIBounds applied = window->renderer.applyLayout(bounds, layout);
+    bool consumed = false;
     bool anyHovered = false;
 
-    runForEach([this, hoverable, down, up, &anyHovered, input, applied](const UILayout& toolLayout, const CategoryToolBarEntry& tool, const ToolBarCategory& category) {
+    runForEach([this, hoverable, down, up, &consumed, &anyHovered, input, applied](const UILayout& toolLayout, const CategoryToolBarEntry& tool, const ToolBarCategory& category) {
         if (UITools::isPointOverRoundedRect(input.mouse.position, window->renderer.resolveLayout(toolLayout, applied))) {
             if (hoverable) {
+                consumed = true;
                 anyHovered = true;
                 if (hoveredTool != tool.id) {
                     hoveredTool = tool.id;
@@ -77,10 +79,12 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
                 }
             }
             if (down) {
+                consumed = true;
                 selectingTool = tool.id;
                 selecting = true;
             } else if (up) {
                 if (selectingTool == tool.id && selectedTool != tool.id) {
+                    consumed = true;
                     selectedTool = tool.id;
                     onToolSelected.emit(selectedTool);
                     window->renderer.dirty();
@@ -92,6 +96,10 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
     if (!anyHovered) {
         hovered = false;
         window->renderer.dirty();
+    }
+
+    if (!consumed) {
+        return false;
     }
 
     return true;

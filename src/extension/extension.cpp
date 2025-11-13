@@ -319,8 +319,14 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
     // Document
     lua.new_usertype<Canvas>("Canvas");
     lua.new_usertype<Object>("Object",
-        "createPoint", &Object::createPoint,
-        "createLine", &Object::createLine
+        "createPoint", [this](Object& self, const Vector2& position) {
+            this->app.forceRender();
+            return self.createPoint(position);
+        },
+        "createLine", [this](Object& self, Point::Id point1, Point::Id point2) {
+            this->app.forceRender();
+            return self.createLine(point1, point2);
+        }
     );
 
     // -- Classes -- //
@@ -377,8 +383,14 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
     );
 
     lua.new_usertype<Document>("Document",
-        "createCanvas", &Document::createCanvas,
-        "createObject", &Document::createObject
+        "createCanvas", [this](Document& self, const Rect& rect) {
+            this->app.forceRender();
+            return self.createCanvas(rect);
+        },
+        "createObject", [this](Document& self) {
+            this->app.forceRender();
+            return self.createObject();
+        }
     );
 
     lua.new_usertype<Extension>("Extension",

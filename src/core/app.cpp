@@ -41,6 +41,10 @@ void App::destroyWindow(const uint32_t& id) {
     }
 }
 
+void App::forceRender() {
+    needsRender = true;
+}
+
 float App::getUIScale() {
     return uiScale;
 }
