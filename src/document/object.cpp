@@ -10,7 +10,7 @@ Point::Id Object::createPoint(const Vector2& position) {
         id = nextPointId++; // Otherwise, use the next point id and increment it
     }
 
-    points.push_back(Point{id, position}); // Add the point to the point vector
+    points.push_back(std::make_unique<Point>(id, position)); // Add the point to the point vector
 
     pointIdToIndex[id] = points.size() - 1; // Link this id with the index of the point in the point vector
 
@@ -23,7 +23,7 @@ void Object::deletePoint(Point::Id id) {
 
     size_t index = it->second; // Get the point's index
     std::swap(points[index], points.back()); // Swap the point we want to delete with the point at the front of the point vector
-    pointIdToIndex[points[index].id] = index; // Update moved point index that used to be at the front
+    pointIdToIndex[points[index]->id] = index; // Update moved point index that used to be at the front
     points.pop_back(); // Remove the point we want to delete that we just moved to the front
 
     pointIdToIndex.erase(it); // Unlink this id from the deleted point's index
@@ -36,10 +36,10 @@ void Object::deletePoint(Point::Id id) {
     }
 }
 
-const Point* Object::getPoint(Point::Id id) {
+std::unique_ptr<Point>& Object::getPoint(Point::Id id) {
     auto it = pointIdToIndex.find(id); // Get an iterator from the map
-    if (it == pointIdToIndex.end()) return nullptr; // Invalid id
-    return &points[it->second]; // Return a pointer
+    //if (it == pointIdToIndex.end()) return nullptr; // Invalid id         TODO: figure out a way to return garbage
+    return points[it->second];
 }
 
 Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
@@ -56,7 +56,7 @@ Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
         id = nextLineId++; // Otherwise, use the next line id and increment it
     }
 
-    lines.push_back(Line{id, point1, point2}); // Add the line to the line vector
+    lines.push_back(std::make_unique<Line>(id, point1, point2)); // Add the line to the line vector
 
     lineIdToIndex[id] = lines.size() - 1; // Link this id with the index of the line in the line vector
 
@@ -69,7 +69,7 @@ void Object::deleteLine(Line::Id id) {
 
     size_t index = it->second; // Get the line's index
     std::swap(lines[index], lines.back()); // Swap the line we want to delete with the line at the front of the line vector
-    lineIdToIndex[lines[index].id] = index; // Update moved line index that used to be at the front
+    lineIdToIndex[lines[index]->id] = index; // Update moved line index that used to be at the front
     lines.pop_back(); // Remove the line we want to delete that we just moved to the front
 
     lineIdToIndex.erase(it); // Unlink this id from the deleted line's index
@@ -82,10 +82,10 @@ void Object::deleteLine(Line::Id id) {
     }
 }
 
-const Line* Object::getLine(Line::Id id) {
+std::unique_ptr<Line>& Object::getLine(Line::Id id) {
     auto it = lineIdToIndex.find(id); // Get an iterator from the map
-    if (it == lineIdToIndex.end()) return nullptr; // Invalid id
-    return &lines[it->second]; // Return a pointer
+    //if (it == lineIdToIndex.end()) return nullptr; // Invalid id           TODO: Figure out a way to return garbage
+    return lines[it->second]; // Return a pointer
 }
 
 void Object::compute() {
@@ -98,35 +98,35 @@ void Object::compute() {
     nextFaceId = 0;
 
     // Add existing real points to vertex vector
-    for (const Point& point : points) {
-        vertices.emplace_back(Vertex(point.id, point.x, point.y));
-        if (point.id >= nextVertexId) nextVertexId = point.id + 1;
+    for (const std::unique_ptr<Point>& point : points) {
+        vertices.emplace_back(Vertex(point->id, point->x, point->y));
+        if (point->id >= nextVertexId) nextVertexId = point->id + 1;
     }
 
     // Create virtual points from line intersections
     for (size_t i = 0; i < lines.size(); ++i) { // For every line
-        const Line& lineA = lines[i]; // Get the line from the loop
-        const Point& pointA1 = points[pointIdToIndex[lineA.point1]];
-        const Point& pointA2 = points[pointIdToIndex[lineA.point2]];
+        const std::unique_ptr<Line>& lineA = lines[i]; // Get the line from the loop
+        const std::unique_ptr<Point>& pointA1 = points[pointIdToIndex[lineA->point1]];
+        const std::unique_ptr<Point>& pointA2 = points[pointIdToIndex[lineA->point2]];
 
         // Get the line's vertices' positions
-        const Vector2& A1 = Vector2(pointA1.x, pointA1.y);
-        const Vector2& A2 = Vector2(pointA2.x, pointA2.y);
+        const Vector2& A1 = Vector2(pointA1->x, pointA1->y);
+        const Vector2& A2 = Vector2(pointA2->x, pointA2->y);
 
         for (size_t j = i + 1; j < lines.size(); ++j) { // For every line, go through every line
-            const Line& lineB = lines[j]; // Get the other line from this loop
-            const Point& pointB1 = points[pointIdToIndex[lineB.point1]];
-            const Point& pointB2 = points[pointIdToIndex[lineB.point2]];
+            const std::unique_ptr<Line>& lineB = lines[j]; // Get the other line from this loop
+            const std::unique_ptr<Point>& pointB1 = points[pointIdToIndex[lineB->point1]];
+            const std::unique_ptr<Point>& pointB2 = points[pointIdToIndex[lineB->point2]];
 
             // Get the other line's vertices' positions
-            const Vector2& B1 = Vector2(pointB1.x, pointB1.y);
-            const Vector2& B2 = Vector2(pointB2.x, pointB2.y);
+            const Vector2& B1 = Vector2(pointB1->x, pointB1->y);
+            const Vector2& B2 = Vector2(pointB2->x, pointB2->y);
 
             // Now that we have the positions of two lines' vertices, we can see if the lines intersect
             Vector2 intersection;
             if (lineSegmentIntersection(A1, A2, B1, B2, intersection)) { // Check for intersection
-                auto isSamePoint = [&](const Point& p) {
-                    return std::fabs(p.x - intersection.x) < EPSILON && std::fabs(p.y - intersection.y) < EPSILON;
+                auto isSamePoint = [&](const std::unique_ptr<Point>& p) {
+                    return std::fabs(p->x - intersection.x) < EPSILON && std::fabs(p->y - intersection.y) < EPSILON;
                 };
                 if (isSamePoint(pointA1) || isSamePoint(pointA2) ||
                     isSamePoint(pointB1) || isSamePoint(pointB2)) {
@@ -154,15 +154,15 @@ void Object::compute() {
     }
 
     // Split lines into edges at intersections
-    for (const Line& line : lines) { // For every line
-        std::vector<Id> verticesOnLine = {line.point1, line.point2}; // Collect endpoints
+    for (const std::unique_ptr<Line>& line : lines) { // For every line
+        std::vector<Id> verticesOnLine = {line->point1, line->point2}; // Collect endpoints
 
-        const Vertex& vertex1 = vertices[line.point1];
-        const Vertex& vertex2 = vertices[line.point2];
+        const Vertex& vertex1 = vertices[line->point1];
+        const Vertex& vertex2 = vertices[line->point2];
 
         // Check all intersection vertices
         for (const Vertex& vertex : vertices) { // For every line, go through every vertex
-            if (vertex.id != line.point1 && vertex.id != line.point2) { // Ensure both of these aren't one of this line's endpoints
+            if (vertex.id != line->point1 && vertex.id != line->point2) { // Ensure both of these aren't one of this line's endpoints
                 // If vertex lies on the line segment
                 if (isVertexOnLine(vertex, vertex1, vertex2)) {
                     verticesOnLine.push_back(vertex.id);

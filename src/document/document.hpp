@@ -19,4 +19,6 @@ public:
 
     Canvas* createCanvas(const Rect& rect);
     Object* createObject();
+
+    std::vector<std::unique_ptr<Instance>>& getContents() {return instances;}
 };

@@ -1,7 +1,7 @@
 local def = ToolDefinition.new()
 def.name = "Pen"
 def.mode = EditorMode.Object
-def.category = ToolCategory.Select
+def.category = ToolCategory.Modify
 
 local object = nil
 local firstPoint = nil
@@ -31,6 +31,12 @@ def:connect(ToolEvent.LeftMouseDown, function(position)
             lastPoint = point
         end
     end
+end)
+
+def:connect(ToolEvent.Deselect, function()
+    object = nil
+    firstPoint = nil
+    lastPoint = nil
 end)
 
 extension:registerTool(def)

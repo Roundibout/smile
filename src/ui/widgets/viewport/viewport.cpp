@@ -120,9 +120,9 @@ void Viewport::drawCanvas(Canvas* canvas, const UIBounds& bounds) {
 
 void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
     if (!computedRender) {
-        for (const Line& line : obj->lines) {
-            const Point* point1 = obj->getPoint(line.point1);
-            const Point* point2 = obj->getPoint(line.point2);
+        for (std::unique_ptr<Line>& line : obj->lines) {
+            std::unique_ptr<Point>& point1 = obj->getPoint(line->point1);
+            std::unique_ptr<Point>& point2 = obj->getPoint(line->point2);
             Vector2 applied1 = applyViewTransform(point1->x, point1->y);
             Vector2 applied2 = applyViewTransform(point2->x, point2->y);
             UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
@@ -137,8 +137,8 @@ void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
             );
         }
 
-        for (const Point& point : obj->points) {
-            Vector2 applied = applyViewTransform(point.x, point.y);
+        for (std::unique_ptr<Point>& point : obj->points) {
+            Vector2 applied = applyViewTransform(point->x, point->y);
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
             pointLayout.setCorners(UIDim(1.0f, 0));

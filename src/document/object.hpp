@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include <stack>
+#include <memory>
 
 #include <datatypes/vector2.hpp>
 
@@ -39,19 +40,19 @@ public: // CHANGE AFTER TESTING
     // EXTERNAL
 
     // Points
-    std::vector<Point> points;
+    std::vector<std::unique_ptr<Point>> points;
     std::unordered_map<Point::Id, size_t> pointIdToIndex;
     std::vector<Point::Id> freePointIds;
     Point::Id nextPointId = 0;
 
     // Lines
-    std::vector<Line> lines;
+    std::vector<std::unique_ptr<Line>> lines;
     std::unordered_map<Line::Id, size_t> lineIdToIndex;
     std::vector<Line::Id> freeLineIds;
     Line::Id nextLineId = 0;
 
     // Shapes
-    std::vector<Shape> shapes;
+    std::vector<std::unique_ptr<Shape>> shapes;
     std::unordered_map<Shape::Id, size_t> shapeIdToIndex;
     std::vector<Shape::Id> freeShapeIds;
     Shape::Id nextShapeId = 0;
@@ -351,14 +352,15 @@ public:
     Point::Id createPoint(const Vector2& position);
     void deletePoint(Point::Id id);
 
-    const Point* getPoint(Point::Id id);
+    std::unique_ptr<Point>& getPoint(Point::Id id);
+    std::vector<std::unique_ptr<Point>>& getPoints() {return points;}
 
     // LINES
 
     Line::Id createLine(Point::Id point1, Point::Id point2);
     void deleteLine(Line::Id id);
 
-    const Line* getLine(Line::Id id);
+    std::unique_ptr<Line>& getLine(Line::Id id);
 
     // INTERNAL
 

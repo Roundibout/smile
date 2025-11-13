@@ -8,4 +8,6 @@ protected:
 public:
     Instance(std::string name) : name(name) {}
     virtual ~Instance() = default;
+
+    std::string getName() {return name;}
 };

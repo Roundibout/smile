@@ -318,7 +318,24 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
 
     // Document
     lua.new_usertype<Canvas>("Canvas");
+
+    lua.new_usertype<Point>("Point",
+        "id", &Point::id,
+        "x", &Point::x,
+        "y", &Point::y
+    );
+    lua.new_usertype<Line>("Line",
+        "id", &Line::id,
+        "point1", &Line::point1,
+        "point2", &Line::point2
+    );
+
+    lua.new_usertype<Instance>("Instance",
+        "getName", &Instance::getName
+    );
+
     lua.new_usertype<Object>("Object",
+        sol::base_classes, sol::bases<Instance>(),
         "createPoint", [this](Object& self, const Vector2& position) {
             this->app.forceRender();
             return self.createPoint(position);
@@ -326,6 +343,14 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "createLine", [this](Object& self, Point::Id point1, Point::Id point2) {
             this->app.forceRender();
             return self.createLine(point1, point2);
+        },
+        "getPoints", [this](Object& self) {
+            const auto& points = self.getPoints();
+            sol::table table = lua.create_table(static_cast<int>(points.size()), 0);
+            for (size_t i = 0; i < points.size(); ++i) {
+                table[i + 1] = points[i].get(); // just store the raw pointer; TODO: don't probably
+            }
+            return table;
         }
     );
 
@@ -390,6 +415,20 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "createObject", [this](Document& self) {
             this->app.forceRender();
             return self.createObject();
+        },
+        "getContents", [this](Document& self) {
+            auto& contents = self.getContents();
+            sol::table table = lua.create_table(static_cast<int>(contents.size()), 0);
+            for (size_t i = 0; i < contents.size(); ++i) {
+                Instance* inst = contents[i].get();
+                // Attempt to cast to Object* because this is dumb
+                if (Object* obj = dynamic_cast<Object*>(inst)) {
+                    table[i + 1] = obj; // now Lua sees it as Object*
+                } else {
+                    table[i + 1] = inst; // fallback to base Instance*
+                }
+            }
+            return table;
         }
     );
 

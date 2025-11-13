@@ -16,6 +16,7 @@ void Editor::setSelectedTool(Mode toolMode, Tool* tool) {
         Logger::warn("Tool \"" + tool->getName() + "\" is not of the specified mode");
         return;
     }
+    if (objectModeTool) objectModeTool->fireEvent(ToolEventType::Deselect);
     objectModeTool = tool;
     tool->fireEvent(ToolEventType::Select);
     onToolSelected.emit(tool, toolMode);
