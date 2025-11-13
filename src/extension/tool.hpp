@@ -36,7 +36,7 @@ struct ToolDefinition {
     Editor::Mode mode = Editor::Mode::Object;
     ToolCategory category = ToolCategory::Custom;
     
-    std::array<std::vector<sol::function>, (size_t)ToolEventType::Count> eventHandlers;
+    std::array<std::vector<sol::protected_function>, (size_t)ToolEventType::Count> eventHandlers;
 
     void connect(ToolEventType type, sol::protected_function handler) {
         eventHandlers[(size_t)type].push_back(std::move(handler));

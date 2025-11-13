@@ -96,7 +96,7 @@ void Viewport::update(float deltaTime, const UIBounds& bounds) {
         if (computedRender) {
             computedRender = false;
         } else {
-            computedRender = true;
+            //computedRender = true;
         }
         window->renderer.dirty();
     }
@@ -120,8 +120,6 @@ void Viewport::drawCanvas(Canvas* canvas, const UIBounds& bounds) {
 
 void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
     if (!computedRender) {
-        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
-
         for (const Line& line : obj->lines) {
             const Point* point1 = obj->getPoint(line.point1);
             const Point* point2 = obj->getPoint(line.point2);
@@ -148,8 +146,6 @@ void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     } else {
-        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
-
         for (const Face& face : obj->faces) {
 
             float blue = static_cast<float>(face.id) / static_cast<float>(obj->nextFaceId - 1);
@@ -340,6 +336,13 @@ void Viewport::render(const UIBounds& bounds) {
     toolBar->render(bounds);
 
     window->renderer.endStencil();
+
+    // Temporary title
+    if (!computedRender) {
+        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
+    } else {
+        window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
+    }
 }
 
 bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
@@ -551,18 +554,26 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     }
 
     // Tools
-    if (input.type == WindowInputType::MouseButtonDown && (input.mouse.button == MouseButton::Left || input.mouse.button == MouseButton::Right)) {
+    if ((input.type == WindowInputType::MouseButtonDown || input.type == WindowInputType::MouseButtonUp) && (input.mouse.button == MouseButton::Left || input.mouse.button == MouseButton::Right)) {
         // Calculate world position of mouse
         Vector2 mousePos(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
         Vector2 worldPos = mouseToWorldSpace(mousePos);
 
         ToolEventType event;
-        if (input.mouse.button == MouseButton::Left) {
-            event = ToolEventType::LeftMouseDown;
-        } else if (input.mouse.button == MouseButton::Right) {
-            event = ToolEventType::RightMouseDown;
+        if (input.type == WindowInputType::MouseButtonDown) {
+            if (input.mouse.button == MouseButton::Left) {
+                event = ToolEventType::LeftMouseDown;
+            } else if (input.mouse.button == MouseButton::Right) {
+                event = ToolEventType::RightMouseDown;
+            }
+        } else if (input.type == WindowInputType::MouseButtonUp) {
+            if (input.mouse.button == MouseButton::Left) {
+                event = ToolEventType::LeftMouseUp;
+            } else if (input.mouse.button == MouseButton::Right) {
+                event = ToolEventType::RightMouseUp;
+            }
         }
-        app.editor->getSelectedTool(app.editor->getMode())->fireEvent(event, worldPos);
+        app.editor->getSelectedTool(app.editor->getMode())->fireEvent(event, Vector2(worldPos.x, worldPos.y));
     }
 
     return false;
