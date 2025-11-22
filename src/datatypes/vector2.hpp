@@ -86,5 +86,27 @@ struct Vector2 {
         return *this;
     }
 
+    static float dot(const Vector2& a, const Vector2& b) {
+        return a.x * b.x + a.y * b.y;
+    }
+
+    static float cross(const Vector2& a, const Vector2& b) {
+        return a.x * b.y - a.y * b.x; // 2D cross product magnitude
+    }
+
+    static float length(const Vector2& v) {
+        return std::sqrt(v.x * v.x + v.y * v.y);
+    }
+
+    static Vector2 normalize(const Vector2& v) {
+        float len = length(v);
+        if (len == 0.0f) return Vector2(0.0f, 0.0f);
+        return v / len;
+    }
+
+    static float angleOf(const Vector2& v) {
+        return atan2(v.y, v.x);
+    }
+
     std::string toString() const;
 };

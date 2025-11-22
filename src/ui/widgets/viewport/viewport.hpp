@@ -44,6 +44,7 @@ private:
 
     void drawCanvas(Canvas* canvas, const UIBounds& bounds);
     void drawCanvasOutline(Canvas* canvas, const UIBounds& bounds); // Separate function so overlapping canvases are visible
+    void drawObjectHandles(Object* obj, const UIBounds& bounds);
     void drawObject(Object* obj, const UIBounds& bounds);
     void drawRotationCursor(const AbsoluteLayout& appliedLayout, const UIBounds& bounds);
     void drawRotationIndicator(const UIBounds& bounds);
