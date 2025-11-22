@@ -34,6 +34,16 @@ enum class EdgeDirection {
 constexpr uint32_t INVALID_ID = UINT32_MAX;
 
 class Object : public Instance {
+private:
+    struct StrokeEdge {
+        Vector2 start;
+        Vector2 end;
+    };
+    struct StrokeEdgePair {
+        StrokeEdge first;
+        StrokeEdge second;
+        Edge::Id parent;
+    };
 public:
     using Id = uint32_t;
 public: // CHANGE AFTER TESTING
@@ -70,6 +80,9 @@ public: // CHANGE AFTER TESTING
     // Faces
     std::vector<Face> faces;
     Face::Id nextFaceId = 0;
+
+    // Stroke
+    std::unordered_map<Edge::Id, std::vector<Vector2>> stroke;
 
     bool lineSegmentIntersection(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& intersection) {
         // Represent lines as p + r*t and q + s*u
@@ -343,6 +356,130 @@ public: // CHANGE AFTER TESTING
         bool hasNeg = (c1 < 0) || (c2 < 0) || (c3 < 0);
         bool hasPos = (c1 > 0) || (c2 > 0) || (c3 > 0);
         return !(hasNeg && hasPos); // all same sign => inside
+    }
+    
+    StrokeEdge offsetLine(const Vector2& a, const Vector2& b, float offsetAmount) {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+
+        float L = std::sqrt(dx*dx + dy*dy);
+
+        // Perpendicular unit vector
+        float nx = -dy / L;
+        float ny =  dx / L;
+
+        StrokeEdge result;
+
+        if (L == 0.0f) {
+        // zero-length line; just return original points
+        result.start = a;
+        result.end = b;
+        return result;
+    }
+
+        result.start.x = a.x + offsetAmount * nx;
+        result.start.y = a.y + offsetAmount * ny;
+
+        result.end.x = b.x + offsetAmount * nx;
+        result.end.y = b.y + offsetAmount * ny;
+
+        return result;
+    }
+    
+    bool lineIntersection(
+        const Vector2& p1, 
+        const Vector2& p2, 
+        const Vector2& p3, 
+        const Vector2& p4, 
+        Vector2& out
+    ) {
+        Vector2 r = p2 - p1;
+        Vector2 s = p4 - p3;
+
+        float denom = Vector2::cross(r, s);
+        if (denom == 0.0f) {
+            return false; // parallel or collinear lines
+        }
+        float t = Vector2::cross((p3 - p1), s) / denom;
+        out = p1 + r * t;
+        return true;
+    }
+
+    struct AngleIndexedEdge {
+        float angle;
+        StrokeEdgePair* edge;
+        bool isLeftSide;
+    };
+
+    void computeSharpStroke(
+        const Vertex& vert, 
+        std::vector<StrokeEdgePair>& connectedEdges, 
+        std::unordered_map<Vertex::Id, 
+        std::vector<Vector2>>& outPoints
+    ) {
+        Vertex::Id vid = vert.id;
+
+        // One edge connected to vertex (End caps)
+
+        if (connectedEdges.size() == 1) {
+            StrokeEdgePair& e = connectedEdges[0];
+
+            bool isStart = (edges[e.parent].start == vid);
+
+            Vector2 L = isStart ? e.first.start : e.first.end;
+            Vector2 R = isStart ? e.second.start : e.second.end;
+
+            outPoints[vid].push_back(L);
+            outPoints[vid].push_back(R);
+            return;
+        }
+
+        // Multiple edges connected to a vertex
+        std::vector<AngleIndexedEdge> list;
+
+        list.reserve(connectedEdges.size());
+
+        for (StrokeEdgePair& e : connectedEdges) {
+            Vector2 midStart = (e.first.start + e.second.start) * 0.5f;
+            Vector2 dir = midStart - Vector2(vert.x, vert.y);
+
+            list.push_back({Vector2::angleOf(dir), &e});
+        }
+
+        std::sort(list.begin(), list.end(), [](const AngleIndexedEdge& a, const AngleIndexedEdge& b) {
+            return a.angle < b.angle;
+        });
+
+        int N = list.size();
+        for (int i = 0; i < N; ++i) {
+            StrokeEdgePair* A = list[i].edge;
+            StrokeEdgePair* B = list[(i + 1) % N].edge;
+
+            // Their **left sides**
+            Vector2 A1 = A->first.start;
+            Vector2 A2 = A->first.end;
+            Vector2 B1 = B->first.start;
+            Vector2 B2 = B->first.end;
+
+            // Left-side intersection
+            Vector2 iPos;
+            if (lineIntersection(A1, A2, B1, B2, iPos))
+                outPoints[vid].push_back(iPos);
+            else
+                outPoints[vid].push_back(Vector2(vert.x, vert.y));
+
+            // Their **right sides**
+            A1 = A->second.start;
+            A2 = A->second.end;
+            B1 = B->second.start;
+            B2 = B->second.end;
+
+            // Right-side intersection
+            if (lineIntersection(A1, A2, B1, B2, iPos))
+                outPoints[vid].push_back(iPos);
+            else
+                outPoints[vid].push_back(Vector2(vert.x, vert.y));
+        }
     }
 public:
     Object(std::string name) : Instance(name) {}

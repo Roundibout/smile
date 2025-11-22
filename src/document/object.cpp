@@ -14,6 +14,8 @@ Point::Id Object::createPoint(const Vector2& position) {
 
     pointIdToIndex[id] = points.size() - 1; // Link this id with the index of the point in the point vector
 
+    compute();
+
     return id;
 }
 
@@ -34,6 +36,8 @@ void Object::deletePoint(Point::Id id) {
     } else {
         freePointIds.push_back(id); // Otherwise, add to free list
     }
+
+    compute();
 }
 
 std::unique_ptr<Point>& Object::getPoint(Point::Id id) {
@@ -60,6 +64,8 @@ Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
 
     lineIdToIndex[id] = lines.size() - 1; // Link this id with the index of the line in the line vector
 
+    compute();
+
     return id;
 }
 
@@ -80,6 +86,8 @@ void Object::deleteLine(Line::Id id) {
     } else {
         freeLineIds.push_back(id); // Otherwise, add to free list
     }
+
+    compute();
 }
 
 std::unique_ptr<Line>& Object::getLine(Line::Id id) {
@@ -93,9 +101,12 @@ void Object::compute() {
     vertices.clear();
     edges.clear();
     faces.clear();
+    stroke.clear();
     nextVertexId = 0;
     nextEdgeId = 0;
     nextFaceId = 0;
+
+    //Logger::print("computing...");
 
     // Add existing real points to vertex vector
     for (const std::unique_ptr<Point>& point : points) {
@@ -337,6 +348,72 @@ void Object::compute() {
                 }
                 c.erase(std::remove(c.begin(), c.end(), biggestFace), c.end());
             }
+        }
+    }
+
+    std::unordered_map<Edge::Id, StrokeEdgePair> strokeEdges;
+
+    for (Edge& edge : edges) {
+        const Vertex& vertex1 = vertices[edge.start];
+        const Vertex& vertex2 = vertices[edge.end];
+        
+        Vector2 p1 = Vector2(vertex1.x, vertex1.y);
+        Vector2 p2 = Vector2(vertex2.x, vertex2.y);
+
+        StrokeEdge l1 = offsetLine(p1, p2, 10);
+        StrokeEdge l2 = offsetLine(p1, p2, -10);
+
+        strokeEdges[edge.id] = StrokeEdgePair{l1, l2, edge.id};
+    }
+
+    std::unordered_map<Vertex::Id, std::vector<Edge::Id>> vertexToEdges;
+
+    for (Edge& edge : edges) {
+        Logger::print(edge.id);
+        vertexToEdges[edge.start].push_back(edge.id);
+        vertexToEdges[edge.end].push_back(edge.id);
+    }
+
+    std::unordered_map<Vertex::Id, std::vector<Vector2>> outPoints;
+
+    for (Vertex& vertex : vertices) {
+        const std::vector<Edge::Id>& connectedEdges = vertexToEdges[vertex.id];
+
+        std::vector<StrokeEdgePair> edgePairs;
+
+        edgePairs.reserve(connectedEdges.size());
+
+        for (Edge::Id id : connectedEdges) {
+            edgePairs.push_back(strokeEdges[id]);
+        }
+
+        computeSharpStroke(vertex, edgePairs, outPoints);
+    }
+
+    for (Edge& edge : edges) { // find stroke outline points for every edge in this object
+        // combine all the points into one vector so that we can sort them by angle and make triangles out of them
+
+        stroke[edge.id].insert(stroke[edge.id].end(), outPoints[edge.start].begin(), outPoints[edge.start].end());
+        stroke[edge.id].insert(stroke[edge.id].end(), outPoints[edge.end].begin(), outPoints[edge.end].end());
+
+        // ROTATION SORTING IN BASEMENT (CURSED METHOD) ☠️
+
+        Vector2 centroid; // get average position of points in the edge's stroke
+        for (const Vector2& p : stroke[edge.id]) {
+            centroid += p;
+        }
+        centroid /= stroke[edge.id].size(); // average position
+
+        std::sort(stroke[edge.id].begin(), stroke[edge.id].end(), [&](const Vector2& a, const Vector2& b){ // sort the points by rotation around the centroid
+            //Logger::print("sorting");
+            float angleA = atan2(a.y - centroid.y, a.x - centroid.x);
+            float angleB = atan2(b.y - centroid.y, b.x - centroid.x);
+            return angleA < angleB; // Counter-clockwise
+        });
+
+        //Logger::print(edge.id);
+        for (Vector2 p : stroke[edge.id]) {
+            //Logger::print(p.x, " ", p.y);
         }
     }
 }

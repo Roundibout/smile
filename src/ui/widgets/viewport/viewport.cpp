@@ -118,7 +118,7 @@ void Viewport::drawCanvas(Canvas* canvas, const UIBounds& bounds) {
     window->renderer.drawQuad(position1, position2, position3, position4, bounds, canvas->getColor());
 }
 
-void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
+void Viewport::drawObjectHandles(Object* obj, const UIBounds& bounds) {
     if (!computedRender) {
         for (std::unique_ptr<Line>& line : obj->lines) {
             std::unique_ptr<Point>& point1 = obj->getPoint(line->point1);
@@ -197,6 +197,41 @@ void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
             window->renderer.drawRoundedRect(vertexLayout, bounds, Color4(1.0f - blue, 0.0f, blue));
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
+    }
+}
+
+void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
+    for (const Face& face : obj->faces) {
+        for (const Triangle& tri : face.triangles) {
+            Vector2 applied1 = applyViewTransform(obj->vertices[tri.vertex1].x, obj->vertices[tri.vertex1].y);
+            Vector2 applied2 = applyViewTransform(obj->vertices[tri.vertex2].x, obj->vertices[tri.vertex2].y);
+            Vector2 applied3 = applyViewTransform(obj->vertices[tri.vertex3].x, obj->vertices[tri.vertex3].y);
+            UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
+            UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
+            UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
+
+            window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f, 0.0f, 0.0f));
+        }
+    }
+
+    std::vector<Vector2> triangles;
+    for (const Edge& edge : obj->edges) {
+        for (size_t i = 1; i + 1 < obj->stroke[edge.id].size(); i++) {
+            triangles.push_back(obj->stroke[edge.id][0]);
+            triangles.push_back(obj->stroke[edge.id][i]);
+            triangles.push_back(obj->stroke[edge.id][i+1]);   
+        }
+    }
+
+    for (size_t i = 1; i <= triangles.size()/3; i++) {
+        Vector2 applied1 = applyViewTransform(triangles[i*3-3].x, triangles[i*3-3].y);
+        Vector2 applied2 = applyViewTransform(triangles[i*3-2].x, triangles[i*3-2].y);
+        Vector2 applied3 = applyViewTransform(triangles[i*3-1].x, triangles[i*3-1].y);
+        UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
+        UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
+        UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
+
+        window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(0.0f, 0.0f, 0.0f));
     }
 }
 
@@ -319,6 +354,14 @@ void Viewport::render(const UIBounds& bounds) {
 
         if (Object* object = dynamic_cast<Object*>(instance)) {
             drawObject(object, bounds);
+        }
+    }
+
+    for (std::unique_ptr<Instance>& instancePtr : document->instances) {
+        Instance* instance = instancePtr.get();
+
+        if (Object* object = dynamic_cast<Object*>(instance)) {
+            drawObjectHandles(object, bounds);
         }
     }
 
