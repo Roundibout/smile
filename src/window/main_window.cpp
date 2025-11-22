@@ -17,9 +17,9 @@ void MainWindow::create() {
     PanelContainer* container = window->addWidget<PanelContainer>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 30), UIDim2(1.0f, 0, 1.0f, -120))));
     PanelLeaf* viewportPanel = static_cast<PanelLeaf*>(container->getPanel());
     viewportPanel->addChild<Viewport>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
-    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.5f, PanelSplitPlacement::First);
-    PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::Second);
-    PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.2f, PanelSplitPlacement::First);
+    PanelSplit* split1 = container->splitPanel(PanelSplitDirection::Vertical, 0.85f, PanelSplitPlacement::First);
+    PanelSplit* split2 = split1->splitPanel(PanelSplitPlacement::First, PanelSplitDirection::Horizontal, 0.1f, PanelSplitPlacement::Second);
+    PanelSplit* split3 = split1->splitPanel(PanelSplitPlacement::Second, PanelSplitDirection::Horizontal, 0.3f, PanelSplitPlacement::First);
     PanelLeaf* consolePanel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::First));
     consolePanel->addChild<Console>(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
     //PanelLeaf* viewport2Panel = static_cast<PanelLeaf*>(split3->getPanel(PanelSplitPlacement::Second));

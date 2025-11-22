@@ -118,6 +118,25 @@ void Viewport::drawCanvas(Canvas* canvas, const UIBounds& bounds) {
     window->renderer.drawQuad(position1, position2, position3, position4, bounds, canvas->getColor());
 }
 
+void Viewport::drawCanvasOutline(Canvas* canvas, const UIBounds& bounds) {
+    Rect rect = canvas->getSize();
+
+    Vector2 applied1 = applyViewTransform(rect.position.x, rect.position.y);
+    Vector2 applied2 = applyViewTransform(rect.position.x + rect.size.x, rect.position.y);
+    Vector2 applied3 = applyViewTransform(rect.position.x + rect.size.x, rect.position.y + rect.size.y);
+    Vector2 applied4 = applyViewTransform(rect.position.x, rect.position.y + rect.size.y);
+
+    UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
+    UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
+    UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
+    UIDim2 position4 = UIDim2(0.0f, applied4.x, 0.0f, applied4.y);
+
+    window->renderer.drawLine(position1, position2, bounds, Color4(0.0f, 0.0f, 0.0f), 2.0f);
+    window->renderer.drawLine(position2, position3, bounds, Color4(0.0f, 0.0f, 0.0f), 2.0f);
+    window->renderer.drawLine(position3, position4, bounds, Color4(0.0f, 0.0f, 0.0f), 2.0f);
+    window->renderer.drawLine(position4, position1, bounds, Color4(0.0f, 0.0f, 0.0f), 2.0f);
+}
+
 void Viewport::drawObjectHandles(Object* obj, const UIBounds& bounds) {
     if (!computedRender) {
         for (std::unique_ptr<Line>& line : obj->lines) {
@@ -141,8 +160,7 @@ void Viewport::drawObjectHandles(Object* obj, const UIBounds& bounds) {
             Vector2 applied = applyViewTransform(point->x, point->y);
             UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
             UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
-            pointLayout.setCorners(UIDim(1.0f, 0));
-            window->renderer.drawRoundedRect(pointLayout, bounds, Color4(0.0f, 1.0f, 0.0f));
+            window->renderer.drawRect(pointLayout, bounds, Color4(0.0f, 1.0f, 0.0f));
             //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
         }
     } else {
@@ -355,6 +373,12 @@ void Viewport::render(const UIBounds& bounds) {
         if (Object* object = dynamic_cast<Object*>(instance)) {
             drawObject(object, bounds);
         }
+    }
+
+    for (std::unique_ptr<Canvas>& canvasPtr : document->canvases) {
+        Canvas* canvas = canvasPtr.get();
+
+        drawCanvasOutline(canvas, bounds);
     }
 
     for (std::unique_ptr<Instance>& instancePtr : document->instances) {

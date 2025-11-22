@@ -13,7 +13,7 @@ License:
 
 Window* App::createWindow(const WindowConfig& config) {
     Logger::print("Creating window");
-
+    
     // Create window and associate it with the next window id
     std::unique_ptr<Window> window = std::make_unique<Window>(*this, nextId, config);
     Window* ptr = window.get();
