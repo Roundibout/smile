@@ -7,7 +7,7 @@ vector art renderer (nothing fancy, just get fill and stroke working without cur
 
 selection tool (object mode only)
 
-localization (en-us only)
+~~localization (en-us only)~~
 
 properties panel
     selection properties (object mode only)
