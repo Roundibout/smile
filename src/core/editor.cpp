@@ -1,6 +1,7 @@
-#include "editor.hpp"
-#include <core/app.hpp>
-#include <extension/tool.hpp>
+#include "core/editor.hpp"
+
+#include "core/app.hpp"
+#include "extension/tool.hpp"
 
 Tool* Editor::getSelectedTool(Mode toolMode) {
     if (toolMode == Mode::Object) {
@@ -13,7 +14,7 @@ Tool* Editor::getSelectedTool(Mode toolMode) {
 
 void Editor::setSelectedTool(Mode toolMode, Tool* tool) {
     if (tool->getMode() != toolMode) {
-        Logger::warn("Tool \"" + tool->getName() + "\" is not of the specified mode");
+        console::warn("Tool \"" + tool->getName() + "\" is not of the specified mode");
         return;
     }
     if (objectModeTool) objectModeTool->fireEvent(ToolEventType::Deselect);

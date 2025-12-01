@@ -1,5 +1,6 @@
-#include "extension_registry.hpp"
-#include <core/app.hpp>
+#include "extension/extension_registry.hpp"
+
+#include "core/app.hpp"
 
 MenuAction* ExtensionRegistry::registerMenuAction(MenuActionDefinition definition) {
     std::unique_ptr<MenuAction> action = std::make_unique<MenuAction>(definition);

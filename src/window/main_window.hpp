@@ -4,7 +4,7 @@
 
 #include <ui/widgets/panels/panel_container.hpp>
 #include <ui/widgets/viewport/viewport.hpp>
-#include <ui/widgets/console/console.hpp>
+#include <ui/widgets/console/console_display.hpp>
 #include <ui/widgets/tab/tab_bar.hpp>
 
 class App;

@@ -1,14 +1,3 @@
-/*
-File:
-    vector2.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the Vector2 datatype
-License:
-    MIT (see LICENSE file)
-*/
-
 #include "vector2.hpp"
 
 std::string Vector2::toString() const {

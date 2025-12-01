@@ -1,6 +1,7 @@
 #include "viewport.hpp"
-#include <core/app.hpp>
-#include <window/window.hpp>
+
+#include "core/app.hpp"
+#include "window/window.hpp"
 
 Vector2 Viewport::applyViewTransform(float x, float y) {
     return Vector2(
@@ -138,119 +139,34 @@ void Viewport::drawCanvasOutline(Canvas* canvas, const UIBounds& bounds) {
 }
 
 void Viewport::drawObjectHandles(Object* obj, const UIBounds& bounds) {
-    if (!computedRender) {
-        for (std::unique_ptr<Line>& line : obj->lines) {
-            std::unique_ptr<Point>& point1 = obj->getPoint(line->point1);
-            std::unique_ptr<Point>& point2 = obj->getPoint(line->point2);
-            Vector2 applied1 = applyViewTransform(point1->x, point1->y);
-            Vector2 applied2 = applyViewTransform(point2->x, point2->y);
-            UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
-            UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
+    for (std::unique_ptr<Line>& line : obj->getLines()) {
+        std::unique_ptr<Point>& point1 = obj->getPoint(line->point1);
+        std::unique_ptr<Point>& point2 = obj->getPoint(line->point2);
+        Vector2 applied1 = applyViewTransform(point1->x, point1->y);
+        Vector2 applied2 = applyViewTransform(point2->x, point2->y);
+        UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
+        UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
 
-            window->renderer.drawLine(
-                position1,
-                position2,
-                bounds, 
-                Color4(0.0f, 1.0f, 0.0f), 
-                2.0f
-            );
-        }
+        window->renderer.drawLine(
+            position1,
+            position2,
+            bounds, 
+            Color4(0.0f, 1.0f, 0.0f), 
+            2.0f
+        );
+    }
 
-        for (std::unique_ptr<Point>& point : obj->points) {
-            Vector2 applied = applyViewTransform(point->x, point->y);
-            UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
-            UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
-            window->renderer.drawRect(pointLayout, bounds, Color4(0.0f, 1.0f, 0.0f));
-            //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
-        }
-    } else {
-        for (const Face& face : obj->faces) {
-
-            float blue = static_cast<float>(face.id) / static_cast<float>(obj->nextFaceId - 1);
-
-            for (const Triangle& triangle : face.triangles) {
-                const Vertex& vertex1 = obj->vertices[triangle.vertex1];
-                const Vertex& vertex2 = obj->vertices[triangle.vertex2];
-                const Vertex& vertex3 = obj->vertices[triangle.vertex3];
-                Vector2 applied1 = applyViewTransform(vertex1.x, vertex1.y);
-                Vector2 applied2 = applyViewTransform(vertex2.x, vertex2.y);
-                Vector2 applied3 = applyViewTransform(vertex3.x, vertex3.y);
-                UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
-                UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
-                UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
-
-                window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f - blue, 0.0f, 0.0f + blue, 0.25f));
-            }
-        }
-
-        for (const Edge& edge : obj->edges) {
-            const Vertex& vertex1 = obj->vertices[edge.start];
-            const Vertex& vertex2 = obj->vertices[edge.end];
-            Vector2 applied1 = applyViewTransform(vertex1.x, vertex1.y);
-            Vector2 applied2 = applyViewTransform(vertex2.x, vertex2.y);
-            UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
-            UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
-            UIDim2 midPos = UIDim2(0.0f, (position1.x.offset + position2.x.offset) / 2, 0.0f, (position1.y.offset + position2.y.offset) / 2);
-
-            float blue = static_cast<float>(edge.id) / static_cast<float>(obj->nextEdgeId - 1);
-
-            window->renderer.drawLine(
-                position1,
-                position2,
-                bounds, 
-                Color4(1.0f - blue, 0.0f, blue), 
-                4.0f
-            );
-            //window->renderer.drawText(midPos - UIDim2(0.0f, 10, 0.0f, 10), bounds, std::to_string(edge.id), Theme::font(ThemeFont::Bold), 20, Color4(1.0f - blue / 2, 0.5f, 0.5f + blue / 2));
-        }
-
-        for (const Vertex& vertex : obj->vertices) {
-            Vector2 applied = applyViewTransform(vertex.x, vertex.y);
-            UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
-            UILayout vertexLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
-            vertexLayout.setCorners(UIDim(1.0f, 0));
-
-            float blue = static_cast<float>(vertex.id) / static_cast<float>(obj->nextVertexId - 1);
-
-            window->renderer.drawRoundedRect(vertexLayout, bounds, Color4(1.0f - blue, 0.0f, blue));
-            //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(vertex.id), Theme::font(ThemeFont::Bold), 20, Color4());
-        }
+    for (std::unique_ptr<Point>& point : obj->getPoints()) {
+        Vector2 applied = applyViewTransform(point->x, point->y);
+        UIDim2 position = UIDim2(0.0f, applied.x, 0.0f, applied.y);
+        UILayout pointLayout = UILayout(UIRect(position + UIDim2(0.0f, -5, 0.0f, -5), UIDim2(0.0f, 10, 0.0f, 10)));
+        window->renderer.drawRect(pointLayout, bounds, Color4(0.0f, 1.0f, 0.0f));
+        //window->renderer.drawText(position + UIDim2(0.0f, 5, 0.0f, 5), bounds, std::to_string(point.id), Theme::font(ThemeFont::Bold), 20, Color4());
     }
 }
 
 void Viewport::drawObject(Object* obj, const UIBounds& bounds) {
-    for (const Face& face : obj->faces) {
-        for (const Triangle& tri : face.triangles) {
-            Vector2 applied1 = applyViewTransform(obj->vertices[tri.vertex1].x, obj->vertices[tri.vertex1].y);
-            Vector2 applied2 = applyViewTransform(obj->vertices[tri.vertex2].x, obj->vertices[tri.vertex2].y);
-            Vector2 applied3 = applyViewTransform(obj->vertices[tri.vertex3].x, obj->vertices[tri.vertex3].y);
-            UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
-            UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
-            UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
-
-            window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(1.0f, 0.0f, 0.0f));
-        }
-    }
-
-    std::vector<Vector2> triangles;
-    for (const Edge& edge : obj->edges) {
-        for (size_t i = 1; i + 1 < obj->stroke[edge.id].size(); i++) {
-            triangles.push_back(obj->stroke[edge.id][0]);
-            triangles.push_back(obj->stroke[edge.id][i]);
-            triangles.push_back(obj->stroke[edge.id][i+1]);   
-        }
-    }
-
-    for (size_t i = 1; i <= triangles.size()/3; i++) {
-        Vector2 applied1 = applyViewTransform(triangles[i*3-3].x, triangles[i*3-3].y);
-        Vector2 applied2 = applyViewTransform(triangles[i*3-2].x, triangles[i*3-2].y);
-        Vector2 applied3 = applyViewTransform(triangles[i*3-1].x, triangles[i*3-1].y);
-        UIDim2 position1 = UIDim2(0.0f, applied1.x, 0.0f, applied1.y);
-        UIDim2 position2 = UIDim2(0.0f, applied2.x, 0.0f, applied2.y);
-        UIDim2 position3 = UIDim2(0.0f, applied3.x, 0.0f, applied3.y);
-
-        window->renderer.drawTriangle(position1, position2, position3, bounds, Color4(0.0f, 0.0f, 0.0f));
-    }
+    // Do stuff later
 }
 
 void Viewport::drawRotationCursor(const AbsoluteLayout& appliedLayout, const UIBounds& bounds) {
@@ -420,8 +336,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
         if (movingView) {
             viewPosition = Vector2(viewPosition.x + window->renderer.divide(input.mouse.delta.x), viewPosition.y + window->renderer.divide(input.mouse.delta.y));
 
-            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
-                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, resolved));
+            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
+                window->setMousePosition(ui_tools::mirror_point_across_rect(input.mouse.position, resolved));
             }
 
             window->renderer.dirty();
@@ -432,7 +348,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2 + resolved.rect.size.y * rotateMirrors.y
             );
             
-            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
+            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
                 if (input.mouse.position.x > resolved.rect.position.x + resolved.rect.size.x) {
                     rotateMirrors.x += 1;
                 } else if (input.mouse.position.x < resolved.rect.position.x) {
@@ -443,7 +359,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 } else if (input.mouse.position.y < resolved.rect.position.y) {
                     rotateMirrors.y -= 1;
                 }
-                Vector2 newMousePos = UITools::mirrorPointAcrossRect(input.mouse.position, resolved);
+                Vector2 newMousePos = ui_tools::mirror_point_across_rect(input.mouse.position, resolved);
                 window->setMousePosition(newMousePos);
             }   
 
@@ -487,8 +403,8 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             window->renderer.dirty();
             return true;
         } else if (zoomingView) {
-            if (!UITools::isPointOverRect(input.mouse.position, resolved)) {
-                window->setMousePosition(UITools::mirrorPointAcrossRect(input.mouse.position, resolved));
+            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
+                window->setMousePosition(ui_tools::mirror_point_across_rect(input.mouse.position, resolved));
             }
 
             float oldScale = viewScale;
@@ -533,7 +449,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
         input.type == WindowInputType::MouseButtonDown || 
         input.type == WindowInputType::MouseButtonUp || 
         input.type == WindowInputType::MouseScroll) 
-        && !UITools::isPointOverRoundedRect(input.mouse.position, resolved)
+        && !ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)
     ) return false;
 
     // UI
@@ -541,7 +457,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
 
     // Viewport action starts
     if (input.type == WindowInputType::MouseScroll) {
-        if (!movingView && !rotatingView && UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+        if (!movingView && !rotatingView && ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)) {
             if (window->isKeyDown(KeyCode::Shift)) {
                 if (rotatingView) return true;
 
@@ -569,7 +485,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 };
                 viewPosition = mousePos + rotatedOffset;
 
-                Logger::print("Rotated by increment");
+                console::print("Rotated by increment");
             } else {
                 if (zoomingView) return true;
 
@@ -587,7 +503,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
 
                 // Adjust the camera so zoom focuses on mouse point
                 viewPosition = (viewPosition - mousePos) * scaleFactor + mousePos;
-                Logger::print("Zoomed by increment");
+                console::print("Zoomed by increment");
             }
 
             window->renderer.dirty();
@@ -595,7 +511,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
         }
     } else if (input.type == WindowInputType::MouseButtonDown) {
         if (input.mouse.button == MouseButton::Middle) {
-            if (UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+            if (ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)) {
                 if (window->isKeyDown(KeyCode::Shift)) {
                     rotatingView = true;
                     tooCloseToRotate = true;
@@ -604,14 +520,14 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                     rotatePosition = rotatePivot;
                     rotateMirrors = Vector2();
                     window->hideCursor();
-                    Logger::print("Rotating");
+                    console::print("Rotating");
                 } else if (window->isKeyDown(KeyCode::Control)) {
                     zoomingView = true;
                     zoomCenter = Vector2(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
-                    Logger::print("Zooming");
+                    console::print("Zooming");
                 } else {
                     movingView = true;
-                    Logger::print("Moving");
+                    console::print("Moving");
                 }
                 window->renderer.dirty();
                 window->setCapture();

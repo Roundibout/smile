@@ -35,10 +35,10 @@ void MainWindow::create() {
         if (input.type == WindowInputType::KeyDown) {
             if (input.key == KeyCode::Equals) {
                 app.setUIScale(std::clamp(app.getUIScale() + 0.25f, UI_SCALE_MIN, UI_SCALE_MAX)); 
-                Logger::print("Scale +");
+                console::print("Scale +");
             } else if (input.key == KeyCode::Minus) {
                 app.setUIScale(std::clamp(app.getUIScale() - 0.25f, UI_SCALE_MIN, UI_SCALE_MAX)); 
-                Logger::print("Scale -");
+                console::print("Scale -");
             }
         }
     });

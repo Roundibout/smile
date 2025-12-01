@@ -1,15 +1,4 @@
-/*
-File:
-    renderer_gl.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the Renderer implementation class for OpenGL
-License:
-    MIT (see LICENSE file)
-*/
-
-#include "renderer_gl.hpp"
+#include "render/renderer_gl.hpp"
 
 // Simple orthographic matrix builder
 static std::array<float, 16> makeOrtho(float left, float right, float bottom, float top) {
@@ -27,7 +16,7 @@ static std::array<float, 16> makeOrtho(float left, float right, float bottom, fl
 
 RendererGL::RendererGL(WindowImpl* w) : RendererImpl(w) {
     w->bindGLContext();
-    Logger::print("OpenGL loaded");
+    console::print("OpenGL loaded");
 
     shaders = ShaderManagerGL();
     shaders.loadShader("basic", "assets/shaders/basic.vert", "assets/shaders/basic.frag");
@@ -497,7 +486,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 
     Font* font = FontManager::get().getFont(path, size);
     if (!font) {
-        Logger::print("Failed to load font: " + path);
+        console::print("Failed to load font: " + path);
         return;
     }
 
@@ -508,7 +497,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
     for (char c : text) {
         const GLGlyph* g = getGlyph(path, size, font, c);
         if (!g) {
-            Logger::print("Failed to get glyph for character: " + c);
+            console::print("Failed to get glyph for character: " + c);
             continue;
         }
 

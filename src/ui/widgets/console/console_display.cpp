@@ -1,4 +1,4 @@
-#include "console.hpp"
+#include "console_display.hpp"
 #include <core/app.hpp>
 #include <window/window.hpp>
 
@@ -26,7 +26,7 @@ void Console::render(const UIBounds& bounds) {
     float height = window->renderer.resolveLayout(content, bounds).rect.size.y + app.theme.getMetric(ThemeMetric::ConsoleTextSize); // add 20 for one extra line so hanging letters aren't cut
     int absoluteLineHeight = static_cast<int>(window->renderer.scale(app.theme.getMetric(ThemeMetric::ConsoleTextSize)));
 
-    const std::deque<LogEntry>& logs = Logger::getAllLogs();
+    const std::deque<LogEntry>& logs = console::getAllLogs();
 
     int textHeight = 10;
     int currentHeight = static_cast<int>(window->renderer.scale(10.0f));

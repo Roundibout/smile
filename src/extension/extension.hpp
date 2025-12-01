@@ -7,29 +7,26 @@
 
 #include <sol/sol.hpp>
 
-#include <datatypes/vector2.hpp>
-#include <datatypes/rect.hpp>
-#include <datatypes/color4.hpp>
-#include <datatypes/ui_types.hpp>
-#include <datatypes/object/point.hpp>
-#include <datatypes/object/line.hpp>
-#include <datatypes/object/shape.hpp>
+#include "type/vector2.hpp"
+#include "type/rect.hpp"
+#include "type/color4.hpp"
+#include "type/ui_types.hpp"
+#include "type/point.hpp"
+#include "type/line.hpp"
+#include "type/shape.hpp"
 
-#include <core/editor.hpp>
-
-#include <document/document_manager.hpp>
-#include <document/document.hpp>
-#include <document/canvas.hpp>
-#include <document/object.hpp>
-
-#include <window/window.hpp>
-#include <window/window_input.hpp>
-#include <ui/theme.hpp>
-
-#include <extension/extension_registry.hpp>
-#include <extension/menu_action.hpp>
-#include <extension/context_action.hpp>
-#include <extension/tool.hpp>
+#include "core/editor.hpp"
+#include "document/document_manager.hpp"
+#include "document/document.hpp"
+#include "document/canvas.hpp"
+#include "document/object.hpp"
+#include "window/window.hpp"
+#include "window/window_input.hpp"
+#include "ui/theme.hpp"
+#include "extension/extension_registry.hpp"
+#include "extension/menu_action.hpp"
+#include "extension/context_action.hpp"
+#include "extension/tool.hpp"
 
 class App;
 

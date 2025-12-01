@@ -1,14 +1,3 @@
-/*
-File:
-    shader_manager.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the ShaderManager class, responsible for handling shaders per Renderer
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>
@@ -18,7 +7,7 @@ License:
 
 #include <glad/gl.h>
 
-#include <util/logger.hpp>
+#include "util/console.hpp"
 
 class ShaderManagerGL {
 private:

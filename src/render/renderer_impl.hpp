@@ -1,23 +1,12 @@
-/*
-File:
-    renderer_impl.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Renderer implementation class
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
-#include <datatypes/vector2.hpp>
-#include <datatypes/color4.hpp>
-#include <datatypes/ui_types.hpp>
+#include "type/vector2.hpp"
+#include "type/color4.hpp"
+#include "type/ui_types.hpp"
 
-#include <window/window_impl.hpp>
+#include "window/window_impl.hpp"
 
-constexpr float PI_180 = 3.1415926f / 180;
+constexpr float PI_180 = 3.1415927f / 180;
 
 class RendererImpl {
 protected:

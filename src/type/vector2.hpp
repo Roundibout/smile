@@ -1,14 +1,3 @@
-/*
-File:
-    vector2.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Vector2 datatype
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>

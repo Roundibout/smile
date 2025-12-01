@@ -5,14 +5,14 @@
 
 #include <ui/widgets/widget.hpp>
 
-#include <util/logger.hpp>
+#include <util/console.hpp>
 
 class Console : public Widget {
 private:
     bool newEntry = false;
 public:
     Console(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
-        Logger::addCallback([this](const LogEntry& log){
+        console::addCallback([this](const LogEntry& log){
             this->newEntry = true;
         });
     }

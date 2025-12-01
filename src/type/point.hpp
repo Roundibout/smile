@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cstdint>
-
-#include <datatypes/vector2.hpp>
+#include "type/numbers.hpp"
+#include "type/vector2.hpp"
 
 struct Point {
-    using Id = uint32_t;
+    using Id = u32;
 
     Id id;
     float x, y = 0.0f;

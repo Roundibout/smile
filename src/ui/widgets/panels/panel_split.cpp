@@ -39,7 +39,7 @@ bool PanelSplit::isOverResizeArea(const Vector2& point, const UIBounds& bounds) 
         selectionArea = UILayout(UIRect(UIDim2(0.0f, 0, ratio, -margin / 2), UIDim2(1.0f, 0, 0.0f, margin)));
     }
 
-    if (UITools::isPointOverRect(point, window->renderer.resolveLayout(selectionArea, bounds))) {
+    if (ui_tools::is_point_over_rect(point, window->renderer.resolveLayout(selectionArea, bounds))) {
         return true;
     }
     return false;

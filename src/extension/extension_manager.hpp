@@ -5,14 +5,14 @@
 #include <vector>
 #include <cstdint>
 #include <filesystem>
+
 #include <nlohmann/json.hpp>
 
-#include <util/logger.hpp>
-
-#include <extension/extension.hpp>
-#include <extension/menu_action.hpp>
-#include <extension/context_action.hpp>
-#include <extension/tool.hpp>
+#include "extension/extension.hpp"
+#include "extension/menu_action.hpp"
+#include "extension/context_action.hpp"
+#include "extension/tool.hpp"
+#include "util/console.hpp"
 
 class App;
 

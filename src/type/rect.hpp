@@ -1,6 +1,6 @@
 #pragma once
 
-#include <datatypes/vector2.hpp>
+#include <type/vector2.hpp>
 
 struct Rect {
     Vector2 position, size;

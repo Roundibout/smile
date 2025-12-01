@@ -1,14 +1,3 @@
-/*
-File:
-    window_win32.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Window implementation interface for Win32
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>
@@ -26,11 +15,11 @@ License:
 
 #include <winres.h>
 
-#include <datatypes/vector2.hpp>
+#include <type/vector2.hpp>
 
 #include <window/window_impl.hpp>
 
-#include <util/logger.hpp>
+#include <util/console.hpp>
 
 class App;
 

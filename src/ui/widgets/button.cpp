@@ -20,7 +20,7 @@ void Button::render(const UIBounds& bounds) {
 bool Button::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     if (input.type == WindowInputType::MouseMove) {
         AbsoluteLayout resolved = window->renderer.resolveLayout(layout, bounds);
-        if (UITools::isPointOverRoundedRect(input.mouse.position, resolved)) {
+        if (ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)) {
             if (hovered == false) window->renderer.dirty();
             hovered = true;
             return true;

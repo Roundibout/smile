@@ -1,15 +1,4 @@
-/*
-File:
-    font_manager.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the FontManager singleton, responsible for handling fonts
-License:
-    MIT (see LICENSE file)
-*/
-
-#include "font_manager.hpp"
+#include "render/font_manager.hpp"
 
 Font::~Font() {
     if (face) FT_Done_Face(face);
@@ -23,7 +12,7 @@ const Glyph* Font::getGlyph(char c) {
 
     // Load glyph from FreeType
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-        Logger::error("Failed to load glyph: " + c);
+        console::error("Failed to load glyph: " + c);
         return nullptr;
     }
 
@@ -49,7 +38,7 @@ const Glyph* Font::getGlyph(char c) {
 
 FontManager::FontManager() {
     if (FT_Init_FreeType(&library)) {
-        Logger::error("Failed to initialize FreeType");
+        console::error("Failed to initialize FreeType");
     }
 }
 
@@ -68,7 +57,7 @@ Font* FontManager::getFont(const std::string& path, int size) {
     // Not loaded yet → load
     auto font = std::make_unique<Font>();
     if (FT_New_Face(library, path.c_str(), 0, &font->face)) {
-        Logger::error("Failed to load font: " + path);
+        console::error("Failed to load font: " + path);
         return nullptr;
     }
 

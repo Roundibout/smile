@@ -2,17 +2,15 @@
 
 #include <unordered_map>
 
-#include <core/signal.hpp>
-#include <core/editor.hpp>
+#include "type/numbers.hpp"
 
-#include <ui/widgets/widget.hpp>
-
-#include <ui/widgets/tool/category_tool_bar.hpp>
-
-#include <document/canvas.hpp>
-#include <document/object.hpp>
-
-#include <extension/tool.hpp>
+#include "core/signal.hpp"
+#include "core/editor.hpp"
+#include "ui/widgets/widget.hpp"
+#include "ui/widgets/tool/category_tool_bar.hpp"
+#include "document/canvas.hpp"
+#include "document/object.hpp"
+#include "extension/tool.hpp"
 
 constexpr float MAX_SCALE = 100000.0f;
 constexpr float MIN_SCALE = 0.1f;

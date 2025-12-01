@@ -1,5 +1,6 @@
-#include "extension.hpp"
-#include <core/app.hpp>
+#include "extension/extension.hpp"
+
+#include "core/app.hpp"
 
 Extension::Extension(App& app, Id id, std::string name, std::string path) : app(app), id(id), name(name), folder(path) {
     lua.open_libraries(
@@ -19,13 +20,13 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         std::string out = "[" + this->name + "]";
         for (auto v : args)
             out += " " + v.get<std::string>();
-        Logger::log(LogLevel::Extension, out);
+        console::log(LogLevel::Extension, out);
     });
     lua.set_function("warn", [this](sol::variadic_args args) {
         std::string out = "[" + this->name + "]";
         for (auto v : args)
             out += " " + v.get<std::string>();
-        Logger::warn(out);
+        console::warn(out);
     });
 
     // Bind usertypes
@@ -114,7 +115,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         }
     );
 
-    // -- Datatypes -- //
+    // -- types -- //
 
     // Vector2
     lua.new_usertype<Vector2>("Vector2",
@@ -381,7 +382,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
                 sol::protected_function_result result = luaFunc(deltaTime, bounds);
                 if (!result.valid()) {
                     sol::error err = result;
-                    Logger::error("Lua update callback error: ", err.what());
+                    console::error("Lua update callback error: ", err.what());
                 }
             });
         },
@@ -391,7 +392,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
                 sol::protected_function_result result = luaFunc(bounds);
                 if (!result.valid()) {
                     sol::error err = result;
-                    Logger::error("Lua render callback error: ", err.what());
+                    console::error("Lua render callback error: ", err.what());
                 }
             });
         },
@@ -401,7 +402,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
                 sol::protected_function_result result = luaFunc(input, bounds);
                 if (!result.valid()) {
                     sol::error err = result;
-                    Logger::error("Lua input callback error: ", err.what());
+                    console::error("Lua input callback error: ", err.what());
                 }
             });
         }
@@ -462,12 +463,12 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
 }
 
 bool Extension::load() {
-    Logger::print("Loading extension ", id);
+    console::print("Loading extension ", id);
 
     sol::load_result script = lua.load_file(folder + "/main.lua");
     if (!script.valid()) { // Check if main.lua exists
         sol::error err = script;
-        Logger::error("Failed to load extension ", name, "\n    ", err.what()); // Syntax/load error
+        console::error("Failed to load extension ", name, "\n    ", err.what()); // Syntax/load error
         return false;
     }
 
@@ -475,10 +476,10 @@ bool Extension::load() {
     sol::protected_function_result result = script();
     if (!result.valid()) {
         sol::error err = result;
-        Logger::error("Failed to load extension ", name, "\n    ", err.what()); // Runtime error
+        console::error("Failed to load extension ", name, "\n    ", err.what()); // Runtime error
         return false;
     } else {
-        Logger::print("Successfully loaded extension \"", name, "\"");
+        console::print("Successfully loaded extension \"", name, "\"");
     }
 
     return true;

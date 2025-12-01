@@ -1,14 +1,3 @@
-/*
-File:
-    window.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Window class, used to create windows in Smile
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>
@@ -19,7 +8,7 @@ License:
 #include <deque>
 #include <functional>
 
-#include <datatypes/vector2.hpp>
+#include <type/vector2.hpp>
 #include <window/window_input.hpp>
 
 #include <window/window_impl.hpp>
@@ -43,7 +32,7 @@ enum class WindowEvent {
 class Window {
 private:
     App& app;
-
+    
     std::unique_ptr<WindowImpl> impl;
     std::deque<WindowInput> inputs;
 
@@ -52,7 +41,7 @@ private:
     std::vector<std::function<void(float deltaTime, const UIBounds& bounds)>> updateCallbacks;
     std::vector<std::function<void(const UIBounds& bounds)>> renderCallbacks;
     std::vector<std::function<void(WindowInput& input, const UIBounds& bounds)>> inputCallbacks;
-
+    
     bool blank = true;
     Vector2 lastSize;
 public:
@@ -81,8 +70,8 @@ public:
 
     void setCapture();
     void releaseCapture();
-
-    template <typename T, typename... Args>
+    
+    template<typename T, typename... Args>
     T* addWidget(Args&&... args) {
         static_assert(std::is_base_of<Widget, T>::value, "T must be a Widget");
 

@@ -1,14 +1,3 @@
-/*
-File:
-    window_impl.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the common Window implementation interface
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>
@@ -17,7 +6,7 @@ License:
 
 #include <glad/gl.h>
 
-#include <datatypes/vector2.hpp>
+#include <type/vector2.hpp>
 #include <window/window_input.hpp>
 #include <render/renderer_types.hpp>
 

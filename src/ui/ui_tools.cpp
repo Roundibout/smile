@@ -1,10 +1,10 @@
 #include "ui_tools.hpp"
 
-bool UITools::isPointOverRect(const Vector2& point, const AbsoluteLayout& layout) {
+bool ui_tools::is_point_over_rect(const Vector2& point, const AbsoluteLayout& layout) {
     return point.x >= layout.rect.position.x && point.y >= layout.rect.position.y && point.x <= layout.rect.position.x + layout.rect.size.x && point.y <= layout.rect.position.y + layout.rect.size.y;
 }
 
-bool UITools::isPointOverRoundedRect(const Vector2& point, const AbsoluteLayout& layout) {
+bool ui_tools::is_point_over_rounded_rect(const Vector2& point, const AbsoluteLayout& layout) {
     float x = point.x;
     float y = point.y;
     float left = layout.rect.position.x;
@@ -50,11 +50,11 @@ bool UITools::isPointOverRoundedRect(const Vector2& point, const AbsoluteLayout&
     return true;
 }
 
-Vector2 UITools::clampPointWithinRect(const Vector2& point, const AbsoluteLayout& layout) {
+Vector2 ui_tools::clamp_point_within_rect(const Vector2& point, const AbsoluteLayout& layout) {
     return Vector2(std::clamp(point.x, layout.rect.position.x, layout.rect.position.x + layout.rect.size.x), std::clamp(point.y, layout.rect.position.y, layout.rect.position.y + layout.rect.size.y));
 }
 
-Vector2 UITools::mirrorPointAcrossRect(const Vector2& point, const AbsoluteLayout& layout) {
+Vector2 ui_tools::mirror_point_across_rect(const Vector2& point, const AbsoluteLayout& layout) {
     Vector2 mirrored;
     if (point.x < layout.rect.position.x) {
         mirrored.x = layout.rect.position.x + layout.rect.size.x - 4;

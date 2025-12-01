@@ -1,14 +1,3 @@
-/*
-File:
-    window_win32.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the Window implementation class for Win32
-License:
-    MIT (see LICENSE file)
-*/
-
 #include "window_win32.hpp"
 #include <core/app.hpp>
 
@@ -443,7 +432,7 @@ std::deque<WindowInput> WindowWin32::update() {
 
 void WindowWin32::bindGLContext() {
     if (rbackendSet) {
-        Logger::print("Render context already bound");
+        console::print("Render context already bound");
         return;
     }
     
@@ -488,7 +477,7 @@ void WindowWin32::bindGLContext() {
 
     // Load WGL extensions (needed for core context creation)
     if (!gladLoaderLoadWGL(dummyHdc)) {
-        Logger::error("Failed to load WGL extensions");
+        console::error("Failed to load WGL extensions");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(dummyCtx);
         DestroyWindow(dummyHwnd);
@@ -512,7 +501,7 @@ void WindowWin32::bindGLContext() {
     int pf;
     UINT numFormats;
     if (!wglChoosePixelFormatARB(hdc, pixelFormatAttribs, nullptr, 1, &pf, &numFormats) || numFormats == 0) {
-        Logger::warn("MSAA pixel format not supported, falling back to standard format");
+        console::warn("MSAA pixel format not supported, falling back to standard format");
         pf = ChoosePixelFormat(hdc, &pfd);
     }
 
@@ -536,7 +525,7 @@ void WindowWin32::bindGLContext() {
 
     // Load GL from glad
     if (!gladLoaderLoadGL()) {
-        Logger::error("Failed to load OpenGL");
+        console::error("Failed to load OpenGL");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(glContext);
     }
@@ -554,7 +543,7 @@ void WindowWin32::makeGLCurrent() {
         // Enable VSync
         wglSwapIntervalEXT(1);
     } else {
-        Logger::error("Render context either does not exist or is not OpenGL");
+        console::error("Render context either does not exist or is not OpenGL");
     }
 }
 
@@ -563,7 +552,7 @@ void WindowWin32::swapGLBuffers() {
         // Just swap buffers
         SwapBuffers(hdc);
     } else {
-        Logger::error("Render context either does not exist or is not OpenGL");
+        console::error("Render context either does not exist or is not OpenGL");
     }
 }
 

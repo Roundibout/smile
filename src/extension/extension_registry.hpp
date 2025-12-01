@@ -4,11 +4,10 @@
 #include <vector>
 #include <algorithm>
 
-#include <core/signal.hpp>
-
-#include <extension/menu_action.hpp>
-#include <extension/context_action.hpp>
-#include <extension/tool.hpp>
+#include "core/signal.hpp"
+#include "extension/menu_action.hpp"
+#include "extension/context_action.hpp"
+#include "extension/tool.hpp"
 
 class App;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <datatypes/ui_types.hpp>
+#include <type/ui_types.hpp>
 
 #include <render/renderer.hpp>
 

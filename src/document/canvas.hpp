@@ -1,7 +1,7 @@
 #pragma once
 
-#include <datatypes/rect.hpp>
-#include <datatypes/color4.hpp>
+#include "type/rect.hpp"
+#include "type/color4.hpp"
 
 class Canvas {
 private:

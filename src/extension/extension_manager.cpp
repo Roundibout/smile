@@ -1,5 +1,6 @@
-#include "extension_manager.hpp"
-#include <core/app.hpp>
+#include "extension/extension_manager.hpp"
+
+#include "core/app.hpp"
 
 void ExtensionManager::loadAll() {
     if (extensionsFolder.empty())
@@ -14,14 +15,14 @@ void ExtensionManager::loadAll() {
         // Check if there is an entry point
         std::filesystem::path mainPath = entry.path() / "main.lua";
         if (!std::filesystem::exists(mainPath)) {
-            Logger::error("Failed to load extension " + extensionPath + "\n    Doesn't contain main.lua entry point");
+            console::error("Failed to load extension " + extensionPath + "\n    Doesn't contain main.lua entry point");
             continue;
         }
 
         // Check if there is a metadata file
         std::filesystem::path metaPath = entry.path() / "meta.json";
         if (!std::filesystem::exists(metaPath)) {
-            Logger::error("Failed to load extension " + extensionPath + "\n    Doesn't contain meta.json metadata file");
+            console::error("Failed to load extension " + extensionPath + "\n    Doesn't contain meta.json metadata file");
             continue;
         }
 
@@ -31,7 +32,7 @@ void ExtensionManager::loadAll() {
             std::ifstream file(metaPath);
             file >> metaJson;
         } catch (const std::exception& e) {
-            Logger::error("Failed to load extension " + extensionPath + "\n    Failed to parse meta.json: " + std::string(e.what()));
+            console::error("Failed to load extension " + extensionPath + "\n    Failed to parse meta.json: " + std::string(e.what()));
             continue;
         }
 
@@ -40,7 +41,7 @@ void ExtensionManager::loadAll() {
         try {
             extensionName = metaJson.at("name").get<std::string>(); // throws if missing
         } catch (const std::exception&) {
-            Logger::error("Failed to load extension " + extensionPath + "\n    meta.json missing required field \"name\"");
+            console::error("Failed to load extension " + extensionPath + "\n    meta.json missing required field \"name\"");
             continue;
         }
         
@@ -51,7 +52,7 @@ void ExtensionManager::loadAll() {
                 ++nextId;
             }
         } catch (const std::exception& err) {
-            Logger::error("Failed to load extension " + extensionPath + "\n    ", std::string(err.what()).substr(5));
+            console::error("Failed to load extension " + extensionPath + "\n    ", std::string(err.what()).substr(5));
         }
     }
 }

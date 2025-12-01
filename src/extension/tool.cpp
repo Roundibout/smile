@@ -1,4 +1,4 @@
-#include "tool.hpp"
+#include "extension/tool.hpp"
 
 Tool::Tool(ToolDefinition definition)
     : name(std::move(definition.name)),

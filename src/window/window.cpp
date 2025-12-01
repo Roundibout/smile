@@ -1,14 +1,3 @@
-/*
-File:
-    window.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the Window class, used to create windows in Smile
-License:
-    MIT (see LICENSE file)
-*/
-
 #include "window.hpp"
 #include <core/app.hpp>
 

@@ -6,7 +6,7 @@
 
 #include <sol/sol.hpp>
 
-#include <core/editor.hpp>
+#include "core/editor.hpp"
 
 enum class ToolCategory {
     Select,
@@ -59,7 +59,7 @@ public:
             sol::protected_function_result result = func(std::forward<Args>(args)...);
             if (!result.valid()) {
                 sol::error err = result;
-                Logger::error("Lua event error: ", err.what());
+                console::error("Lua event error: ", err.what());
             }
         }
     }

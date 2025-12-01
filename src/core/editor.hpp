@@ -1,8 +1,7 @@
 #pragma once
 
-#include <core/signal.hpp>
-
-#include <util/logger.hpp>
+#include "core/signal.hpp"
+#include "util/console.hpp"
 
 class App;
 class Tool;

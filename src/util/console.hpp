@@ -43,7 +43,7 @@ inline std::string getCurrentTimestamp() {
     return oss.str();
 }
 
-namespace Logger {
+namespace console {
     inline std::deque<LogEntry> logs;
     constexpr size_t MAX_LOGS = 500;
     // Callback functions for new log events
@@ -82,15 +82,10 @@ namespace Logger {
         }
     }
 
-    // Allow other systems to subscribe to new logs (console)
+    // Allow other systems to subscribe to new logs (console display)
     inline void addCallback(std::function<void(const LogEntry&)> cb) {
         callbacks.push_back(cb);
     }
 
     inline const std::deque<LogEntry>& getAllLogs() {return logs;}
 }
-
-using Logger::print;
-using Logger::warn;
-using Logger::error;
-using Logger::append;

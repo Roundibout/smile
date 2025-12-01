@@ -1,14 +1,3 @@
-/*
-File:
-    renderer_gl.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Renderer implementation class for OpenGL
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <vector>
@@ -18,11 +7,10 @@ License:
 
 #include <glad/gl.h>
 
-#include <render/renderer_impl.hpp>
-#include <render/shader_manager.hpp>
-#include <render/font_manager.hpp>
-
-#include <util/logger.hpp>
+#include "render/renderer_impl.hpp"
+#include "render/shader_manager.hpp"
+#include "render/font_manager.hpp"
+#include "util/console.hpp"
 
 struct BasicVertex {
     Vector2 position;

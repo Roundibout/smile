@@ -1,14 +1,3 @@
-/*
-File:
-    font_manager.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the FontManager singleton, responsible for handling fonts
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <vector>
@@ -19,7 +8,7 @@ License:
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <util/logger.hpp>
+#include "util/console.hpp"
 
 struct Glyph {
     std::vector<unsigned char> bitmap;

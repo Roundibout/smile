@@ -1,4 +1,4 @@
-#include "context_action.hpp"
+#include "extension/context_action.hpp"
 
 ContextAction::ContextAction(ContextActionDefinition definition) : name(definition.name) {
     

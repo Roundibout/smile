@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <string>
 
-#include <datatypes/vector2.hpp>
-#include <datatypes/rect.hpp>
+#include <type/vector2.hpp>
+#include <type/rect.hpp>
 
 struct UIDim {
     float scale;

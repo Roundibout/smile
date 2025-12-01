@@ -1,17 +1,6 @@
-/*
-File:
-    window_input.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of various enums and structs used in WindowInputs
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
-#include <datatypes/vector2.hpp>
+#include <type/vector2.hpp>
 
 // This exists so we don't need to write all of these multiple times in different places
 #define KEY_CODE_LIST \

@@ -1,18 +1,7 @@
-/*
-File:
-    app.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the App singleton, used to control the C++ side functionality of the program.
-License:
-    MIT (see LICENSE file)
-*/
-
-#include "app.hpp"
+#include "core/app.hpp"
 
 Window* App::createWindow(const WindowConfig& config) {
-    Logger::print("Creating window");
+    console::print("Creating window");
     
     // Create window and associate it with the next window id
     std::unique_ptr<Window> window = std::make_unique<Window>(*this, nextId, config);

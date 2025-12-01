@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cstdint>
-
-#include <datatypes/color4.hpp>
+#include "type/numbers.hpp"
+#include "type/color4.hpp"
 
 struct Line {
-    using Id = uint32_t;
+    using Id = u32;
     
     Id id;
     Id point1, point2;

@@ -1,15 +1,4 @@
-/*
-File:
-    renderer.cpp
-Authors:
-    Lucas
-Purpose:
-    Implementation of the Renderer class
-License:
-    MIT (see LICENSE file)
-*/
-
-#include "renderer.hpp"
+#include "render/renderer.hpp"
 
 Renderer::Renderer(WindowImpl* window) {
     impl = std::make_unique<RendererGL>(window); // only OpenGL for now (a while probably)

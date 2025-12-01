@@ -1,4 +1,4 @@
-#include "document.hpp"
+#include "document/document.hpp"
 
 Canvas* Document::createCanvas(const Rect& rect) {
     std::unique_ptr<Canvas> canvas = std::make_unique<Canvas>(rect);

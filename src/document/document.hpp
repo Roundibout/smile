@@ -3,12 +3,12 @@
 #include <vector>
 #include <memory>
 
-#include <datatypes/vector2.hpp>
-#include <datatypes/rect.hpp>
+#include "type/vector2.hpp"
+#include "type/rect.hpp"
 
-#include <document/canvas.hpp>
-#include <document/instance.hpp>
-#include <document/object.hpp>
+#include "document/canvas.hpp"
+#include "document/instance.hpp"
+#include "document/object.hpp"
 
 class Document {
 public:

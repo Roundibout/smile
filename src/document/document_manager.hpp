@@ -4,10 +4,10 @@
 #include <memory>
 #include <cstdint>
 
-#include <document/document.hpp>
-#include <document/canvas.hpp>
-#include <document/instance.hpp>
-#include <document/object.hpp>
+#include "document/document.hpp"
+#include "document/canvas.hpp"
+#include "document/instance.hpp"
+#include "document/object.hpp"
 
 using DocumentId = uint32_t;
 

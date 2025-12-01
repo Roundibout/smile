@@ -1,4 +1,4 @@
-#include "object.hpp"
+#include "document/object.hpp"
 
 Point::Id Object::createPoint(const Vector2& position) {
     Point::Id id;
@@ -14,7 +14,7 @@ Point::Id Object::createPoint(const Vector2& position) {
 
     pointIdToIndex[id] = points.size() - 1; // Link this id with the index of the point in the point vector
 
-    compute();
+    solve();
 
     return id;
 }
@@ -37,12 +37,12 @@ void Object::deletePoint(Point::Id id) {
         freePointIds.push_back(id); // Otherwise, add to free list
     }
 
-    compute();
+    solve();
 }
 
 std::unique_ptr<Point>& Object::getPoint(Point::Id id) {
     auto it = pointIdToIndex.find(id); // Get an iterator from the map
-    //if (it == pointIdToIndex.end()) return nullptr; // Invalid id         TODO: figure out a way to return garbage
+    // TODO: What to do when the id doesn't exist?
     return points[it->second];
 }
 
@@ -64,7 +64,7 @@ Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
 
     lineIdToIndex[id] = lines.size() - 1; // Link this id with the index of the line in the line vector
 
-    compute();
+    solve();
 
     return id;
 }
@@ -87,333 +87,15 @@ void Object::deleteLine(Line::Id id) {
         freeLineIds.push_back(id); // Otherwise, add to free list
     }
 
-    compute();
+    solve();
 }
 
 std::unique_ptr<Line>& Object::getLine(Line::Id id) {
     auto it = lineIdToIndex.find(id); // Get an iterator from the map
-    //if (it == lineIdToIndex.end()) return nullptr; // Invalid id           TODO: Figure out a way to return garbage
+    // TODO: What to do when the id doesn't exist?
     return lines[it->second]; // Return a pointer
 }
 
-void Object::compute() {
-    // Reset
-    vertices.clear();
-    edges.clear();
-    faces.clear();
-    stroke.clear();
-    nextVertexId = 0;
-    nextEdgeId = 0;
-    nextFaceId = 0;
-
-    //Logger::print("computing...");
-
-    // Add existing real points to vertex vector
-    for (const std::unique_ptr<Point>& point : points) {
-        vertices.emplace_back(Vertex(point->id, point->x, point->y));
-        if (point->id >= nextVertexId) nextVertexId = point->id + 1;
-    }
-
-    // Create virtual points from line intersections
-    for (size_t i = 0; i < lines.size(); ++i) { // For every line
-        const std::unique_ptr<Line>& lineA = lines[i]; // Get the line from the loop
-        const std::unique_ptr<Point>& pointA1 = points[pointIdToIndex[lineA->point1]];
-        const std::unique_ptr<Point>& pointA2 = points[pointIdToIndex[lineA->point2]];
-
-        // Get the line's vertices' positions
-        const Vector2& A1 = Vector2(pointA1->x, pointA1->y);
-        const Vector2& A2 = Vector2(pointA2->x, pointA2->y);
-
-        for (size_t j = i + 1; j < lines.size(); ++j) { // For every line, go through every line
-            const std::unique_ptr<Line>& lineB = lines[j]; // Get the other line from this loop
-            const std::unique_ptr<Point>& pointB1 = points[pointIdToIndex[lineB->point1]];
-            const std::unique_ptr<Point>& pointB2 = points[pointIdToIndex[lineB->point2]];
-
-            // Get the other line's vertices' positions
-            const Vector2& B1 = Vector2(pointB1->x, pointB1->y);
-            const Vector2& B2 = Vector2(pointB2->x, pointB2->y);
-
-            // Now that we have the positions of two lines' vertices, we can see if the lines intersect
-            Vector2 intersection;
-            if (lineSegmentIntersection(A1, A2, B1, B2, intersection)) { // Check for intersection
-                auto isSamePoint = [&](const std::unique_ptr<Point>& p) {
-                    return std::fabs(p->x - intersection.x) < EPSILON && std::fabs(p->y - intersection.y) < EPSILON;
-                };
-                if (isSamePoint(pointA1) || isSamePoint(pointA2) ||
-                    isSamePoint(pointB1) || isSamePoint(pointB2)) {
-                    continue; // Already represented as a real point
-                }
-
-                // Check if we've already added this virtual point
-                bool exists = false;
-                for (const auto& v : vertices) {
-                    if (std::fabs(v.x - intersection.x) < EPSILON &&
-                        std::fabs(v.y - intersection.y) < EPSILON) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (exists) continue;
-
-                // Create the vertex's id
-                Vertex::Id interId = nextVertexId++;
-
-                vertices.emplace_back(interId, intersection);
-                if (interId >= nextVertexId) nextVertexId = interId + 1;
-            }
-        }
-    }
-
-    // Split lines into edges at intersections
-    for (const std::unique_ptr<Line>& line : lines) { // For every line
-        std::vector<Id> verticesOnLine = {line->point1, line->point2}; // Collect endpoints
-
-        const Vertex& vertex1 = vertices[line->point1];
-        const Vertex& vertex2 = vertices[line->point2];
-
-        // Check all intersection vertices
-        for (const Vertex& vertex : vertices) { // For every line, go through every vertex
-            if (vertex.id != line->point1 && vertex.id != line->point2) { // Ensure both of these aren't one of this line's endpoints
-                // If vertex lies on the line segment
-                if (isVertexOnLine(vertex, vertex1, vertex2)) {
-                    verticesOnLine.push_back(vertex.id);
-                }
-            }
-        }
-
-        // Sort vertices along the line for correct order
-        sortVerticesAlongLine(verticesOnLine, vertex1, vertex2);
-
-        // Create edges between consecutive vertices
-        for (size_t i = 0; i < verticesOnLine.size() - 1; ++i) {
-            Vertex::Id v1 = verticesOnLine[i];
-            Vertex::Id v2 = verticesOnLine[i+1];
-            Edge edge = Edge(nextEdgeId++, v1, v2);
-            edges.push_back(edge);
-        }
-    }
-
-    // Figure out the faces
-    for (Edge& startEdge : edges) {
-        computeFace(startEdge, EdgeDirection::Forward); // Go forward
-        computeFace(startEdge, EdgeDirection::Backward); // Go backward
-    }
-
-    // Triangulate faces
-    for (Face& face : faces) {
-        if (face.vertices.size() == 3) {
-            face.triangles.emplace_back(face.vertices[0], face.vertices[1], face.vertices[2]);
-        } else if (face.vertices.size() > 3) {
-            // Ear clipping
-            std::vector<Vertex::Id> remainingVertices = face.vertices;
-
-            // Ensure CCW winding
-            if (!isCCW(face)) {
-                std::reverse(remainingVertices.begin(), remainingVertices.end());
-            }
-
-            while (remainingVertices.size() > 3) {
-                bool earFound = false;
-
-                for (size_t i = 0; i < remainingVertices.size(); i++) {
-                    Vertex::Id prevId = remainingVertices[(i + remainingVertices.size() - 1) % remainingVertices.size()];
-                    Vertex::Id currId = remainingVertices[i];
-                    Vertex::Id nextId = remainingVertices[(i + 1) % remainingVertices.size()];
-                    const Vertex& prev = vertices[prevId];
-                    const Vertex& curr = vertices[currId];
-                    const Vertex& next = vertices[nextId];
-
-                    // Check convexity
-                    if (cross(prev, curr, next) <= 0) continue; // Not convex (skip)
-
-                    // Check if any other vertex is inside the triangle
-                    bool contains = false;
-                    for (size_t j = 0; j < remainingVertices.size(); j++) {
-                        if (j == i || j == (i + 1) % remainingVertices.size() || j == (i + remainingVertices.size() - 1) % remainingVertices.size())
-                            continue; // skip the 3 vertices that make up this triangle
-
-                        const Vertex& testVertex = vertices[remainingVertices[j]];
-                        if (pointInTriangle(testVertex, prev, curr, next)) {
-                            contains = true;
-                            break;
-                        }
-                    }
-
-                    if (contains) continue;
-
-                    // It's an ear — add triangle
-                    face.triangles.emplace_back(prevId, currId, nextId);
-
-                    // Remove current vertex
-                    remainingVertices.erase(remainingVertices.begin() + i);
-                    earFound = true;
-                    break;
-                }
-
-                if (!earFound) {
-                    // Polygon may be self-intersecting or malformed
-                    //Logger::error("Ear clipping failed");
-                    break;
-                }
-            }
-
-            // Remaining 3 vertices form the last triangle
-            if (remainingVertices.size() == 3) {
-                face.triangles.emplace_back(remainingVertices[0], remainingVertices[1], remainingVertices[2]);
-            }
-        }
-    }
-
-    // Remove silhouettes
-
-    std::unordered_map<Edge::Id, std::vector<Face::Id>> edgeToFaces;
-    for (size_t i = 0; i < faces.size(); ++i)
-        for (Edge::Id e : faces[i].edges)
-            edgeToFaces[e].push_back(i);
-
-    std::vector<std::vector<Vertex::Id>> clusters; // each cluster = face indices
-    std::vector<bool> visited(faces.size(), false);
-
-    for (size_t i = 0; i < faces.size(); ++i) {
-        if (visited[i]) continue;
-
-        std::vector<Vertex::Id> cluster;
-        std::stack<Face::Id> stack;
-        stack.push(i);
-        visited[i] = true;
-
-        while (!stack.empty()) {
-            Face::Id fidx = stack.top();
-            stack.pop();
-            cluster.push_back(fidx);
-            const Face& f = faces[fidx];
-
-            // explore neighbors
-            for (Edge::Id v : f.edges) {
-                for (Face::Id neighborIdx : edgeToFaces[v]) {
-                    if (!visited[neighborIdx]) {
-                        visited[neighborIdx] = true;
-                        stack.push(neighborIdx);
-                    }
-                }
-            }
-        }
-
-        clusters.push_back(cluster);
-    }
-
-    //Logger::print("CLUSTERS: " + std::to_string(clusters.size()));
-
-    for (std::vector<Face::Id> cluster : clusters) {
-        Face::Id biggestFace = INVALID_ID;
-        float biggestArea = 0.0f;
-
-        // Find the face with the biggest area
-        for (Face::Id face : cluster) {
-            float area = 0.0f;
-
-            for (Triangle triangle : faces[face].triangles) {
-                const Vertex& a = vertices[triangle.vertex1];
-                const Vertex& b = vertices[triangle.vertex2];
-                const Vertex& c = vertices[triangle.vertex3];
-                
-                area += std::abs(
-                    (a.x * (b.y - c.y) +
-                    b.x * (c.y - a.y) +
-                    c.x * (a.y - b.y)) * 0.5f
-                );
-            }
-
-            //Logger::print(std::to_string(face) + " area: " + std::to_string(area));
-
-            if (area > biggestArea) {
-                biggestFace = face;
-                biggestArea = area;
-            }
-        }
-
-        if (biggestFace != INVALID_ID) {
-            //Logger::print("Biggest Face: " + std::to_string(biggestFace));
-            // Remove from faces vector
-            faces.erase(faces.begin() + biggestFace);
-
-            // Update face IDs
-            for (size_t i = 0; i < faces.size(); ++i)
-                faces[i].id = i;
-
-            // Update clusters
-            for (auto& c : clusters) {
-                for (auto& fidx : c) {
-                    if (fidx > biggestFace) fidx--;
-                }
-                c.erase(std::remove(c.begin(), c.end(), biggestFace), c.end());
-            }
-        }
-    }
-
-    std::unordered_map<Edge::Id, StrokeEdgePair> strokeEdges;
-
-    for (Edge& edge : edges) {
-        const Vertex& vertex1 = vertices[edge.start];
-        const Vertex& vertex2 = vertices[edge.end];
-        
-        Vector2 p1 = Vector2(vertex1.x, vertex1.y);
-        Vector2 p2 = Vector2(vertex2.x, vertex2.y);
-
-        StrokeEdge l1 = offsetLine(p1, p2, 10);
-        StrokeEdge l2 = offsetLine(p1, p2, -10);
-
-        strokeEdges[edge.id] = StrokeEdgePair{l1, l2, edge.id};
-    }
-
-    std::unordered_map<Vertex::Id, std::vector<Edge::Id>> vertexToEdges;
-
-    for (Edge& edge : edges) {
-        Logger::print(edge.id);
-        vertexToEdges[edge.start].push_back(edge.id);
-        vertexToEdges[edge.end].push_back(edge.id);
-    }
-
-    std::unordered_map<Vertex::Id, std::vector<Vector2>> outPoints;
-
-    for (Vertex& vertex : vertices) {
-        const std::vector<Edge::Id>& connectedEdges = vertexToEdges[vertex.id];
-
-        std::vector<StrokeEdgePair> edgePairs;
-
-        edgePairs.reserve(connectedEdges.size());
-
-        for (Edge::Id id : connectedEdges) {
-            edgePairs.push_back(strokeEdges[id]);
-        }
-
-        computeSharpStroke(vertex, edgePairs, outPoints);
-    }
-
-    for (Edge& edge : edges) { // find stroke outline points for every edge in this object
-        // combine all the points into one vector so that we can sort them by angle and make triangles out of them
-
-        stroke[edge.id].insert(stroke[edge.id].end(), outPoints[edge.start].begin(), outPoints[edge.start].end());
-        stroke[edge.id].insert(stroke[edge.id].end(), outPoints[edge.end].begin(), outPoints[edge.end].end());
-
-        // ROTATION SORTING IN BASEMENT (CURSED METHOD) ☠️
-
-        Vector2 centroid; // get average position of points in the edge's stroke
-        for (const Vector2& p : stroke[edge.id]) {
-            centroid += p;
-        }
-        centroid /= stroke[edge.id].size(); // average position
-
-        std::sort(stroke[edge.id].begin(), stroke[edge.id].end(), [&](const Vector2& a, const Vector2& b){ // sort the points by rotation around the centroid
-            //Logger::print("sorting");
-            float angleA = atan2(a.y - centroid.y, a.x - centroid.x);
-            float angleB = atan2(b.y - centroid.y, b.x - centroid.x);
-            return angleA < angleB; // Counter-clockwise
-        });
-
-        //Logger::print(edge.id);
-        for (Vector2 p : stroke[edge.id]) {
-            //Logger::print(p.x, " ", p.y);
-        }
-    }
+void Object::solve() {
+    
 }

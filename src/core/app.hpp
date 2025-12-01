@@ -1,14 +1,3 @@
-/*
-File:
-    app.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the App singleton, used to control the C++ side functionality of the program.
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <unordered_map>
@@ -16,17 +5,15 @@ License:
 #include <chrono>
 #include <thread>
 
-#include <datatypes/vector2.hpp>
-#include <window/window.hpp>
+#include "type/vector2.hpp"
 
-#include <window/main_window.hpp>
-#include <extension/extension_manager.hpp>
-#include <core/editor.hpp>
-
-#include <ui/theme.hpp>
-#include <document/document_manager.hpp>
-
-#include <util/logger.hpp>
+#include "window/window.hpp"
+#include "window/main_window.hpp"
+#include "extension/extension_manager.hpp"
+#include "core/editor.hpp"
+#include "ui/theme.hpp"
+#include "document/document_manager.hpp"
+#include "util/console.hpp"
 
 class Window; // forward declaration
 

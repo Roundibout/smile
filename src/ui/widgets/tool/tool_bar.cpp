@@ -41,7 +41,7 @@ bool ToolBar::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     bool up = false;
 
     // Check if the mouse is within the toolbar area
-    if (UITools::isPointOverRect(input.mouse.position, resolvedArea)) {
+    if (ui_tools::is_point_over_rect(input.mouse.position, resolvedArea)) {
         hoverable = true;
         if (input.type == WindowInputType::MouseButtonDown && input.mouse.button == MouseButton::Left) {
             down = true;
@@ -61,7 +61,7 @@ bool ToolBar::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     bool anyHovered = false;
 
     runForEach([this, hoverable, down, up, &anyHovered, input, applied](const UILayout& toolLayout, const ToolBarEntry& tool) {
-        if (UITools::isPointOverRoundedRect(input.mouse.position, window->renderer.resolveLayout(toolLayout, applied))) {
+        if (ui_tools::is_point_over_rounded_rect(input.mouse.position, window->renderer.resolveLayout(toolLayout, applied))) {
             if (hoverable) {
                 anyHovered = true;
                 if (hoveredTool != tool.id) {

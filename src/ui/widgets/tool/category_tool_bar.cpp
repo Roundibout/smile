@@ -44,7 +44,7 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
     bool up = false;
 
     // Check if the mouse is within the toolbar area
-    if (UITools::isPointOverRect(input.mouse.position, resolvedArea)) {
+    if (ui_tools::is_point_over_rect(input.mouse.position, resolvedArea)) {
         hoverable = true;
         if (input.type == WindowInputType::MouseButtonDown && input.mouse.button == MouseButton::Left) {
             down = true;
@@ -65,7 +65,7 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
     bool anyHovered = false;
 
     runForEach([this, hoverable, down, up, &consumed, &anyHovered, input, applied](const UILayout& toolLayout, const CategoryToolBarEntry& tool, const ToolBarCategory& category) {
-        if (UITools::isPointOverRoundedRect(input.mouse.position, window->renderer.resolveLayout(toolLayout, applied))) {
+        if (ui_tools::is_point_over_rounded_rect(input.mouse.position, window->renderer.resolveLayout(toolLayout, applied))) {
             if (hoverable) {
                 consumed = true;
                 anyHovered = true;

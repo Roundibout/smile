@@ -1,10 +1,11 @@
 #pragma once
 
-#include <cstdint>
+#include "type/numbers.hpp"
+
 #include <vector>
 
 struct Shape {
-    using Id = uint32_t;
+    using Id = u32;
 
     Id id;
 

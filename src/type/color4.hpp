@@ -1,14 +1,3 @@
-/*
-File:
-    color4.hpp
-Authors:
-    Lucas
-Purpose:
-    Definition of the Color4 datatype
-License:
-    MIT (see LICENSE file)
-*/
-
 #pragma once
 
 #include <string>
