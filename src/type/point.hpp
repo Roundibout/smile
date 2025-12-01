@@ -1,6 +1,6 @@
 #pragma once
 
-#include "type/numbers.hpp"
+import numbers;
 #include "type/vector2.hpp"
 
 struct Point {

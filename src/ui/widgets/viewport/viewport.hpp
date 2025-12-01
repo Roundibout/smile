@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "type/numbers.hpp"
+import numbers;
 
 #include "core/signal.hpp"
 #include "core/editor.hpp"

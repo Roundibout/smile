@@ -56,10 +56,21 @@ add_subdirectory(extern/freetype)
 
 # Smile executable
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
-add_executable(Smile WIN32 ${SOURCES})
+
+add_executable(Smile ${SOURCES})
+
+target_compile_options(Smile PRIVATE /bigobj)
+
+# Add module interfaces
+target_sources(Smile
+    PRIVATE
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        FILES
+            src/type/numbers.cppm
+)
 
 if(WIN32)
-    target_sources(Smile PRIVATE win.rc) # Windows resources
+    # target_sources(Smile PRIVATE win.rc) # Windows resources
     # set_target_properties(Smile PROPERTIES
     #     WIN32_EXECUTABLE TRUE
     # )
@@ -80,17 +91,17 @@ if(WIN32)
     )
 endif()
 
-if (MINGW)
-    # bundle these so it works everywhere
-    target_link_options(Smile PRIVATE -static -static-libgcc -static-libstdc++)
-    # random crap to fix sol binding
-    target_compile_options(Smile PRIVATE 
-        -Wa,-mbig-obj
-        -ftemplate-backtrace-limit=0
-        -O1  # Lower optimization to reduce template bloat
-    )
-    target_link_options(Smile PRIVATE -Wl,--allow-multiple-definition)
-endif()
+# if (MINGW)
+#     # bundle these so it works everywhere
+#     target_link_options(Smile PRIVATE -static -static-libgcc -static-libstdc++)
+#     # random crap to fix sol binding
+#     target_compile_options(Smile PRIVATE 
+#         -Wa,-mbig-obj
+#         -ftemplate-backtrace-limit=0
+#         -O1  # Lower optimization to reduce template bloat
+#     )
+#     target_link_options(Smile PRIVATE -Wl,--allow-multiple-definition)
+# endif()
 
 # Custom target to copy extensions, assets (and licenses) every build
 add_custom_target(copy_extensions

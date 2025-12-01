@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "type/numbers.hpp"
+import numbers;
 #include "type/vector2.hpp"
 #include "type/point.hpp"
 #include "type/line.hpp"
