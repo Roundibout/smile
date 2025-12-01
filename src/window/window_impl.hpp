@@ -7,6 +7,7 @@
 #include <glad/gl.h>
 
 #include <type/vector2.hpp>
+#include <type/color4.hpp>
 #include <window/window_input.hpp>
 #include <render/renderer_types.hpp>
 
