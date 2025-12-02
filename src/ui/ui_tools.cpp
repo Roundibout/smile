@@ -1,7 +1,7 @@
 #include "ui_tools.hpp"
 
 bool ui_tools::is_point_over_rect(const Vector2& point, const AbsoluteLayout& layout) {
-    return point.x >= layout.rect.position.x && point.y >= layout.rect.position.y && point.x <= layout.rect.position.x + layout.rect.size.x && point.y <= layout.rect.position.y + layout.rect.size.y;
+    return point.x >= layout.rect.position.x and point.y >= layout.rect.position.y and point.x <= layout.rect.position.x + layout.rect.size.x and point.y <= layout.rect.position.y + layout.rect.size.y;
 }
 
 bool ui_tools::is_point_over_rounded_rect(const Vector2& point, const AbsoluteLayout& layout) {
@@ -12,7 +12,7 @@ bool ui_tools::is_point_over_rounded_rect(const Vector2& point, const AbsoluteLa
     float right = left + layout.rect.size.x;
     float top = bottom + layout.rect.size.y;
 
-    if (x < left || x > right || y < bottom || y > top) return false;
+    if (x < left or x > right or y < bottom or y > top) return false;
 
     float rLB = layout.cornerLB;
     float rRB = layout.cornerRB;
@@ -20,28 +20,28 @@ bool ui_tools::is_point_over_rounded_rect(const Vector2& point, const AbsoluteLa
     float rRT = layout.cornerRT;
 
     // bottom-left
-    if (x < left + rLB && y < bottom + rLB) {
+    if (x < left + rLB and y < bottom + rLB) {
         float dx = x - (left + rLB);
         float dy = y - (bottom + rLB);
         return (dx * dx + dy * dy) <= rLB * rLB;
     }
 
     // bottom-right
-    if (x > right - rRB && y < bottom + rRB) {
+    if (x > right - rRB and y < bottom + rRB) {
         float dx = x - (right - rRB);
         float dy = y - (bottom + rRB);
         return (dx * dx + dy * dy) <= rRB * rRB;
     }
 
     // top-left
-    if (x < left + rLT && y > top - rLT) {
+    if (x < left + rLT and y > top - rLT) {
         float dx = x - (left + rLT);
         float dy = y - (top - rLT);
         return (dx * dx + dy * dy) <= rLT * rLT;
     }
 
     // top-right
-    if (x > right - rRT && y > top - rRT) {
+    if (x > right - rRT and y > top - rRT) {
         float dx = x - (right - rRT);
         float dy = y - (top - rRT);
         return (dx * dx + dy * dy) <= rRT * rRT;

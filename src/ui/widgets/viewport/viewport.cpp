@@ -321,7 +321,7 @@ void Viewport::render(const UIBounds& bounds) {
     window->renderer.endStencil();
 
     // Temporary title
-    if (!computedRender) {
+    if (not computedRender) {
         window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
     } else {
         window->renderer.drawText(UIDim2(0.0f, 10, 1.0f, -30), bounds, "Viewport (Computed)", app.theme.getFont(ThemeFont::Regular), 20, Color4(1.0f, 1.0f, 1.0f, 0.5f));
@@ -336,7 +336,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
         if (movingView) {
             viewPosition = Vector2(viewPosition.x + window->renderer.divide(input.mouse.delta.x), viewPosition.y + window->renderer.divide(input.mouse.delta.y));
 
-            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
+            if (not ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
                 window->setMousePosition(ui_tools::mirror_point_across_rect(input.mouse.position, resolved));
             }
 
@@ -348,7 +348,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
                 input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2 + resolved.rect.size.y * rotateMirrors.y
             );
             
-            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
+            if (not ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
                 if (input.mouse.position.x > resolved.rect.position.x + resolved.rect.size.x) {
                     rotateMirrors.x += 1;
                 } else if (input.mouse.position.x < resolved.rect.position.x) {
@@ -367,7 +367,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             float dy = rotatePosition.y - rotatePivot.y;
 
             if (sqrtf(dx*dx + dy*dy) < window->renderer.scale(30.0f)) {
-                if (!tooCloseToRotate) {
+                if (not tooCloseToRotate) {
                     lastRotation = viewRotation;
                 }
                 tooCloseToRotate = true;
@@ -403,7 +403,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
             window->renderer.dirty();
             return true;
         } else if (zoomingView) {
-            if (!ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
+            if (not ui_tools::is_point_over_rect(input.mouse.position, resolved)) {
                 window->setMousePosition(ui_tools::mirror_point_across_rect(input.mouse.position, resolved));
             }
 
@@ -445,11 +445,11 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     }
 
     if ((
-        input.type == WindowInputType::MouseMove || 
-        input.type == WindowInputType::MouseButtonDown || 
-        input.type == WindowInputType::MouseButtonUp || 
+        input.type == WindowInputType::MouseMove or 
+        input.type == WindowInputType::MouseButtonDown or 
+        input.type == WindowInputType::MouseButtonUp or 
         input.type == WindowInputType::MouseScroll) 
-        && !ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)
+        and not ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)
     ) return false;
 
     // UI
@@ -457,7 +457,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
 
     // Viewport action starts
     if (input.type == WindowInputType::MouseScroll) {
-        if (!movingView && !rotatingView && ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)) {
+        if (not movingView and not rotatingView and ui_tools::is_point_over_rounded_rect(input.mouse.position, resolved)) {
             if (window->isKeyDown(KeyCode::Shift)) {
                 if (rotatingView) return true;
 
@@ -537,7 +537,7 @@ bool Viewport::processWindowInput(WindowInput& input, const UIBounds& bounds) {
     }
 
     // Tools
-    if ((input.type == WindowInputType::MouseButtonDown || input.type == WindowInputType::MouseButtonUp) && (input.mouse.button == MouseButton::Left || input.mouse.button == MouseButton::Right)) {
+    if ((input.type == WindowInputType::MouseButtonDown or input.type == WindowInputType::MouseButtonUp) and (input.mouse.button == MouseButton::Left or input.mouse.button == MouseButton::Right)) {
         // Calculate world position of mouse
         Vector2 mousePos(input.mouse.position.x - resolved.rect.position.x - resolved.rect.size.x / 2, input.mouse.position.y - resolved.rect.position.y - resolved.rect.size.y / 2);
         Vector2 worldPos = mouseToWorldSpace(mousePos);

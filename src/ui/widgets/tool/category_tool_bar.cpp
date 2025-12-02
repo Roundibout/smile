@@ -13,7 +13,7 @@ void CategoryToolBar::render(const UIBounds& bounds) {
         window->renderer.drawRoundedStrokeRect(tipLayout, applied, Color4(0.1f, 0.1f, 0.1f), 2, Color4(0.13f, 0.13f, 0.13f));
         window->renderer.drawText(toolLayout.rect.position + UIDim2(0.0f, toolSize + 20, 0.0f, toolSize / 2 - 7), applied, tool.name, app.theme.getFont(ThemeFont::Regular), 20, Color4());
 
-        if ((hovered && hoveredTool == tool.id) || selectedTool == tool.id) return;
+        if ((hovered and hoveredTool == tool.id) or selectedTool == tool.id) return;
         Color4 color = app.theme.getColor(ThemeColor::Button);
         Color4 stroke = app.theme.getColor(ThemeColor::ButtonStroke);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
@@ -21,7 +21,7 @@ void CategoryToolBar::render(const UIBounds& bounds) {
 
     // Render hovered tools to appear between
     runForEach([this, applied](const UILayout& toolLayout, const CategoryToolBarEntry& tool, const ToolBarCategory& category) {
-        if (!hovered || hoveredTool != tool.id || selectedTool == tool.id) return;
+        if (not hovered or hoveredTool != tool.id or selectedTool == tool.id) return;
         Color4 color = app.theme.getColor(ThemeColor::ButtonHovered);
         Color4 stroke = app.theme.getColor(ThemeColor::ButtonStrokeHovered);
         window->renderer.drawRoundedStrokeRect(toolLayout, applied, color, 2, stroke, UIStrokeAlignment::Middle);
@@ -46,10 +46,10 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
     // Check if the mouse is within the toolbar area
     if (ui_tools::is_point_over_rect(input.mouse.position, resolvedArea)) {
         hoverable = true;
-        if (input.type == WindowInputType::MouseButtonDown && input.mouse.button == MouseButton::Left) {
+        if (input.type == WindowInputType::MouseButtonDown and input.mouse.button == MouseButton::Left) {
             down = true;
             selecting = false;
-        } else if (input.type == WindowInputType::MouseButtonUp && input.mouse.button == MouseButton::Left) {
+        } else if (input.type == WindowInputType::MouseButtonUp and input.mouse.button == MouseButton::Left) {
             up = true;
         }
     } else {
@@ -73,7 +73,7 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
                     hoveredTool = tool.id;
                     window->renderer.dirty();
                 }
-                if (!hovered) {
+                if (not hovered) {
                     hovered = true;
                     window->renderer.dirty();
                 }
@@ -83,7 +83,7 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
                 selectingTool = tool.id;
                 selecting = true;
             } else if (up) {
-                if (selectingTool == tool.id && selectedTool != tool.id) {
+                if (selectingTool == tool.id and selectedTool != tool.id) {
                     consumed = true;
                     selectedTool = tool.id;
                     onToolSelected.emit(selectedTool);
@@ -93,12 +93,12 @@ bool CategoryToolBar::processWindowInput(WindowInput& input, const UIBounds& bou
         }
     });
 
-    if (!anyHovered) {
+    if (not anyHovered) {
         hovered = false;
         window->renderer.dirty();
     }
 
-    if (!consumed) {
+    if (not consumed) {
         return false;
     }
 

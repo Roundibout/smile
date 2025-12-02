@@ -8,20 +8,20 @@ void ExtensionManager::loadAll() {
 
     for (auto& entry : std::filesystem::directory_iterator(extensionsFolder)) {
         // Skip anything that isn't a folder
-        if (!entry.is_directory()) continue; 
+        if (not entry.is_directory()) continue; 
 
         std::string extensionPath = entry.path().string();
 
         // Check if there is an entry point
         std::filesystem::path mainPath = entry.path() / "main.lua";
-        if (!std::filesystem::exists(mainPath)) {
+        if (not std::filesystem::exists(mainPath)) {
             console::error("Failed to load extension " + extensionPath + "\n    Doesn't contain main.lua entry point");
             continue;
         }
 
         // Check if there is a metadata file
         std::filesystem::path metaPath = entry.path() / "meta.json";
-        if (!std::filesystem::exists(metaPath)) {
+        if (not std::filesystem::exists(metaPath)) {
             console::error("Failed to load extension " + extensionPath + "\n    Doesn't contain meta.json metadata file");
             continue;
         }

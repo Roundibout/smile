@@ -71,7 +71,7 @@ Font* FontManager::getFont(const std::string& path, int size) {
 
 float FontManager::getTextWidth(const std::string& text, const std::string& path, int size) {
     Font* font = getFont(path, size);
-    if (!font || !font->face) {
+    if (not font or not font->face) {
         return 0.0f;
     }
 
@@ -82,7 +82,7 @@ float FontManager::getTextWidth(const std::string& text, const std::string& path
 
         // Get glyph so we can add it's width
         const Glyph* glyph = font->getGlyph(c);
-        if (!glyph) continue;
+        if (not glyph) continue;
 
         totalWidth += glyph->advance;
 

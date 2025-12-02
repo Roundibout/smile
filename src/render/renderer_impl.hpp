@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cmath>
+#include <algorithm>
+
 #include "type/vector2.hpp"
 #include "type/color4.hpp"
 #include "type/ui_types.hpp"

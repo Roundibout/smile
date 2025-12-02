@@ -26,7 +26,7 @@ Tool* ExtensionRegistry::registerTool(ToolDefinition definition) {
     Tool* ptr = tool.get();
     tools.push_back(std::move(tool));
 
-    if (!app.editor->getSelectedTool(definition.mode)) app.editor->setSelectedTool(definition.mode, ptr); // Select tool if none are selected
+    if (not app.editor->getSelectedTool(definition.mode)) app.editor->setSelectedTool(definition.mode, ptr); // Select tool if none are selected
 
     onToolRegistered.emit(ptr);
 

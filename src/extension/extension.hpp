@@ -11,9 +11,7 @@
 #include "type/rect.hpp"
 #include "type/color4.hpp"
 #include "type/ui_types.hpp"
-#include "type/point.hpp"
-#include "type/line.hpp"
-#include "type/shape.hpp"
+#include "type/primitives.hpp"
 
 #include "core/editor.hpp"
 #include "document/document_manager.hpp"

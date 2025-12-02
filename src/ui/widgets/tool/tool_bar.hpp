@@ -5,11 +5,13 @@
 #include <vector>
 #include <cstdint>
 
+#include "type/numbers.hpp"
+
 #include <core/signal.hpp>
 
 #include <ui/widgets/widget.hpp>
 
-using ToolEntryId = uint32_t;
+using ToolEntryId = u32;
 
 struct ToolBarEntry {
     ToolEntryId id;

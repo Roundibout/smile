@@ -3,7 +3,7 @@
 Point::Id Object::createPoint(const Vector2& position) {
     Point::Id id;
 
-    if (!freePointIds.empty()) { // Are there any free points?
+    if (not freePointIds.empty()) { // Are there any free points?
         id = freePointIds.back(); // Use it
         freePointIds.pop_back(); // Remove it from the list
     } else {
@@ -53,7 +53,7 @@ Line::Id Object::createLine(Point::Id point1, Point::Id point2) {
 
     Line::Id id;
 
-    if (!freeLineIds.empty()) { // Are there any free lines?
+    if (not freeLineIds.empty()) { // Are there any free lines?
         id = freeLineIds.back(); // Use it
         freeLineIds.pop_back(); // Remove it from the list
     } else {

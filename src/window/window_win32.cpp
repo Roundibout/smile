@@ -131,7 +131,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // ENFORCE MINIMUM AND MAXIMUM SIZE
         case WM_GETMINMAXINFO: {
             WindowWin32* window = reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // Get the window
-            if (!window) {
+            if (not window) {
                 // Window not fully created yet, ignore this message
                 return 0;
             }
@@ -354,9 +354,9 @@ WindowWin32::WindowWin32(App& app, const uint32_t& i, const WindowConfig& c) : W
     // Create window style from config
     DWORD style = WS_OVERLAPPEDWINDOW;
 
-    if (!config.resizable) style &= ~WS_SIZEBOX;
-    if (!config.maximizable) style &= ~WS_MAXIMIZEBOX;
-    if (!config.minimizable) style &= ~WS_MINIMIZEBOX;
+    if (not config.resizable) style &= ~WS_SIZEBOX;
+    if (not config.maximizable) style &= ~WS_MAXIMIZEBOX;
+    if (not config.minimizable) style &= ~WS_MINIMIZEBOX;
     
     // Create a window associated with Smile
     hwnd = CreateWindow(
@@ -380,9 +380,9 @@ WindowWin32::WindowWin32(App& app, const uint32_t& i, const WindowConfig& c) : W
     hdc = GetDC(hwnd);
 
     // Display the window
-    if (config.maximizable == true && config.maximized == true) {
+    if (config.maximizable == true and config.maximized == true) {
         ShowWindow(hwnd, SW_MAXIMIZE);
-    } else if (config.minimizable == true && config.minimized == true) {
+    } else if (config.minimizable == true and config.minimized == true) {
         ShowWindow(hwnd, SW_MINIMIZE);
     } else {
         ShowWindow(hwnd, SW_SHOW);
@@ -406,7 +406,7 @@ std::deque<WindowInput> WindowWin32::update() {
     
     for (auto it = inputs.begin(); it != inputs.end();) {
         if (it->type == WindowInputType::MouseMove) {
-            if (!haveMerged) {
+            if (not haveMerged) {
                 merged = *it;
                 haveMerged = true;
             } else {
@@ -476,7 +476,7 @@ void WindowWin32::bindGLContext() {
     wglMakeCurrent(dummyHdc, dummyCtx); // Make it current so we can use it
 
     // Load WGL extensions (needed for core context creation)
-    if (!gladLoaderLoadWGL(dummyHdc)) {
+    if (not gladLoaderLoadWGL(dummyHdc)) {
         console::error("Failed to load WGL extensions");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(dummyCtx);
@@ -500,7 +500,7 @@ void WindowWin32::bindGLContext() {
 
     int pf;
     UINT numFormats;
-    if (!wglChoosePixelFormatARB(hdc, pixelFormatAttribs, nullptr, 1, &pf, &numFormats) || numFormats == 0) {
+    if (not wglChoosePixelFormatARB(hdc, pixelFormatAttribs, nullptr, 1, &pf, &numFormats) or numFormats == 0) {
         console::warn("MSAA pixel format not supported, falling back to standard format");
         pf = ChoosePixelFormat(hdc, &pfd);
     }
@@ -524,7 +524,7 @@ void WindowWin32::bindGLContext() {
     wglMakeCurrent(hdc, glContext); // Make it current so we can use modern GL
 
     // Load GL from glad
-    if (!gladLoaderLoadGL()) {
+    if (not gladLoaderLoadGL()) {
         console::error("Failed to load OpenGL");
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(glContext);
@@ -536,7 +536,7 @@ void WindowWin32::bindGLContext() {
 }
 
 void WindowWin32::makeGLCurrent() {
-    if (rbackendSet && rbackend == RenderBackend::GL) {
+    if (rbackendSet and rbackend == RenderBackend::GL) {
         // Just make the context current
         wglMakeCurrent(hdc, glContext);
 
@@ -548,7 +548,7 @@ void WindowWin32::makeGLCurrent() {
 }
 
 void WindowWin32::swapGLBuffers() {
-    if (rbackendSet && rbackend == RenderBackend::GL) {
+    if (rbackendSet and rbackend == RenderBackend::GL) {
         // Just swap buffers
         SwapBuffers(hdc);
     } else {
@@ -652,7 +652,7 @@ WindowWin32::~WindowWin32() {
         wglDeleteContext(glContext);
         glContext = nullptr;
     }
-    if (hdc && hwnd) {
+    if (hdc and hwnd) {
         ReleaseDC(hwnd, hdc);
         hdc = nullptr;
     }

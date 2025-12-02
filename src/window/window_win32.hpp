@@ -15,7 +15,8 @@
 
 #include <winres.h>
 
-#include <type/vector2.hpp>
+#include "type/numbers.hpp"
+#include "type/vector2.hpp"
 
 #include <window/window_impl.hpp>
 
@@ -35,7 +36,7 @@ private:
 
     LPCSTR cursorId = IDC_ARROW;
 public:
-    WindowWin32(App& app, const uint32_t& i, const WindowConfig& c);
+    WindowWin32(App& app, const u32& i, const WindowConfig& c);
     ~WindowWin32();
     std::deque<WindowInput> update() override;
 

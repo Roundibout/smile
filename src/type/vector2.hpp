@@ -44,11 +44,11 @@ struct Vector2 {
     }
 
     bool operator==(const Vector2& other) const {
-        return x == other.x && y == other.y;
+        return x == other.x and y == other.y;
     }
 
     bool operator!=(const Vector2& other) const {
-        return x != other.x || y != other.y;
+        return x != other.x or y != other.y;
     }
 
     Vector2& operator+=(const Vector2& other) {
@@ -97,5 +97,20 @@ struct Vector2 {
         return atan2(v.y, v.x);
     }
 
-    std::string toString() const;
+    std::string toString() const {
+        std::string xString, yString;
+
+        if (std::fmod(x, 1.0f) != 0.0f) {
+            xString = std::to_string(x);
+        } else {
+            xString = std::to_string(int(x));
+        }
+        if (std::fmod(y, 1.0f) != 0.0f) {
+            yString = std::to_string(y);
+        } else {
+            yString = std::to_string(int(y));
+        }
+
+        return "(" + xString + ", " + yString + ")";
+    }
 };

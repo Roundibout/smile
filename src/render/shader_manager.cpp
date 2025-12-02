@@ -3,7 +3,7 @@
 // Function for reading a file into a string
 static std::string readFile(const std::string& path) {
     std::ifstream file(path);
-    if (!file.is_open()) {
+    if (not file.is_open()) {
         console::error("Failed to open shader file: " + path);
         return "";
     }
@@ -16,7 +16,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     std::string vertexSrc = readFile(vertexPath);
     std::string fragmentSrc = readFile(fragmentPath);
 
-    if (vertexSrc.empty() || fragmentSrc.empty()) {
+    if (vertexSrc.empty() or fragmentSrc.empty()) {
         console::error("Shader source is empty");
         return false;
     }
@@ -32,7 +32,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
 
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (not success) {
         char log[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, log);
         console::error("Vertex shader compilation failed: " + std::string(log));
@@ -46,7 +46,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if (not success) {
         char log[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, log);
         console::error("Fragment shader compilation failed: " + std::string(log));
@@ -61,7 +61,7 @@ bool ShaderManagerGL::loadShader(const std::string& name, const std::string& ver
     glLinkProgram(program);
 
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (not success) {
         char log[512];
         glGetProgramInfoLog(program, 512, nullptr, log);
         console::error("Shader program linking failed: " + std::string(log));

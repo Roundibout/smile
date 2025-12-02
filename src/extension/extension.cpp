@@ -380,7 +380,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "connectUpdate", [](Window& self, sol::function luaFunc) {
             self.connectUpdate([luaFunc](float deltaTime, const UIBounds& bounds) {
                 sol::protected_function_result result = luaFunc(deltaTime, bounds);
-                if (!result.valid()) {
+                if (not result.valid()) {
                     sol::error err = result;
                     console::error("Lua update callback error: ", err.what());
                 }
@@ -390,7 +390,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "connectRender", [](Window& self, sol::function luaFunc) {
             self.connectRender([luaFunc](const UIBounds& bounds) {
                 sol::protected_function_result result = luaFunc(bounds);
-                if (!result.valid()) {
+                if (not result.valid()) {
                     sol::error err = result;
                     console::error("Lua render callback error: ", err.what());
                 }
@@ -400,7 +400,7 @@ Extension::Extension(App& app, Id id, std::string name, std::string path) : app(
         "connectInput", [](Window& self, sol::function luaFunc) {
             self.connectInput([luaFunc](WindowInput& input, const UIBounds& bounds) {
                 sol::protected_function_result result = luaFunc(input, bounds);
-                if (!result.valid()) {
+                if (not result.valid()) {
                     sol::error err = result;
                     console::error("Lua input callback error: ", err.what());
                 }
@@ -466,7 +466,7 @@ bool Extension::load() {
     console::print("Loading extension ", id);
 
     sol::load_result script = lua.load_file(folder + "/main.lua");
-    if (!script.valid()) { // Check if main.lua exists
+    if (not script.valid()) { // Check if main.lua exists
         sol::error err = script;
         console::error("Failed to load extension ", name, "\n    ", err.what()); // Syntax/load error
         return false;
@@ -474,7 +474,7 @@ bool Extension::load() {
 
     // Run it safely
     sol::protected_function_result result = script();
-    if (!result.valid()) {
+    if (not result.valid()) {
         sol::error err = result;
         console::error("Failed to load extension ", name, "\n    ", err.what()); // Runtime error
         return false;

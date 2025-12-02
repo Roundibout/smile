@@ -21,7 +21,7 @@ void Window::process() {
     UIBounds bounds(impl->getSize(), UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))));
 
     // Process inputs
-    while (!inputs.empty()) {
+    while (not inputs.empty()) {
         WindowInput& input = inputs.front();
         
         // Process input on widgets first
@@ -40,7 +40,7 @@ void Window::process() {
         }
 
         // Set dirty overrides
-        if (input.type == WindowInputType::WindowResized || input.type == WindowInputType::WindowMoved) {
+        if (input.type == WindowInputType::WindowResized or input.type == WindowInputType::WindowMoved) {
             overdirtied = true;
             lastSize = impl->getSize();
         }
@@ -72,7 +72,7 @@ void Window::update(float deltaTime) {
 }
 
 void Window::render(float uiScale) {
-    if (renderer.isDirty() || blank == true) { // Only render if the renderer is dirty or the window is blank
+    if (renderer.isDirty() or blank == true) { // Only render if the renderer is dirty or the window is blank
         blank = false;
         // Begin the frame
         renderer.beginFrame(uiScale);

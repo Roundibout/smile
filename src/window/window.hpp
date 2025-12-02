@@ -8,7 +8,8 @@
 #include <deque>
 #include <functional>
 
-#include <type/vector2.hpp>
+#include "type/numbers.hpp"
+#include "type/vector2.hpp"
 #include <window/window_input.hpp>
 
 #include <window/window_impl.hpp>
@@ -47,7 +48,7 @@ private:
 public:
     Renderer renderer;
 
-    Window(App& app, const uint32_t& id, const WindowConfig& config);
+    Window(App& app, const u32& id, const WindowConfig& config);
 
     void process();
     void update(float deltaTime);

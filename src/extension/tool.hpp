@@ -57,7 +57,7 @@ public:
     void fireEvent(ToolEventType type, Args&&... args) {
         for (auto& func : eventHandlers[(size_t)type]) {
             sol::protected_function_result result = func(std::forward<Args>(args)...);
-            if (!result.valid()) {
+            if (not result.valid()) {
                 sol::error err = result;
                 console::error("Lua event error: ", err.what());
             }

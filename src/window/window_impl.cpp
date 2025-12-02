@@ -1,8 +1,8 @@
 #include "window_impl.hpp"
 
-WindowImpl::WindowImpl(App& app, const uint32_t& i, const WindowConfig& c) : app(app), id(i), config(c) {}
+WindowImpl::WindowImpl(App& app, const u32& i, const WindowConfig& c) : app(app), id(i), config(c) {}
 
-const uint32_t WindowImpl::getId() {
+const u32 WindowImpl::getId() {
     return id;
 }
 

@@ -132,8 +132,8 @@ bool PanelSplit::processWindowInput(WindowInput& input, const UIBounds& bounds, 
 
     if (consumed == false) {
         consumed = panel1->processWindowInput(input, first, firstAdj);
-        if (!consumed) {
-            if (!panel2->processWindowInput(input, second, secondAdj)) {
+        if (not consumed) {
+            if (not panel2->processWindowInput(input, second, secondAdj)) {
                 return false;
             }
         } else {

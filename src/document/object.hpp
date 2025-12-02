@@ -5,11 +5,9 @@
 #include <string>
 #include <memory>
 
-import numbers;
+#include "type/numbers.hpp"
 #include "type/vector2.hpp"
-#include "type/point.hpp"
-#include "type/line.hpp"
-#include "type/shape.hpp"
+#include "type/primitives.hpp"
 
 #include "document/instance.hpp"
 #include "util/console.hpp"
@@ -22,7 +20,7 @@ enum class EdgeDirection {
 class Object : public Instance {
 public:
     using Id = u32;
-    inline static constexpr u32 INVALID_ID = UINT32_MAX;
+    inline static constexpr u32 INVALID_ID = U32_MAX;
 private:
     // Points
     std::vector<std::unique_ptr<Point>> points;

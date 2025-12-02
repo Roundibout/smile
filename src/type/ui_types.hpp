@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <string>
 
-#include <type/vector2.hpp>
-#include <type/rect.hpp>
+#include "type/vector2.hpp"
+#include "type/rect.hpp"
 
 struct UIDim {
     float scale;
@@ -24,11 +24,11 @@ struct UIDim {
     }
 
     bool operator==(const UIDim& other) const {
-        return scale == other.scale && offset == other.offset;
+        return scale == other.scale and offset == other.offset;
     }
 
     bool operator!=(const UIDim& other) const {
-        return scale != other.scale || offset != other.offset;
+        return scale != other.scale or offset != other.offset;
     }
 
     UIDim operator+=(const UIDim& other) {
@@ -43,7 +43,9 @@ struct UIDim {
         return *this;
     }
 
-    std::string toString() const;
+    std::string toString() const {
+        return "(" + std::to_string(scale) + ", " + std::to_string(offset) + ")";
+    }
 };
 
 struct UIDim2 {
@@ -63,11 +65,11 @@ struct UIDim2 {
     }
 
     bool operator==(const UIDim2& other) const {
-        return x == other.x && y == other.y;
+        return x == other.x and y == other.y;
     }
 
     bool operator!=(const UIDim2& other) const {
-        return x != other.x || y != other.y;
+        return x != other.x or y != other.y;
     }
 
     UIDim2 operator+=(const UIDim2& other) {
@@ -82,7 +84,9 @@ struct UIDim2 {
         return *this;
     }
 
-    std::string toString() const;
+    std::string toString() const {
+        return "{" + x.toString() + ", " + y.toString() + "}";
+    }
 };
 
 struct UIRect {
@@ -92,11 +96,11 @@ struct UIRect {
     UIRect(const UIDim2& position, const UIDim2& size) : position(position), size(size) {}
 
     bool operator==(const UIRect& other) const {
-        return position == other.position && size == other.size;
+        return position == other.position and size == other.size;
     }
 
     bool operator!=(const UIRect& other) const {
-        return position != other.position || size != other.size;
+        return position != other.position or size != other.size;
     }
 };
 

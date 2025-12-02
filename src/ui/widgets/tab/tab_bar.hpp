@@ -3,9 +3,11 @@
 #include <string>
 #include <unordered_map>
 
+#include "type/numbers.hpp"
+
 #include <ui/widgets/widget.hpp>
 
-using TabId = uint32_t;
+using TabId = u32;
 
 enum class TabBarDirection {
     Horizontal,

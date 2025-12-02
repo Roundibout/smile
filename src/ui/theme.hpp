@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 
-#include <type/color4.hpp>
+#include "type/color4.hpp"
 
 enum class ThemeMetric {
     PanelMargin,

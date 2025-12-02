@@ -37,6 +37,8 @@
 
 # Build
 /build/
+/out/
 
 # Config
+/.vs/
 /.vscode/

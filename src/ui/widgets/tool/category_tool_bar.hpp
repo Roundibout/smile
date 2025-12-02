@@ -5,13 +5,15 @@
 #include <vector>
 #include <cstdint>
 
+#include "type/numbers.hpp"
+
 #include <core/signal.hpp>
 
 #include <ui/widgets/widget.hpp>
 
 #include <render/font_manager.hpp>
 
-using ToolEntryId = uint32_t;
+using ToolEntryId = u32;
 
 struct CategoryToolBarEntry {
     ToolEntryId id;

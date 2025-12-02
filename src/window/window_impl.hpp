@@ -6,8 +6,9 @@
 
 #include <glad/gl.h>
 
-#include <type/vector2.hpp>
-#include <type/color4.hpp>
+#include "type/numbers.hpp"
+#include "type/vector2.hpp"
+#include "type/color4.hpp"
 #include <window/window_input.hpp>
 #include <render/renderer_types.hpp>
 
@@ -38,13 +39,13 @@ enum class Cursor {
 
 class WindowImpl {
 protected:
-    const uint32_t id;
+    const u32 id;
     WindowConfig config;
 
     RenderBackend rbackend;
     bool rbackendSet = false;
 public:
-    WindowImpl(App& app, const uint32_t& i, const WindowConfig& c);
+    WindowImpl(App& app, const u32& i, const WindowConfig& c);
     virtual ~WindowImpl() = default;
     virtual std::deque<WindowInput> update() = 0;
 
@@ -52,7 +53,7 @@ public:
     virtual void makeGLCurrent() = 0;
     virtual void swapGLBuffers() = 0;
 
-    const uint32_t getId();
+    const u32 getId();
     virtual Vector2 getSize() = 0;
     virtual Vector2 getPosition() = 0;
 

@@ -452,7 +452,7 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
     if (it != map.end()) return &it->second;
     
     const Glyph* g = font->getGlyph(c);
-    if (!g) return nullptr;
+    if (not g) return nullptr;
 
     GLGlyph glyph;
     glyph.width = g->width;
@@ -485,7 +485,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
     size = static_cast<int>(std::round(size * currentScale));
 
     Font* font = FontManager::get().getFont(path, size);
-    if (!font) {
+    if (not font) {
         console::print("Failed to load font: " + path);
         return;
     }
@@ -496,12 +496,12 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 
     for (char c : text) {
         const GLGlyph* g = getGlyph(path, size, font, c);
-        if (!g) {
+        if (not g) {
             console::print("Failed to get glyph for character: " + c);
             continue;
         }
 
-        if (g->width > 0 && g->height > 0) {
+        if (g->width > 0 and g->height > 0) {
             // Flush text batch if we're at capacity
             if (textQuadCount >= maxTextQuads) {
                 flushTextBatch();
@@ -533,7 +533,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
             });
 
             // handle texture batch
-            if (textBatches.empty() || textBatches.back().texture != &g->texture) {
+            if (textBatches.empty() or textBatches.back().texture != &g->texture) {
                 textBatches.push_back({ &g->texture, textQuadCount, 1 });
             } else {
                 textBatches.back().count++;
@@ -548,7 +548,7 @@ void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const 
 }
 
 void RendererGL::beginStencil() {
-    if (!stencilActive) {
+    if (not stencilActive) {
         stencilActive = true;
 
         flushTriangleBatch();

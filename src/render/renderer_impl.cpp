@@ -40,7 +40,7 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
     resolved.cornerRB = applied.layout.cornerRB.offset * currentScale;
     resolved.cornerLB = applied.layout.cornerLB.offset * currentScale;
 
-    if (!subpixel) {
+    if (not subpixel) {
         resolved.rect.position.x = std::roundf(resolved.rect.position.x);
         resolved.rect.position.y = std::roundf(resolved.rect.position.y);
         resolved.rect.size.x = std::roundf(resolved.rect.size.x);

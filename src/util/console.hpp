@@ -76,7 +76,7 @@ namespace console {
 
     template<typename... Args>
     inline void append(const Args&... args) {
-        if (!logs.empty()) {
+        if (not logs.empty()) {
             logs.back().message += concat(args...);
             for (auto& callback : callbacks) callback(logs.back());
         }
