@@ -4,7 +4,11 @@ RendererImpl::RendererImpl(WindowImpl* w) {
     window = w;
 }
 
-Vector2 RendererImpl::resolvePosition(const UIDim2& position, const UIBounds& bounds, bool subpixel) {
+Vector2 RendererImpl::resolvePosition(
+    const UIDim2& position, 
+    const UIBounds& bounds, 
+    bool subpixel
+) {
     UIBounds applied = applyLayout(bounds, UILayout(UIRect(position, UIDim2())));
 
     if (subpixel) {
@@ -20,7 +24,11 @@ Vector2 RendererImpl::resolvePosition(const UIDim2& position, const UIBounds& bo
     }
 }
 
-AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBounds& bounds, bool subpixel) {
+AbsoluteLayout RendererImpl::resolveLayout(
+    const UILayout& layout, 
+    const UIBounds& bounds, 
+    bool subpixel
+) {
     UIBounds applied = applyLayout(bounds, layout);
 
     AbsoluteLayout resolved(
@@ -67,7 +75,10 @@ AbsoluteLayout RendererImpl::resolveLayout(const UILayout& layout, const UIBound
     return resolved;
 }
 
-UIBounds RendererImpl::applyLayout(const UIBounds& bounds, const UILayout& childLayout) {
+UIBounds RendererImpl::applyLayout(
+    const UIBounds& bounds, 
+    const UILayout& childLayout
+) {
     UIBounds applied(bounds.absolute);
 
     applied.layout.rect.position.x.scale = bounds.layout.rect.position.x.scale + (bounds.layout.rect.size.x.scale * childLayout.rect.position.x.scale);

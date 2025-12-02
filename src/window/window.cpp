@@ -1,9 +1,14 @@
 #include "window.hpp"
 #include <core/app.hpp>
 
-Window::Window(App& app, const uint32_t& id, const WindowConfig& config)
+Window::Window(
+    App& app, 
+    const uint32_t& id, 
+    const WindowConfig& config
+)
     #ifdef _WIN32
-        : app(app),
+        :
+        app(app),
         impl(std::make_unique<WindowWin32>(app, id, config)), // initializer shenanigans
         renderer(impl.get()),
         lastSize(config.size)

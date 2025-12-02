@@ -20,7 +20,11 @@ struct CategoryToolBarEntry {
     std::string name;
     std::string category;
 
-    CategoryToolBarEntry(ToolEntryId id, const std::string& name, const std::string& category) : id(id), name(name), category(category) {}
+    CategoryToolBarEntry(
+        ToolEntryId id, 
+        const std::string& name, 
+        const std::string& category
+    ) : id(id), name(name), category(category) {}
 };
 
 struct ToolBarCategory {
@@ -83,7 +87,20 @@ private:
 public:
     Signal<ToolEntryId> onToolSelected;
 
-    CategoryToolBar(App& app, Window* window, UILayout layout) : Widget(app, window, UILayout(layout.rect.position, UIDim2(UIDim(0.0f, 60), layout.rect.size.y))) {} // TODO: add changeable tool size? replace 60 with tool size
+    CategoryToolBar(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) :
+        Widget(
+            app, 
+            window, 
+            UILayout(
+                layout.rect.position, 
+                UIDim2(UIDim(0.0f, 60), layout.rect.size.y) // TODO: add changeable tool size? replace 60 with tool size
+            )
+        ) 
+    {}
 
     void update(float deltaTime, const UIBounds& bounds) override {}
     void render(const UIBounds& bounds) override;

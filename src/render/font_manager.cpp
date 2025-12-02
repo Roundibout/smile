@@ -69,7 +69,11 @@ Font* FontManager::getFont(const std::string& path, int size) {
     return ptr;
 }
 
-float FontManager::getTextWidth(const std::string& text, const std::string& path, int size) {
+float FontManager::getTextWidth(
+    const std::string& text, 
+    const std::string& path, 
+    int size
+) {
     Font* font = getFont(path, size);
     if (not font or not font->face) {
         return 0.0f;

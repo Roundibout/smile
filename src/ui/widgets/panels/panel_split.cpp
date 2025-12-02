@@ -3,7 +3,19 @@
 #include <window/window.hpp>
 #include <ui/widgets/panels/panel_container.hpp>
 
-PanelSplit::PanelSplit(App& app, Window* window, PanelContainer* container, std::unique_ptr<Panel> existingPanel, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) : Panel(app, window, container), direction(splitDirection), ratio(std::clamp(splitRatio, 0.05f, 0.95f)) {
+PanelSplit::PanelSplit(
+    App& app, 
+    Window* window, 
+    PanelContainer* container, 
+    std::unique_ptr<Panel> existingPanel, 
+    PanelSplitDirection splitDirection, 
+    float splitRatio, 
+    PanelSplitPlacement existingPlacement
+) :
+    Panel(app, window, container), 
+    direction(splitDirection), 
+    ratio(std::clamp(splitRatio, 0.05f, 0.95f)) 
+{
     if (existingPlacement == PanelSplitPlacement::First) {
         panel1 = std::move(existingPanel);
         panel2 = std::make_unique<PanelLeaf>(app, window, container);
@@ -13,7 +25,13 @@ PanelSplit::PanelSplit(App& app, Window* window, PanelContainer* container, std:
     }
 }
 
-void PanelSplit::applyLayoutAndAdjacencies(const UIBounds& bounds, UIBounds& first, UIBounds& second, PanelAdjacency& firstAdj, PanelAdjacency& secondAdj) {
+void PanelSplit::applyLayoutAndAdjacencies(
+    const UIBounds& bounds, 
+    UIBounds& first, 
+    UIBounds& second, 
+    PanelAdjacency& firstAdj, 
+    PanelAdjacency& secondAdj
+) {
     if (direction == PanelSplitDirection::Vertical) {
         first = window->renderer.applyLayout(bounds, UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(ratio, 0, 1.0f, 0))));
         second = window->renderer.applyLayout(bounds, UILayout(UIRect(UIDim2(ratio, 0, 0.0f, 0), UIDim2(1.0f - ratio, 0, 1.0f, 0))));
@@ -29,7 +47,10 @@ void PanelSplit::applyLayoutAndAdjacencies(const UIBounds& bounds, UIBounds& fir
     }
 }
 
-bool PanelSplit::isOverResizeArea(const Vector2& point, const UIBounds& bounds) {
+bool PanelSplit::isOverResizeArea(
+    const Vector2& point, 
+    const UIBounds& bounds
+) {
     int margin = app.theme.getMetricInt(ThemeMetric::PanelMargin);
 
     UILayout selectionArea;
@@ -45,7 +66,10 @@ bool PanelSplit::isOverResizeArea(const Vector2& point, const UIBounds& bounds) 
     return false;
 }
 
-float PanelSplit::getPositionOverArea(const Vector2& point, const UIBounds& bounds) {
+float PanelSplit::getPositionOverArea(
+    const Vector2& point, 
+    const UIBounds& bounds
+) {
     Rect area = window->renderer.resolveLayout(layout, bounds).rect;
 
     if (direction == PanelSplitDirection::Vertical) {
@@ -64,7 +88,11 @@ void PanelSplit::stopResizing() {
     }
 }
 
-void PanelSplit::update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelSplit::update(
+    float deltaTime, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds first;
     UIBounds second;
     PanelAdjacency firstAdj = adjacency;
@@ -76,7 +104,10 @@ void PanelSplit::update(float deltaTime, const UIBounds& bounds, PanelAdjacency 
     panel2->update(deltaTime, second, secondAdj);
 }
 
-void PanelSplit::render(const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelSplit::render(
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds first;
     UIBounds second;
     PanelAdjacency firstAdj = adjacency;
@@ -88,7 +119,11 @@ void PanelSplit::render(const UIBounds& bounds, PanelAdjacency adjacency) {
     panel2->render(second, secondAdj);
 }
 
-bool PanelSplit::processWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) {
+bool PanelSplit::processWindowInput(
+    WindowInput& input, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds first;
     UIBounds second;
     PanelAdjacency firstAdj = adjacency;
@@ -146,7 +181,11 @@ bool PanelSplit::processWindowInput(WindowInput& input, const UIBounds& bounds, 
     return true;
 }
 
-void PanelSplit::observeWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelSplit::observeWindowInput(
+    WindowInput& input, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds first;
     UIBounds second;
     PanelAdjacency firstAdj = adjacency;
@@ -172,7 +211,12 @@ Panel* PanelSplit::getPanel(PanelSplitPlacement placement) {
     }
 }
 
-PanelSplit* PanelSplit::splitPanel(PanelSplitPlacement placement, PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) {
+PanelSplit* PanelSplit::splitPanel(
+    PanelSplitPlacement placement, 
+    PanelSplitDirection splitDirection, 
+    float splitRatio, 
+    PanelSplitPlacement existingPlacement
+) {
     if (placement == PanelSplitPlacement::First) {
         std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(app, window, container, std::move(panel1), splitDirection, splitRatio, existingPlacement);
         PanelSplit* rawPtr = split.get();

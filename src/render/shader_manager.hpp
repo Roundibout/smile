@@ -26,26 +26,94 @@ public:
     void useShader(const std::string& name);
 
     // Set uniforms - integers
-    void setUniformInt(const std::string& shaderName, const std::string& uniform, int value);
-    void setUniformInt2(const std::string& shaderName, const std::string& uniform, int x, int y);
-    void setUniformInt3(const std::string& shaderName, const std::string& uniform, int x, int y, int z);
-    void setUniformInt4(const std::string& shaderName, const std::string& uniform, int x, int y, int z, int w);
+    void setUniformInt(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        int value
+    );
+    void setUniformInt2(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        int x, 
+        int y
+    );
+    void setUniformInt3(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        int x, 
+        int y, 
+        int z
+    );
+    void setUniformInt4(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        int x, 
+        int y, 
+        int z, 
+        int w
+    );
 
     // Set uniforms - floats
-    void setUniformFloat(const std::string& shaderName, const std::string& uniform, float value);
-    void setUniformFloat2(const std::string& shaderName, const std::string& uniform, float x, float y);
-    void setUniformFloat3(const std::string& shaderName, const std::string& uniform, float x, float y, float z);
-    void setUniformFloat4(const std::string& shaderName, const std::string& uniform, float x, float y, float z, float w);
+    void setUniformFloat(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        float value
+    );
+    void setUniformFloat2(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        float x, 
+        float y
+    );
+    void setUniformFloat3(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        float x, 
+        float y, 
+        float z
+    );
+    void setUniformFloat4(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        float x, 
+        float y, 
+        float z, 
+        float w
+    );
 
     // Set uniforms - vectors (array versions)
-    void setUniformFloat2v(const std::string& shaderName, const std::string& uniform, const float* values);
-    void setUniformFloat3v(const std::string& shaderName, const std::string& uniform, const float* values);
-    void setUniformFloat4v(const std::string& shaderName, const std::string& uniform, const float* values);
+    void setUniformFloat2v(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* values
+    );
+    void setUniformFloat3v(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* values
+    );
+    void setUniformFloat4v(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* values
+    );
 
     // Set uniforms - matrices
-    void setUniformMat2(const std::string& shaderName, const std::string& uniform, const float* mat);
-    void setUniformMat3(const std::string& shaderName, const std::string& uniform, const float* mat);
-    void setUniformMat4(const std::string& shaderName, const std::string& uniform, const float* mat);
+    void setUniformMat2(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* mat
+    );
+    void setUniformMat3(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* mat
+    );
+    void setUniformMat4(
+        const std::string& shaderName, 
+        const std::string& uniform, 
+        const float* mat
+    );
 
     // Delete all shaders
     void clear();

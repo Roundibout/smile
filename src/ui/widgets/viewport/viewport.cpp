@@ -54,7 +54,13 @@ void Viewport::fillToolBar() {
     }
 }
 
-Viewport::Viewport(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
+Viewport::Viewport(
+    App& app, 
+    Window* window, 
+    UILayout layout
+) : 
+    Widget(app, window, layout) 
+{
     layout.setCorners(UIDim(0.0f, app.theme.getMetricInt(ThemeMetric::PanelCorner)));
 
     toolBar = std::make_unique<CategoryToolBar>(app, window, UILayout(UIDim2(0.0f, 10, 0.0f, 0), UIDim2(0.0f, 60, 1.0f, -50)));

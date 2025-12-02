@@ -12,8 +12,20 @@ struct UIDim {
     float offset;
 
     UIDim() : scale(0.0f), offset(0) {}
-    UIDim(float scale, int offset) : scale(scale), offset(static_cast<float>(offset)) {}
-    UIDim(float scale, float offset) : scale(scale), offset(offset) {}
+    UIDim(
+        float scale, 
+        int offset
+    ) : 
+        scale(scale), 
+        offset(static_cast<float>(offset)) 
+    {}
+    UIDim(
+        float scale, 
+        float offset
+    ) : 
+        scale(scale), 
+        offset(offset) 
+    {}
 
     UIDim operator+(const UIDim& other) const {
         return UIDim(scale + other.scale, offset + other.offset);
@@ -51,10 +63,35 @@ struct UIDim {
 struct UIDim2 {
     UIDim x, y;
 
-    UIDim2() : x(UIDim()), y(UIDim()) {}
-    UIDim2(const UIDim& x, const UIDim& y) : x(x), y(y) {}
-    UIDim2(float scaleX, int offsetX, float scaleY, int offsetY) : x(UIDim(scaleX, offsetX)), y(UIDim(scaleY, offsetY)) {}
-    UIDim2(float scaleX, float offsetX, float scaleY, float offsetY) : x(UIDim(scaleX, offsetX)), y(UIDim(scaleY, offsetY)) {}
+    UIDim2() : 
+        x(UIDim()), 
+        y(UIDim()) 
+    {}
+    UIDim2(
+        const UIDim& x, 
+        const UIDim& y
+    ) : 
+        x(x), 
+        y(y) 
+    {}
+    UIDim2(
+        float scaleX, 
+        int offsetX, 
+        float scaleY, 
+        int offsetY
+    ) : 
+        x(UIDim(scaleX, offsetX)), 
+        y(UIDim(scaleY, offsetY)) 
+    {}
+    UIDim2(
+        float scaleX, 
+        float offsetX, 
+        float scaleY, 
+        float offsetY
+    ) : 
+        x(UIDim(scaleX, offsetX)), 
+        y(UIDim(scaleY, offsetY)) 
+    {}
 
     UIDim2 operator+(const UIDim2& other) const {
         return UIDim2(x + other.x, y + other.y);
@@ -92,8 +129,17 @@ struct UIDim2 {
 struct UIRect {
     UIDim2 position, size;
     
-    UIRect() : position(UIDim2()), size(UIDim2()) {}
-    UIRect(const UIDim2& position, const UIDim2& size) : position(position), size(size) {}
+    UIRect() : 
+        position(UIDim2()), 
+        size(UIDim2()) 
+    {}
+    UIRect(
+        const UIDim2& position, 
+        const UIDim2& size
+    ) : 
+        position(position), 
+        size(size) 
+    {}
 
     bool operator==(const UIRect& other) const {
         return position == other.position and size == other.size;
@@ -129,9 +175,27 @@ struct UILayout {
 
     UILayout() : rect(UIRect()) {}
     UILayout(const UIRect& rect) : rect(rect) {}
-    UILayout(const UIRect& rect, const Vector2& anchorPoint) : rect(rect), anchorPoint(anchorPoint) {}
-    UILayout(const UIDim2& rectPosition, const UIDim2& rectSize) : rect(UIRect(rectPosition, rectSize)) {}
-    UILayout(const UIDim2& rectPosition, const UIDim2& rectSize, const Vector2& anchorPoint) : rect(UIRect(rectPosition, rectSize)), anchorPoint(anchorPoint) {}
+    UILayout(
+        const UIRect& rect, 
+        const Vector2& anchorPoint
+    ) : 
+        rect(rect), 
+        anchorPoint(anchorPoint) 
+    {}
+    UILayout(
+        const UIDim2& rectPosition, 
+        const UIDim2& rectSize
+    ) : 
+        rect(UIRect(rectPosition, rectSize)) 
+    {}
+    UILayout(
+        const UIDim2& rectPosition, 
+        const UIDim2& rectSize, 
+        const Vector2& anchorPoint
+    ) : 
+        rect(UIRect(rectPosition, rectSize)), 
+        anchorPoint(anchorPoint) 
+    {}
 
     void setCorners(const UIDim& corner) {
         cornerRT = corner;
@@ -146,8 +210,19 @@ struct UIBounds {
     UILayout layout;
 
     UIBounds() : absolute(Vector2()), layout(UILayout()) {}
-    UIBounds(const Vector2& absolute) : absolute(absolute), layout(UILayout()) {}
-    UIBounds(const Vector2& absolute, const UILayout& layout) : absolute(absolute), layout(layout) {}
+    UIBounds(
+        const Vector2& absolute
+    ) : 
+        absolute(absolute), 
+        layout(UILayout()) 
+    {}
+    UIBounds(
+        const Vector2& absolute, 
+        const UILayout& layout
+    ) : 
+        absolute(absolute), 
+        layout(layout) 
+    {}
 };
 
 enum class UIStrokeAlignment {

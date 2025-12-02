@@ -17,7 +17,13 @@ struct ToolBarEntry {
     ToolEntryId id;
     std::string name;
 
-    ToolBarEntry(ToolEntryId id, const std::string& name) : id(id), name(name) {}
+    ToolBarEntry(
+        ToolEntryId id, 
+        const std::string& name
+    ) : 
+        id(id), 
+        name(name) 
+    {}
 };
 
 class ToolBar : public Widget {
@@ -64,7 +70,20 @@ private:
 public:
     Signal<ToolEntryId> onToolSelected;
 
-    ToolBar(App& app, Window* window, UILayout layout) : Widget(app, window, UILayout(layout.rect.position, UIDim2(UIDim(0.0f, 60), layout.rect.size.y))) {} // TODO: add changeable tool size? replace 60 with tool size
+    ToolBar(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) : 
+        Widget(
+            app, 
+            window, 
+            UILayout(
+                layout.rect.position, 
+                UIDim2(UIDim(0.0f, 60), layout.rect.size.y) // TODO: add changeable tool size? replace 60 with tool size
+            )
+        ) 
+    {}
 
     void update(float deltaTime, const UIBounds& bounds) {}
     void render(const UIBounds& bounds) override;

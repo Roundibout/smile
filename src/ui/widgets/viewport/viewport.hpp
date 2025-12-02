@@ -65,7 +65,11 @@ private:
     float timer = 0.0f;
     bool computedRender = false;
 public:
-    Viewport(App& app, Window* window, UILayout layout);
+    Viewport(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    );
 
     void update(float deltaTime, const UIBounds& bounds) override;
 

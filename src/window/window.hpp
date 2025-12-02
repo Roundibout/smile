@@ -48,7 +48,11 @@ private:
 public:
     Renderer renderer;
 
-    Window(App& app, const u32& id, const WindowConfig& config);
+    Window(
+        App& app, 
+        const u32& id, 
+        const WindowConfig& config
+    );
 
     void process();
     void update(float deltaTime);

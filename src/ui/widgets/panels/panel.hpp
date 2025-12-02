@@ -22,11 +22,37 @@ protected:
     UILayout layout;
     PanelContainer* container;
 public:
-    Panel(App& app, Window* window, PanelContainer* container) : app(app), window(window), container(container), layout(UILayout(UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0)))) {}
+    Panel(
+        App& app, 
+        Window* window, 
+        PanelContainer* container
+    ) : 
+        app(app), 
+        window(window), 
+        container(container), 
+        layout(UILayout(
+            UIRect(UIDim2(0.0f, 0, 0.0f, 0), UIDim2(1.0f, 0, 1.0f, 0))
+        )) 
+    {}
 
-    virtual void update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) = 0;
-    virtual void render(const UIBounds& bounds, PanelAdjacency adjacency) = 0;
+    virtual void update(
+        float deltaTime, 
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) = 0;
+    virtual void render(
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) = 0;
 
-    virtual bool processWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) = 0;
-    virtual void observeWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) = 0;
+    virtual bool processWindowInput(
+        WindowInput& input, 
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) = 0;
+    virtual void observeWindowInput(
+        WindowInput& input, 
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) = 0;
 };

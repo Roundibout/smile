@@ -36,7 +36,11 @@ private:
 
     LPCSTR cursorId = IDC_ARROW;
 public:
-    WindowWin32(App& app, const u32& i, const WindowConfig& c);
+    WindowWin32(
+        App& app, 
+        const u32& i, 
+        const WindowConfig& c
+    );
     ~WindowWin32();
     std::deque<WindowInput> update() override;
 

@@ -9,7 +9,13 @@ class ContainerWidget : public Widget {
 protected:
     std::vector<std::unique_ptr<Widget>> children;
 public:
-    ContainerWidget(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {}
+    ContainerWidget(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) : 
+        Widget(app, window, layout) 
+    {}
 
     virtual void update(float deltaTime, const UIBounds& bounds) override;
     virtual void render(const UIBounds& bounds) override;

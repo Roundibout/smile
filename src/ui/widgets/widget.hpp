@@ -16,7 +16,15 @@ public:
     Window* window;
     UILayout layout;
     
-    Widget(App& app, Window* window, UILayout layout) : app(app), window(window), layout(layout) {}
+    Widget(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) : 
+        app(app), 
+        window(window), 
+        layout(layout) 
+    {}
     virtual ~Widget() = default;
 
     virtual void update(float deltaTime, const UIBounds& bounds) = 0;

@@ -3,7 +3,10 @@
 #include <window/window.hpp>
 #include <ui/widgets/panels/panel_container.hpp>
 
-UILayout PanelLeaf::applyInsetToLayout(const UILayout& childLayout, const PanelAdjacency& adjacency) {
+UILayout PanelLeaf::applyInsetToLayout(
+    const UILayout& childLayout, 
+    const PanelAdjacency& adjacency
+) {
     UILayout insetLayout = childLayout;
 
     int margin = app.theme.getMetricInt(ThemeMetric::PanelMargin);
@@ -36,7 +39,11 @@ UILayout PanelLeaf::applyInsetToLayout(const UILayout& childLayout, const PanelA
     return insetLayout;
 }
 
-void PanelLeaf::update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelLeaf::update(
+    float deltaTime, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds applied = window->renderer.applyLayout(bounds, applyInsetToLayout(layout, adjacency));
     
     for (auto& child : children) {
@@ -44,7 +51,10 @@ void PanelLeaf::update(float deltaTime, const UIBounds& bounds, PanelAdjacency a
     }
 }
 
-void PanelLeaf::render(const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelLeaf::render(
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UILayout inset = applyInsetToLayout(layout, adjacency);
     inset.setCorners(UIDim(0.0f, app.theme.getMetric(ThemeMetric::PanelCorner)));
 
@@ -57,7 +67,11 @@ void PanelLeaf::render(const UIBounds& bounds, PanelAdjacency adjacency) {
     }
 }
 
-bool PanelLeaf::processWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) {
+bool PanelLeaf::processWindowInput(
+    WindowInput& input, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds applied = window->renderer.applyLayout(bounds, applyInsetToLayout(layout, adjacency));
     
     bool consumed = false;
@@ -72,7 +86,11 @@ bool PanelLeaf::processWindowInput(WindowInput& input, const UIBounds& bounds, P
     return consumed;
 }
 
-void PanelLeaf::observeWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) {
+void PanelLeaf::observeWindowInput(
+    WindowInput& input, 
+    const UIBounds& bounds, 
+    PanelAdjacency adjacency
+) {
     UIBounds applied = window->renderer.applyLayout(bounds, applyInsetToLayout(layout, adjacency));
 
     for (auto& child : children) {

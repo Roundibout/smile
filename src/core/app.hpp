@@ -36,12 +36,12 @@ public:
     Theme theme;
     DocumentManager documents;
 
-    App() {
-        mainWindow = std::make_unique<MainWindow>(*this);
-        extensionManager = std::make_unique<ExtensionManager>(*this);
-        extensionRegistry = std::make_unique<ExtensionRegistry>(*this);
-        editor = std::make_unique<Editor>(*this);
-    }
+    App() : 
+        mainWindow(std::make_unique<MainWindow>(*this)),
+        extensionManager(std::make_unique<ExtensionManager>(*this)),
+        extensionRegistry(std::make_unique<ExtensionRegistry>(*this)),
+        editor(std::make_unique<Editor>(*this))
+    {}
 
     Window* createWindow(const WindowConfig& config);
     Window* getWindowById(const uint32_t& id);

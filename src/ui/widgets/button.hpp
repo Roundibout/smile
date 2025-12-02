@@ -8,7 +8,13 @@ protected:
 
     void deselect();
 public:
-    Button(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {}
+    Button(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) : 
+        Widget(app, window, layout) 
+    {}
 
     void update(float deltaTime, const UIBounds& bounds) override {}
     void render(const UIBounds& bounds) override;

@@ -11,7 +11,13 @@ class Console : public Widget {
 private:
     bool newEntry = false;
 public:
-    Console(App& app, Window* window, UILayout layout) : Widget(app, window, layout) {
+    Console(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    ) 
+      : Widget(app, window, layout) 
+    {
         console::addCallback([this](const LogEntry& log){
             this->newEntry = true;
         });

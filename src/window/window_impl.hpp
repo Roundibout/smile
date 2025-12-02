@@ -45,7 +45,11 @@ protected:
     RenderBackend rbackend;
     bool rbackendSet = false;
 public:
-    WindowImpl(App& app, const u32& i, const WindowConfig& c);
+    WindowImpl(
+        App& app, 
+        const u32& i, 
+        const WindowConfig& c
+    );
     virtual ~WindowImpl() = default;
     virtual std::deque<WindowInput> update() = 0;
 

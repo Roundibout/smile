@@ -12,7 +12,11 @@ static std::string readFile(const std::string& path) {
     return ss.str();
 }
 
-bool ShaderManagerGL::loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
+bool ShaderManagerGL::loadShader(
+    const std::string& name, 
+    const std::string& vertexPath, 
+    const std::string& fragmentPath
+) {
     std::string vertexSrc = readFile(vertexPath);
     std::string fragmentSrc = readFile(fragmentPath);
 
@@ -104,28 +108,50 @@ GLint ShaderManagerGL::getUniformLocation(const std::string& shaderName, const s
 }
 
 // Integer uniforms
-void ShaderManagerGL::setUniformInt(const std::string& shaderName, const std::string& uniform, int value) {
+void ShaderManagerGL::setUniformInt(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    int value
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform1i(location, value);
     }
 }
 
-void ShaderManagerGL::setUniformInt2(const std::string& shaderName, const std::string& uniform, int x, int y) {
+void ShaderManagerGL::setUniformInt2(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    int x, 
+    int y
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform2i(location, x, y);
     }
 }
 
-void ShaderManagerGL::setUniformInt3(const std::string& shaderName, const std::string& uniform, int x, int y, int z) {
+void ShaderManagerGL::setUniformInt3(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    int x, 
+    int y, 
+    int z
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform3i(location, x, y, z);
     }
 }
 
-void ShaderManagerGL::setUniformInt4(const std::string& shaderName, const std::string& uniform, int x, int y, int z, int w) {
+void ShaderManagerGL::setUniformInt4(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    int x, 
+    int y, 
+    int z, 
+    int w
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform4i(location, x, y, z, w);
@@ -133,28 +159,50 @@ void ShaderManagerGL::setUniformInt4(const std::string& shaderName, const std::s
 }
 
 // Float uniforms
-void ShaderManagerGL::setUniformFloat(const std::string& shaderName, const std::string& uniform, float value) {
+void ShaderManagerGL::setUniformFloat(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    float value
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform1f(location, value);
     }
 }
 
-void ShaderManagerGL::setUniformFloat2(const std::string& shaderName, const std::string& uniform, float x, float y) {
+void ShaderManagerGL::setUniformFloat2(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    float x, 
+    float y
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform2f(location, x, y);
     }
 }
 
-void ShaderManagerGL::setUniformFloat3(const std::string& shaderName, const std::string& uniform, float x, float y, float z) {
+void ShaderManagerGL::setUniformFloat3(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    float x, 
+    float y, 
+    float z
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform3f(location, x, y, z);
     }
 }
 
-void ShaderManagerGL::setUniformFloat4(const std::string& shaderName, const std::string& uniform, float x, float y, float z, float w) {
+void ShaderManagerGL::setUniformFloat4(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    float x, 
+    float y, 
+    float z, 
+    float w
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform4f(location, x, y, z, w);
@@ -162,21 +210,33 @@ void ShaderManagerGL::setUniformFloat4(const std::string& shaderName, const std:
 }
 
 // Vector uniforms (array versions)
-void ShaderManagerGL::setUniformFloat2v(const std::string& shaderName, const std::string& uniform, const float* values) {
+void ShaderManagerGL::setUniformFloat2v(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* values
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform2fv(location, 1, values);
     }
 }
 
-void ShaderManagerGL::setUniformFloat3v(const std::string& shaderName, const std::string& uniform, const float* values) {
+void ShaderManagerGL::setUniformFloat3v(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* values
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform3fv(location, 1, values);
     }
 }
 
-void ShaderManagerGL::setUniformFloat4v(const std::string& shaderName, const std::string& uniform, const float* values) {
+void ShaderManagerGL::setUniformFloat4v(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* values
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniform4fv(location, 1, values);
@@ -184,21 +244,33 @@ void ShaderManagerGL::setUniformFloat4v(const std::string& shaderName, const std
 }
 
 // Matrix uniforms
-void ShaderManagerGL::setUniformMat2(const std::string& shaderName, const std::string& uniform, const float* mat) {
+void ShaderManagerGL::setUniformMat2(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* mat
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniformMatrix2fv(location, 1, GL_FALSE, mat);
     }
 }
 
-void ShaderManagerGL::setUniformMat3(const std::string& shaderName, const std::string& uniform, const float* mat) {
+void ShaderManagerGL::setUniformMat3(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* mat
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniformMatrix3fv(location, 1, GL_FALSE, mat);
     }
 }
 
-void ShaderManagerGL::setUniformMat4(const std::string& shaderName, const std::string& uniform, const float* mat) {
+void ShaderManagerGL::setUniformMat4(
+    const std::string& shaderName, 
+    const std::string& uniform, 
+    const float* mat
+) {
     GLint location = getUniformLocation(shaderName, uniform);
     if (location != -1) {
         glUniformMatrix4fv(location, 1, GL_FALSE, mat);

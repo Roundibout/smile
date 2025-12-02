@@ -1,9 +1,14 @@
 #include "panel_container.hpp"
 #include <window/window.hpp>
 
-PanelContainer::PanelContainer(App& app, Window* window, UILayout layout) : 
+PanelContainer::PanelContainer(
+    App& app, 
+    Window* window, 
+    UILayout layout
+) : 
     Widget(app, window, layout), 
-    panel(std::make_unique<PanelLeaf>(app, window, this)) {}
+    panel(std::make_unique<PanelLeaf>(app, window, this)) 
+{}
 
 void PanelContainer::update(float deltaTime, const UIBounds& bounds) {
     UIBounds applied = window->renderer.applyLayout(bounds, layout);
@@ -48,7 +53,11 @@ Panel* PanelContainer::getPanel() {
     return panel.get();
 }
 
-PanelSplit* PanelContainer::splitPanel(PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement) {
+PanelSplit* PanelContainer::splitPanel(
+    PanelSplitDirection splitDirection, 
+    float splitRatio, 
+    PanelSplitPlacement existingPlacement
+) {
     std::unique_ptr<PanelSplit> split = std::make_unique<PanelSplit>(app, window, this, std::move(panel), splitDirection, splitRatio, existingPlacement);
     PanelSplit* rawPtr = split.get();
     panel = std::move(split);

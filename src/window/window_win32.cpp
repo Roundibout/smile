@@ -343,7 +343,13 @@ static void registerWindowClass(HINSTANCE hInstance) {
 }
 
 // Win32 window constructor
-WindowWin32::WindowWin32(App& app, const uint32_t& i, const WindowConfig& c) : WindowImpl(app, i, c) {
+WindowWin32::WindowWin32(
+    App& app, 
+    const u32& i, 
+    const WindowConfig& c
+) : 
+    WindowImpl(app, i, c) 
+{
     SetProcessDPIAware(); // Set this so it isn't blurry
 
     // Get the handle to Smile

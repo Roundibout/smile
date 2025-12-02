@@ -252,7 +252,13 @@ void RendererGL::beginFrame(float scale) {
     shaders.setUniformMat4("text", "uProjection", currentProjection.data());
 }
 
-void RendererGL::drawTriangle(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIBounds& bounds, const Color4& color) {
+void RendererGL::drawTriangle(
+    const UIDim2& position1, 
+    const UIDim2& position2, 
+    const UIDim2& position3, 
+    const UIBounds& bounds, 
+    const Color4& color
+) {
     if (triCount >= maxTris) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
@@ -272,7 +278,14 @@ void RendererGL::drawTriangle(const UIDim2& position1, const UIDim2& position2, 
     ++triCount;
 }
 
-void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, const UIDim2& position3, const UIDim2& position4, const UIBounds& bounds, const Color4& color) {
+void RendererGL::drawQuad(
+    const UIDim2& position1, 
+    const UIDim2& position2, 
+    const UIDim2& position3, 
+    const UIDim2& position4, 
+    const UIBounds& bounds, 
+    const Color4& color
+) {
     if (triCount >= maxTris) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
@@ -297,7 +310,11 @@ void RendererGL::drawQuad(const UIDim2& position1, const UIDim2& position2, cons
     triCount += 2;
 }
 
-void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
+void RendererGL::drawRect(
+    const UILayout& layout, 
+    const UIBounds& bounds, 
+    const Color4& color
+) {
     if (triCount >= maxTris) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
     if (textQuadCount > 0) flushTextBatch();
@@ -323,11 +340,22 @@ void RendererGL::drawRect(const UILayout& layout, const UIBounds& bounds, const 
     triCount += 2;
 }
 
-void RendererGL::drawStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+void RendererGL::drawStrokeRect(
+    const UILayout& layout, 
+    const UIBounds& bounds, 
+    const Color4& color, 
+    float stroke, 
+    const Color4& strokeColor, 
+    const UIStrokeAlignment& strokeAlignment
+) {
     stroke = static_cast<int>(std::round(stroke * currentScale)); // TODO: make this work
 }
 
-void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds, const Color4& color) {
+void RendererGL::drawRoundedRect(
+    const UILayout& layout, 
+    const UIBounds& bounds, 
+    const Color4& color
+) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
     if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
@@ -351,7 +379,14 @@ void RendererGL::drawRoundedRect(const UILayout& layout, const UIBounds& bounds,
     ++roundedCount;
 }
 
-void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& bounds, const Color4& color, float stroke, const Color4& strokeColor, const UIStrokeAlignment& strokeAlignment) {
+void RendererGL::drawRoundedStrokeRect(
+    const UILayout& layout, 
+    const UIBounds& bounds, 
+    const Color4& color, 
+    float stroke, 
+    const Color4& strokeColor, 
+    const UIStrokeAlignment& strokeAlignment
+) {
     if (roundedCount >= maxRoundeds) flushRoundedBatch();
     if (triCount > 0) flushTriangleBatch();
     if (textQuadCount > 0) flushTextBatch();
@@ -445,7 +480,12 @@ void RendererGL::drawRoundedStrokeRect(const UILayout& layout, const UIBounds& b
     }
 }
 
-const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* font, char c) {
+const GLGlyph* RendererGL::getGlyph(
+    const std::string& path, 
+    int size, 
+    Font* font, 
+    char c
+) {
     // Return glyph if it already exists
     auto& map = glyphs[path + "#" + std::to_string(size)];
     auto it = map.find(c);
@@ -478,7 +518,14 @@ const GLGlyph* RendererGL::getGlyph(const std::string& path, int size, Font* fon
     return &inserted->second;
 }
 
-void RendererGL::drawText(const UIDim2& position, const UIBounds& bounds, const std::string& text, const std::string& path, int size, const Color4& color) {
+void RendererGL::drawText(
+    const UIDim2& position, 
+    const UIBounds& bounds, 
+    const std::string& text, 
+    const std::string& path, 
+    int size, 
+    const Color4& color
+) {
     if (triCount > 0) flushTriangleBatch();
     if (roundedCount > 0) flushRoundedBatch();
 

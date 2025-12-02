@@ -42,5 +42,9 @@ public:
         return instance;
     }
     Font* getFont(const std::string& path, int size);
-    float getTextWidth(const std::string& text, const std::string& path, int size);
+    float getTextWidth(
+        const std::string& text, 
+        const std::string& path, 
+        int size
+    );
 };

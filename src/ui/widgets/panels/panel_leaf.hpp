@@ -8,15 +8,39 @@
 class PanelLeaf : public Panel {
 private:
     std::vector<std::unique_ptr<Widget>> children;
-    UILayout applyInsetToLayout(const UILayout& childLayout, const PanelAdjacency& adjacency);
+    UILayout applyInsetToLayout(
+        const UILayout& childLayout, 
+        const PanelAdjacency& adjacency
+    );
 public:
-    PanelLeaf(App& app, Window* window, PanelContainer* container) : Panel(app, window, container) {}
+    PanelLeaf(
+        App& app, 
+        Window* window, 
+        PanelContainer* container
+    ) : 
+        Panel(app, window, container) 
+    {}
 
-    void update(float deltaTime, const UIBounds& bounds, PanelAdjacency adjacency) override;
-    void render(const UIBounds& bounds, PanelAdjacency adjacency) override;
+    void update(
+        float deltaTime, 
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) override;
+    void render(
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) override;
 
-    bool processWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) override;
-    void observeWindowInput(WindowInput& input, const UIBounds& bounds, PanelAdjacency adjacency) override;
+    bool processWindowInput(
+        WindowInput& input, 
+        const UIBounds& bounds,
+         PanelAdjacency adjacency
+        ) override;
+    void observeWindowInput(
+        WindowInput& input, 
+        const UIBounds& bounds, 
+        PanelAdjacency adjacency
+    ) override;
 
     template <typename T, typename... Args>
     T* addChild(Args&&... args) {

@@ -30,4 +30,5 @@ constexpr u16 U16_MAX = UINT16_MAX;
 constexpr u32 U32_MAX = UINT32_MAX;
 constexpr u64 U64_MAX = UINT64_MAX;
 
-constexpr float PI = 3.1415927f;
+constexpr f32 PI = 3.1415927f;
+constexpr f32 ROOT2 = 1.41421356f;

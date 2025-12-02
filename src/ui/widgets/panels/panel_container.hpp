@@ -14,7 +14,11 @@ private:
     PanelSplitDirection hoveredDirection;
     bool resizing = false;
 public:
-    PanelContainer(App& app, Window* window, UILayout layout);
+    PanelContainer(
+        App& app, 
+        Window* window, 
+        UILayout layout
+    );
 
     void update(float deltaTime, const UIBounds& bounds) override;
     void render(const UIBounds& bounds) override;
@@ -23,7 +27,11 @@ public:
     void observeWindowInput(WindowInput& input, const UIBounds& bounds) override;
 
     Panel* getPanel();
-    PanelSplit* splitPanel(PanelSplitDirection splitDirection, float splitRatio, PanelSplitPlacement existingPlacement);
+    PanelSplit* splitPanel(
+        PanelSplitDirection splitDirection, 
+        float splitRatio, 
+        PanelSplitPlacement existingPlacement
+    );
 
     void setResizeHovered(PanelSplitDirection direction);
     void setResize();
